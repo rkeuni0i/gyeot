@@ -1,0 +1,185 @@
+{
+ "file": "2025_학교폭력 사안처리 가이드북.pdf",
+ "evaluated_at": "2026-10-19 12:56:51",
+ "model": "gemini-3.8-flash",
+ "criteria_version": "1.0",
+ "verdict": "추천",
+ "weighted_score": 96.9,
+ "reasons": [
+  "가중 점수 96.9% ≥ 75%, 필수 기준 통과, 0점 기준 없음"
+ ],
+ "scores": {
+  "recency": {
+   "name": "1. 최신성",
+   "weight": 2,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "2025학년도 판본(메타데이터 2025년 2월, 서식 내 2025년 표기, 2024년 3월 시행된 학교폭력 전담조사관제 및 제로센터 반영)으로 2026-10-19 기준 3년 이내의 최신 지침서임(p.2, p.42, p.132)."
+  },
+  "source": {
+   "name": "2. 출처 명확성",
+   "weight": 2,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "교육부와 시·도교육청이 공동 발간하는 전국 표준 '학교폭력 사안처리 가이드북'으로 공공기관 공식 지침임(p.2, p.3)."
+  },
+  "authority": {
+   "name": "3. 전문성 인증",
+   "weight": 2,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "학교폭력예방법 및 동법 시행령에 근거하여 교육당국이 사안처리 표준화를 위해 법률 및 행정 절차를 검토·정리한 공식 실무 지침서임(p.2, p.168)."
+  },
+  "usefulness": {
+   "name": "4. 상담사 활용성",
+   "weight": 2,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "사안 인지 및 초기 접수, 비밀보장 원칙, 학교장 자체해결 요건 확인, 관계회복 프로그램 운영, 피해학생 보호 및 심리상담 연계 등 상담교사가 학교 현장에서 즉시 활용할 수 있는 핵심 절차가 상세히 기술됨(p.24, p.42, p.71, p.96)."
+  },
+  "duplicate": {
+   "name": "5. 기존 자료와 중복·충돌",
+   "weight": 2,
+   "must_pass": true,
+   "score": 2,
+   "evidence": "기존 등록 자료와 내용 중복이 거의 없으며(최대 코사인 유사도 0.795), 학교폭력 법정 사안처리 절차를 체계적으로 다룬 가이드북은 DB에 처음 등록되는 자료임."
+  },
+  "region": {
+   "name": "6. 적용 지역 범위",
+   "weight": 1,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "학교폭력예방법령에 기반한 전국 공통 지침으로 경기도 이산중학교에도 동일하게 직접 적용됨(p.2, p.6)."
+  },
+  "doc_type": {
+   "name": "7. 대상 독자·자료 유형",
+   "weight": 1,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "학교 현장 교원 및 사안처리 담당자가 사용하는 단계별 실무 매뉴얼 및 가이드북임(p.3)."
+  },
+  "actionability": {
+   "name": "8. 구체성(실행 가능성)",
+   "weight": 1,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "학교장 자체해결 4대 요건 체크리스트, 처리 기한(5일 이내 분쟁조정 개시 등), 보호자 확인서(양식 2-2) 및 조치 관리 대장(양식 4-1) 등 구체적인 양식과 실행 단계가 명확함(p.42, p.78, p.132, p.150)."
+  },
+  "extraction": {
+   "name": "9. 텍스트 추출 품질",
+   "weight": 1,
+   "must_pass": true,
+   "score": 2,
+   "evidence": "총 208,036자, 페이지당 중앙값 1,208자이며 저텍스트 페이지 비율이 5.2%로 법령, 도표, 텍스트가 모두 양호하게 추출됨."
+  },
+  "privacy": {
+   "name": "10. 개인정보 포함 여부",
+   "weight": 1,
+   "must_pass": true,
+   "score": 2,
+   "evidence": "실제 인적사항은 포함되어 있지 않으며, 서식 예시는 '20OO학년도' 등으로 마스킹 처리되어 개인정보 노출 위험이 없음(p.132, p.150)."
+  },
+  "topic": {
+   "name": "11. 주제 분류",
+   "weight": 0,
+   "must_pass": false,
+   "score": null,
+   "evidence": "학교폭력"
+  },
+  "license": {
+   "name": "12. 이용 조건",
+   "weight": 1,
+   "must_pass": false,
+   "score": 1,
+   "evidence": "교육부 공공 발간자료이나 '무단 전재와 복제를 금함' 문구가 탐지되어 서비스 내부 참고자료 및 검색 인용 목적으로 제한하여 활용하는 것이 적절함."
+  }
+ },
+ "proposal": {
+  "short": "학폭가이드",
+  "title": "2025 학교폭력 사안처리 가이드북(교육부, 2025)",
+  "role": "procedure",
+  "use_in": [
+   "procedure",
+   "school",
+   "definition",
+   "counseling"
+  ],
+  "topics": [
+   "학교폭력"
+  ],
+  "summary": "학교폭력 사안 발생 시 인지·신고 접수부터 전담기구 사안조사, 학교장 자체해결제, 심의위원회 심의, 피해학생 보호 및 관계회복 지원에 이르는 전 과정을 체계적으로 정리한 교육부 공식 가이드북입니다. 전문상담교사가 학교폭력 관련 학생·보호자 상담을 진행하고 관계회복 프로그램 및 피해 지원 절차를 안내할 때 신뢰할 수 있는 법적·실무적 기준을 제공합니다.",
+  "cautions": [
+   "시·도교육청(경기도교육청) 및 관할 교육지원청(화성오산교육지원청)의 세부 지침이나 이산중학교 학생생활규정과 구체적 서식 명칭·보고 절차가 일부 상이할 수 있으므로 병행 확인이 필요합니다.",
+   "자체해결 4대 요건 충족 여부, 분쟁조정 기간(1개월), 긴급조치 추인 보고 등 법정 기한 및 요건에 대한 답변 시 정확한 조항과 기준을 제시해야 합니다."
+  ]
+ },
+ "measured": {
+  "file": "2025_학교폭력 사안처리 가이드북.pdf",
+  "pages": 192,
+  "chars_total": 208036,
+  "chars_per_page_median": 1208,
+  "low_text_pages_ratio": 0.052,
+  "low_text_pages": [
+   1,
+   4,
+   5,
+   16,
+   25,
+   64,
+   65,
+   82,
+   191,
+   192
+  ],
+  "years_on_cover": [],
+  "pdf_metadata_date": "20250212",
+  "publisher_candidates": [],
+  "region_mentions_on_cover": {
+   "서울": 1
+  },
+  "topic_keyword_counts": {
+   "학교폭력": 1182,
+   "가정": 5,
+   "학업·학교부적응": 2,
+   "정서·위기": 19,
+   "디지털·사이버": 55,
+   "상담 기법": 16,
+   "학교 운영": 19
+  },
+  "pii_pattern_counts": {
+   "휴대전화": 0,
+   "주민번호": 0,
+   "이메일": 0
+  },
+  "masked_name_count": 3,
+  "restriction_phrases": [
+   "저작권법에 의해 보호받는 저작물이므로 무단 전재와 복제를 금"
+  ],
+  "first_page_text": "",
+  "filename_similarity_to_existing": {
+   "esan": 0.178,
+   "cyber": 0.211,
+   "digital": 0.188,
+   "add_학업숙려제": 0.308,
+   "add_정서행동": 0.364
+  },
+  "content_overlap_with_existing": {
+   "add_정서행동": {
+    "samples": 2,
+    "max_cos": 0.75,
+    "mean_cos": 0.742
+   },
+   "add_학업숙려제": {
+    "samples": 1,
+    "max_cos": 0.776,
+    "mean_cos": 0.776
+   },
+   "esan": {
+    "samples": 3,
+    "max_cos": 0.795,
+    "mean_cos": 0.784
+   }
+  }
+ },
+ "seconds": 18.9
+}

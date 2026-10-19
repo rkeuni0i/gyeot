@@ -1,0 +1,199 @@
+{
+ "file": "25_경기도교육청 Wee 희망대상 우수사례집.pdf",
+ "evaluated_at": "2026-10-18 23:46:01",
+ "model": "gemini-3.8-flash",
+ "criteria_version": "1.0",
+ "verdict": "조건부",
+ "weighted_score": 78.1,
+ "reasons": [
+  "0점 기준이 있어 추천 불가: 7. 대상 독자·자료 유형, 12. 이용 조건"
+ ],
+ "scores": {
+  "recency": {
+   "name": "1. 최신성",
+   "weight": 2,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "판권지(p.224)에 발행일이 2025년 12월 31일로 명시되어 있어 최신 자료에 해당함."
+  },
+  "source": {
+   "name": "2. 출처 명확성",
+   "weight": 2,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "17개 시도교육청 주관 및 한국청소년정책연구원 발행(연구보고 25-위센터02, p.1 및 p.224)으로 공공기관 출처가 명확함."
+  },
+  "authority": {
+   "name": "3. 전문성 인증",
+   "weight": 2,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "교육부 및 17개 시도교육청이 주관하는 전국 단위 공식 공모전인 '제14회 위(Wee) 희망대상' 심사를 거쳐 선정된 우수사례집임(p.1~5)."
+  },
+  "usefulness": {
+   "name": "4. 상담사 활용성",
+   "weight": 2,
+   "must_pass": false,
+   "score": 1,
+   "evidence": "실제 전문상담교사의 위기학생 개입 회기별 계획 및 연계 사례가 수록되어 있어 상담 개입 아이디어를 얻는 배경 참고용으로는 유용하나, 표준화된 절차 지침이나 매뉴얼이 아니므로 직접적 규정 안내에는 한계가 있음(p.48, p.69, p.111)."
+  },
+  "duplicate": {
+   "name": "5. 기존 자료와 중복·충돌",
+   "weight": 2,
+   "must_pass": true,
+   "score": 2,
+   "evidence": "기존 등록 자료들과의 내용 유사도가 최대 0.790(사이버상담 매뉴얼) 수준으로 중복 및 충돌 내용 없음."
+  },
+  "region": {
+   "name": "6. 적용 지역 범위",
+   "weight": 1,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "17개 시도교육청 공동 주관 전국 단위 공모 우수사례집으로 전국 학교 현장에 공통 적용 가능함(p.1, p.5)."
+  },
+  "doc_type": {
+   "name": "7. 대상 독자·자료 유형",
+   "weight": 1,
+   "must_pass": false,
+   "score": 0,
+   "evidence": "실무 매뉴얼이나 공식 업무지침이 아닌 위(Wee) 프로젝트 우수사례 모음집(사례집)임(기준상 사례집은 0점)."
+  },
+  "actionability": {
+   "name": "8. 구체성(실행 가능성)",
+   "weight": 1,
+   "must_pass": false,
+   "score": 1,
+   "evidence": "각 사례별로 회기별 개입 내용, 상담 기법 및 전략, 유관기관 연계 내용이 기술되어 있으나(p.48, p.69), 규정된 서식·절차·기한을 담은 표준 가이드는 아님."
+  },
+  "extraction": {
+   "name": "9. 텍스트 추출 품질",
+   "weight": 1,
+   "must_pass": true,
+   "score": 2,
+   "evidence": "중간값 818자, 텍스트 부족 페이지 비율 6.7%로 대부분의 페이지에서 텍스트가 정상 추출됨."
+  },
+  "privacy": {
+   "name": "10. 개인정보 포함 여부",
+   "weight": 1,
+   "must_pass": true,
+   "score": 2,
+   "evidence": "학생 및 교사 성명(박○○, 최○○), 소속 학교명(□□중학교) 등이 철저히 비식별 마스킹 처리되어 있음(p.2~4, p.48)."
+  },
+  "topic": {
+   "name": "11. 주제 분류",
+   "weight": 0,
+   "must_pass": false,
+   "score": null,
+   "evidence": "정서·위기(자해·자살), 학업·학교부적응, 상담 기법, 학교 운영"
+  },
+  "license": {
+   "name": "12. 이용 조건",
+   "weight": 1,
+   "must_pass": false,
+   "score": 0,
+   "evidence": "판권지(p.224)에 '사전 승인없이 보고서 내용의 무단전재·복제를 금함.' 문구가 명시되어 있어 라이선스 기준상 0점(내부 테스트용으로만 활용 가능)."
+  }
+ },
+ "proposal": {
+  "short": "Wee사례집",
+  "title": "제14회 위(Wee) 희망대상 우수사례집(한국청소년정책연구원, 2025)",
+  "role": "reference",
+  "use_in": [
+   "counseling"
+  ],
+  "topics": [
+   "정서·위기(자해·자살)",
+   "학업·학교부적응",
+   "상담 기법"
+  ],
+  "summary": "전국 17개 시도교육청의 Wee 클래스 및 센터에서 진행된 학생 상담, 위기 개입, 맞춤형 통합지원 우수 실천 사례를 엮은 보고서입니다. 전문상담교사가 복합 위기(자해·자살, 미등교, 사이버폭력 피해 등) 학생을 대상으로 회기별 상담 전략을 구상하고 지역사회 자원을 연계할 때 실질적인 참고 사례로 활용할 수 있습니다.",
+  "cautions": [
+   "판권지에 무단전재·복제 금지 문구가 명시되어 있으므로 외부 서비스 배포 및 상용화 시 저작권 확인이 필요합니다.",
+   "공식 업무 매뉴얼이나 처리 규정이 아니므로, 학폭 사안처리나 위기관리위원회 운영 절차 등 규정 안내의 직접적 근거로 인용하지 않도록 주의해야 합니다.",
+   "개별 상담자의 주관적 우수 실천 사례이므로 상담 개입 아이디어 참고용으로 한정하여 활용해야 합니다."
+  ]
+ },
+ "measured": {
+  "file": "25_경기도교육청 Wee 희망대상 우수사례집.pdf",
+  "pages": 224,
+  "chars_total": 174322,
+  "chars_per_page_median": 818,
+  "low_text_pages_ratio": 0.067,
+  "low_text_pages": [
+   1,
+   6,
+   7,
+   26,
+   27,
+   62,
+   63,
+   114,
+   115,
+   131,
+   132,
+   133,
+   189,
+   207,
+   223
+  ],
+  "years_on_cover": [],
+  "pdf_metadata_date": "20260402",
+  "publisher_candidates": [
+   "건양대학교",
+   "시도교육청"
+  ],
+  "region_mentions_on_cover": {
+   "대구": 1,
+   "인천": 1,
+   "대전": 2
+  },
+  "topic_keyword_counts": {
+   "학교폭력": 62,
+   "가정": 26,
+   "학업·학교부적응": 96,
+   "정서·위기": 423,
+   "디지털·사이버": 47,
+   "상담 기법": 824,
+   "학교 운영": 390
+  },
+  "pii_pattern_counts": {
+   "휴대전화": 0,
+   "주민번호": 0,
+   "이메일": 0
+  },
+  "masked_name_count": 78,
+  "restriction_phrases": [
+   "무단전재·복제를 금함."
+  ],
+  "first_page_text": "17개 시도교육청 제14회 위(Wee) 희망대상 우수사례집 연구보고 25-위센터02",
+  "filename_similarity_to_existing": {
+   "guide": 0.217,
+   "esan": 0.08,
+   "cyber": 0.194,
+   "digital": 0.203
+  },
+  "content_overlap_with_existing": {
+   "esan": {
+    "samples": 1,
+    "max_cos": 0.715,
+    "mean_cos": 0.715
+   },
+   "guide": {
+    "samples": 3,
+    "max_cos": 0.749,
+    "mean_cos": 0.738
+   },
+   "digital": {
+    "samples": 2,
+    "max_cos": 0.759,
+    "mean_cos": 0.746
+   },
+   "cyber": {
+    "samples": 2,
+    "max_cos": 0.79,
+    "mean_cos": 0.77
+   }
+  }
+ },
+ "seconds": 17.8
+}

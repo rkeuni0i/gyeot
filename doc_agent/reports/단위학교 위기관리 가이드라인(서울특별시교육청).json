@@ -1,0 +1,181 @@
+{
+ "file": "단위학교 위기관리 가이드라인(서울특별시교육청).pdf",
+ "evaluated_at": "2026-10-18 23:45:20",
+ "model": "gemini-3.8-flash",
+ "criteria_version": "1.0",
+ "verdict": "조건부",
+ "weighted_score": 78.1,
+ "reasons": [
+  "판단 누락(0점 처리): 4. 상담사 활용성",
+  "0점 기준이 있어 추천 불가: 4. 상담사 활용성"
+ ],
+ "scores": {
+  "recency": {
+   "name": "1. 최신성",
+   "weight": 2,
+   "must_pass": false,
+   "score": 1,
+   "evidence": "문서 내 2021년 표기(p.34 '2021년까지 운영') 및 메타데이터(20211006)를 볼 때 2021년 발간된 지침으로 판단되며, 지침 기준 3년이 경과함"
+  },
+  "source": {
+   "name": "2. 출처 명확성",
+   "weight": 2,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "표지(p.1, p.3) 및 본문(p.5, p.52)에 서울특별시교육청 민주시민생활교육과 발행임이 명확히 기재됨"
+  },
+  "authority": {
+   "name": "3. 전문성 인증",
+   "weight": 2,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "시도교육청(서울특별시교육청)이 단위학교 위기대응을 위해 정식 발간한 공식 업무 가이드라인임(p.5)"
+  },
+  "usefulness": {
+   "name": "4. 상담사 활용성",
+   "weight": 2,
+   "must_pass": false,
+   "score": null,
+   "evidence": "판단 결과 없음"
+  },
+  "duplicate": {
+   "name": "5. 기존 자료와 중복·충돌",
+   "weight": 2,
+   "must_pass": true,
+   "score": 2,
+   "evidence": "기존 등록 자료(학폭, 생활규정, 사이버/디지털 미디어)에 포함되지 않은 학생 정서·위기(자살·자해·트라우마) 대응 매뉴얼로 중복이나 충돌이 없음"
+  },
+  "region": {
+   "name": "6. 적용 지역 범위",
+   "weight": 1,
+   "must_pass": false,
+   "score": 1,
+   "evidence": "서울특별시교육청 조례 및 서울 지역 연계 기관 목록(p.30, p.34, p.38)이 포함되어 있으나, 위기관리 대응 흐름과 상담 개입 원칙은 경기도 이산중학교에서도 보편적으로 적용 가능함"
+  },
+  "doc_type": {
+   "name": "7. 대상 독자·자료 유형",
+   "weight": 1,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "단위학교 교직원 및 전문상담교사가 위기 사안 발생 시 즉시 참고할 수 있도록 제작된 학교 현장용 실무 지침서임(p.5, p.52)"
+  },
+  "actionability": {
+   "name": "8. 구체성(실행 가능성)",
+   "weight": 1,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "사안별 학교·Wee클래스 대응 흐름도, 특별상담실 최소 운영 기간(2주), 비밀보장 예외 설명법, 외상 후 스트레스 대처 전략 및 선별 척도(ISAS, PG-13 등)가 매우 구체적으로 제시됨(p.6, p.10, p.18, p.22, p.42)"
+  },
+  "extraction": {
+   "name": "9. 텍스트 추출 품질",
+   "weight": 1,
+   "must_pass": true,
+   "score": 2,
+   "evidence": "총 52쪽 중 저텍스트 페이지 비율이 11.5% 수준이며 페이지당 글자 수 중앙값 1,030자로 텍스트 추출 상태가 양호함"
+  },
+  "privacy": {
+   "name": "10. 개인정보 포함 여부",
+   "weight": 1,
+   "must_pass": true,
+   "score": 2,
+   "evidence": "실제 개인정보는 포함되어 있지 않으며, 기관 공식 대표번호 및 학생 평가용 빈 서식만 포함됨"
+  },
+  "topic": {
+   "name": "11. 주제 분류",
+   "weight": 0,
+   "must_pass": false,
+   "score": null,
+   "evidence": "정서·위기(자해·자살)"
+  },
+  "license": {
+   "name": "12. 이용 조건",
+   "weight": 1,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "학교 현장 배포용 공공 교육자료이며 이용을 제한하는 문구가 없음(p.52 '교무실과 위(Wee) 클래스에 비치하여 활용하시기 바랍니다')"
+  }
+ },
+ "proposal": {
+  "short": "위기관리",
+  "title": "단위학교 위기관리 가이드라인(서울특별시교육청, 2021)",
+  "role": "manual",
+  "use_in": [
+   "counseling",
+   "procedure",
+   "definition"
+  ],
+  "topics": [
+   "정서·위기(자해·자살)",
+   "상담 기법"
+  ],
+  "summary": "서울특별시교육청에서 발간한 단위학교 자살·자해·트라우마 위기 사안 개입 및 Wee클래스 지원 가이드라인입니다. 위기 발생 시 생명존중위원회 운영 절차, 특별상담실 운영 기준, 비밀보장 예외 원칙 및 학부모 면담 방안을 제공합니다. 부록에 자해기능평가지(ISAS), 지속비애척도(PG-13) 등 학교 상담 현장에서 즉시 활용 가능한 평가 척도가 수록되어 있습니다.",
+  "cautions": [
+   "서울시 관내 유관기관 목록(정신건강복지센터, 해바라기센터 등)이 수록되어 있으므로, 이산중학교 관할 지역(경기도 화성오산) 연계 기관 정보로 치환하여 안내해야 합니다.",
+   "2021년 지침이므로 최신 학생 자살예방 관련 교육부 지침이나 개정 법령이 있는 경우 현행 기준을 우선 확인해야 합니다."
+  ]
+ },
+ "measured": {
+  "file": "단위학교 위기관리 가이드라인(서울특별시교육청).pdf",
+  "pages": 52,
+  "chars_total": 47859,
+  "chars_per_page_median": 1030,
+  "low_text_pages_ratio": 0.115,
+  "low_text_pages": [
+   1,
+   2,
+   3,
+   49,
+   51,
+   52
+  ],
+  "years_on_cover": [],
+  "pdf_metadata_date": "20211006",
+  "publisher_candidates": [
+   "서울특별시교육청"
+  ],
+  "region_mentions_on_cover": {
+   "서울": 5
+  },
+  "topic_keyword_counts": {
+   "학교폭력": 4,
+   "가정": 15,
+   "학업·학교부적응": 5,
+   "정서·위기": 264,
+   "디지털·사이버": 13,
+   "상담 기법": 23,
+   "학교 운영": 15
+  },
+  "pii_pattern_counts": {
+   "휴대전화": 6,
+   "주민번호": 0,
+   "이메일": 0
+  },
+  "masked_name_count": 1,
+  "restriction_phrases": [],
+  "first_page_text": "[ 민주시민생활교육과] 단위학교 위기관리 가이드라인",
+  "filename_similarity_to_existing": {
+   "guide": 0.34,
+   "esan": 0.196,
+   "cyber": 0.159,
+   "digital": 0.2
+  },
+  "content_overlap_with_existing": {
+   "guide": {
+    "samples": 5,
+    "max_cos": 0.813,
+    "mean_cos": 0.782
+   },
+   "digital": {
+    "samples": 1,
+    "max_cos": 0.689,
+    "mean_cos": 0.689
+   },
+   "cyber": {
+    "samples": 2,
+    "max_cos": 0.738,
+    "mean_cos": 0.737
+   }
+  }
+ },
+ "seconds": 25.9
+}

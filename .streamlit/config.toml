@@ -1,0 +1,18 @@
+[theme]
+# 화면 전체 글자 크기: 기본 16px의 1.875배(20px에서 1.5배 더 키움, 2026-10-19 요청)
+baseFontSize = 30
+# Figma 시안 색: 연한 연두 바탕 + 흰 사이드바 + 연두 알약 버튼
+base = "light"
+# 글꼴: Pretendard(SIL OFL). 글꼴 파일은 ui_style.py의 @font-face가 jsDelivr CDN에서 불러온다. 인터넷이 막혀 있으면 맑은 고딕
+font = "Pretendard, Malgun Gothic, sans-serif"
+primaryColor = "#4E8A2E"
+backgroundColor = "#EEF5DE"
+secondaryBackgroundColor = "#DDEBC4"
+textColor = "#1C2A18"
+borderColor = "#D3E3B8"
+baseRadius = "large"
+buttonRadius = "full"
+
+[theme.sidebar]
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#EEF5DE"

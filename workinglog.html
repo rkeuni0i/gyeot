@@ -1,0 +1,1287 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>곁 작업 로그</title>
+  <link rel="icon" href="docs/brand/gyeot_mark.svg" type="image/svg+xml">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f5f2;
+      --surface: #fcfcfb;
+      --text: #0b0b0b;
+      --text-2: #52514e;
+      --muted: #77766f;
+      --border: #e3e1db;
+      --accent: #2a78d6;
+      --accent-soft: #e8f0fb;
+      --warn-soft: #fdf3e1;
+      --warn: #9a6200;
+      --ok-soft: #e6f4ec;
+      --ok: #1d7a46;
+      --code-bg: #efeee9;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --bg: #121211;
+        --surface: #1a1a19;
+        --text: #ffffff;
+        --text-2: #c3c2b7;
+        --muted: #9a998f;
+        --border: #2e2e2c;
+        --accent: #3987e5;
+        --accent-soft: #1d2a3b;
+        --warn-soft: #33290f;
+        --warn: #f0b84a;
+        --ok-soft: #13291d;
+        --ok: #5fcf8f;
+        --code-bg: #262624;
+      }
+    }
+
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #121211;
+      --surface: #1a1a19;
+      --text: #ffffff;
+      --text-2: #c3c2b7;
+      --muted: #9a998f;
+      --border: #2e2e2c;
+      --accent: #3987e5;
+      --accent-soft: #1d2a3b;
+      --warn-soft: #33290f;
+      --warn: #f0b84a;
+      --ok-soft: #13291d;
+      --ok: #5fcf8f;
+      --code-bg: #262624;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 40px 16px 72px;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin: 0 0 6px;
+      letter-spacing: -0.02em;
+    }
+
+    .sub {
+      color: var(--text-2);
+      margin: 0;
+    }
+
+    nav.toc {
+      margin: 24px 0 8px;
+      padding: 16px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    nav.toc h2 {
+      font-size: 14px;
+      margin: 0 0 6px;
+      color: var(--text-2);
+    }
+
+    nav.toc ol {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    nav.toc a {
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    nav.toc a:hover {
+      color: var(--accent);
+    }
+
+    .step {
+      position: relative;
+      margin-top: 28px;
+      padding: 22px 22px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+
+    .step-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 6px 12px;
+      margin-bottom: 8px;
+    }
+
+    .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      font-size: 14px;
+      flex: none;
+    }
+
+    .step h2 {
+      font-size: 19px;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+
+    .date {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .req {
+      background: var(--accent-soft);
+      border-left: 3px solid var(--accent);
+      padding: 8px 12px;
+      border-radius: 0 8px 8px 0;
+      margin: 10px 0;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .req b {
+      color: var(--text-2);
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .issue {
+      background: var(--warn-soft);
+      border-left: 3px solid var(--warn);
+      padding: 8px 12px;
+      border-radius: 0 8px 8px 0;
+      margin: 10px 0;
+      font-size: 14px;
+    }
+
+    .issue b {
+      color: var(--warn);
+    }
+
+    .result {
+      background: var(--ok-soft);
+      border-left: 3px solid var(--ok);
+      padding: 8px 12px;
+      border-radius: 0 8px 8px 0;
+      margin: 10px 0;
+      font-size: 14px;
+    }
+
+    .result b {
+      color: var(--ok);
+    }
+
+    h3 {
+      font-size: 15px;
+      margin: 16px 0 4px;
+    }
+
+    ul {
+      margin: 4px 0;
+      padding-left: 20px;
+    }
+
+    li {
+      margin: 2px 0;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 1px 6px;
+      border-radius: 5px;
+      font-size: 13px;
+      font-family: Consolas, "D2Coding", monospace;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 13.5px;
+      margin: 8px 0;
+    }
+
+    th,
+    td {
+      padding: 7px 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--text-2);
+      font-weight: 600;
+      font-size: 12.5px;
+      white-space: nowrap;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    .shots {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    figure {
+      margin: 0;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    figure a {
+      display: block;
+    }
+
+    figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    figcaption {
+      padding: 8px 10px;
+      font-size: 12.5px;
+      color: var(--text-2);
+      border-top: 1px solid var(--border);
+    }
+
+    .files td:first-child {
+      white-space: nowrap;
+    }
+
+    .next ol {
+      padding-left: 20px;
+    }
+
+    footer {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 40px;
+    }
+
+    @media (max-width: 560px) {
+      h1 {
+        font-size: 23px;
+      }
+
+      .step {
+        padding: 18px 14px 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <h1><img src="docs/brand/gyeot_mark.svg" alt="" style="height:1.05em;vertical-align:-.15em;margin-right:.15em">곁 작업 로그</h1>
+    <p class="sub">청소년 상담 사례 분석부터 학교폭력 사안처리 챗봇까지 · 2026-10-15 ~ 2026-10-19 · 서비스 이름 <b>곁</b>(가제 MindGuide에서 변경) · 폴더 <code>gyeot</code>(이전 <code>mindGuide_test</code>)</p>
+
+    <nav class="toc">
+      <h2>목차</h2>
+      <ol>
+        <li><a href="#s1">Wee 우수사례집 42건 상담 주제 분류</a></li>
+        <li><a href="#s2">분석 결과 HTML 만들기</a></li>
+        <li><a href="#s3">테스트 주제 결정과 학교폭력 가이드북 검토</a></li>
+        <li><a href="#s4">챗봇 v1: 가이드북 기반 RAG 챗봇</a></li>
+        <li><a href="#s5">오답 발견과 원인 분석</a></li>
+        <li><a href="#s6">챗봇 v2: 벡터 검색 추가와 근거 표</a></li>
+        <li><a href="#s7">근거 원문 보기 다듬기</a></li>
+        <li><a href="#s8">결과물 파일 저장 보완</a></li>
+        <li><a href="#s9">같은 쪽 청크 합쳐 보기</a></li>
+        <li><a href="#s10">Gemini 노트북과 성능 비교</a></li>
+        <li><a href="#s11">다음 방향과 주제별 DB 설계</a></li>
+        <li><a href="#s12">이산중학교 학생생활규정 반영</a></li>
+        <li><a href="#s13">이산중 전용 챗봇으로 전환</a></li>
+        <li><a href="#s14">성능 개선: Gemini 노트북 수준 이상으로</a></li>
+        <li><a href="#s15">상담 기법 매뉴얼 추가</a></li>
+        <li><a href="#s16">질문 유형별 라우팅</a></li>
+        <li><a href="#s17">참고자료 타당성 평가 에이전트와 자료 추가</a></li>
+        <li><a href="#s18">자료 저장소(DB) 전환·삭제·학기별 점검</a></li>
+        <li><a href="#s19">알림 아이콘, 학업중단 숙려제 매뉴얼, 지역 연계 기관</a></li>
+        <li><a href="#s20">본문 기반 중복 확인과 개정판 교체</a></li>
+        <li><a href="#files">현재 파일 구성</a></li>
+        <li><a href="#next">다음 계획</a></li>
+      </ol>
+    </nav>
+
+    <!-- 1 -->
+    <section class="step" id="s1">
+      <div class="step-head"><span class="num">1</span>
+        <h2>Wee 우수사례집 42건 상담 주제 분류</h2><span class="date">2026-10-15</span>
+      </div>
+      <div class="req"><b>요청</b>상담 우수사례집 PDF를 읽고 가장 많이 나오는 상담 주제를 뽑아, 42개 사례를 주제별로 표로 분류</div>
+      <h3>한 일</h3>
+      <ul>
+        <li>「제14회 위(Wee) 희망대상 우수사례집」에서 텍스트를 추출해 사례별 <b>내담자 기본정보·주호소문제·상담자가 파악한 문제</b>를 정리</li>
+        <li>42건 = 개인 사례 30건(대상 5, 최우수 10, 우수 15) + 기관 사례 12건(대상 2, 최우수 10)</li>
+        <li>개인 사례마다 주 카테고리 1개와 함께 나타난 관련 이슈를 표시. 기관 사례는 운영 프로그램이라 따로 정리</li>
+      </ul>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>카테고리</th>
+              <th>주 카테고리</th>
+              <th>관련 이슈 언급</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>A. 자해·자살 위기</b></td>
+              <td><b>8건</b></td>
+              <td>15건</td>
+            </tr>
+            <tr>
+              <td>D. 또래관계·따돌림·학교폭력 피해</td>
+              <td>5건</td>
+              <td>19건</td>
+            </tr>
+            <tr>
+              <td>B. 우울·무기력·낮은 자존감</td>
+              <td>4건</td>
+              <td>12건</td>
+            </tr>
+            <tr>
+              <td>C. 불안·사회불안·대인 위축</td>
+              <td>4건</td>
+              <td>12건</td>
+            </tr>
+            <tr>
+              <td>G. 학교부적응·등교거부·학업중단 위기</td>
+              <td>3건</td>
+              <td>13건</td>
+            </tr>
+            <tr>
+              <td>F. 분노조절·ADHD·행동문제</td>
+              <td>2건</td>
+              <td>6건</td>
+            </tr>
+            <tr>
+              <td>H. 스마트폰·온라인 과몰입</td>
+              <td>2건</td>
+              <td>4건</td>
+            </tr>
+            <tr>
+              <td>E. 가정문제</td>
+              <td>1건</td>
+              <td><b>21건</b></td>
+            </tr>
+            <tr>
+              <td>I. 학업·성취 압박</td>
+              <td>1건</td>
+              <td>3건</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="result"><b>결과</b> 주된 호소 1위는 자해·자살 위기(8건), 배경 요인 1위는 가정문제(30건 중 21건). 기관 사례 12건 중 5건도 자해·자살 예방이 주요 동기.
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section class="step" id="s2">
+      <div class="step-head"><span class="num">2</span>
+        <h2>분석 결과 HTML 만들기</h2><span class="date">2026-10-15</span>
+      </div>
+      <div class="req"><b>요청</b>데이터 분석 결과를 표까지 포함해 HTML 파일로</div>
+      <ul>
+        <li><a href="wee_case_analysis.html"><code>wee_case_analysis.html</code></a>: 요약 카드, 막대 차트 2개(주 카테고리 / 관련 이슈),
+          카테고리 요약표, 30건 분류표(카테고리 필터), 기관 12건 표</li>
+        <li>다크 모드·모바일 화면 대응. 이후 <code>mindGuide_test</code> 폴더로 복사</li>
+      </ul>
+      <div class="shots">
+        <figure><a href="docs/img/01_wee_analysis_top.jpg" target="_blank"><img src="docs/img/01_wee_analysis_top.jpg"
+              alt="분석 HTML 상단: 요약 카드와 막대 차트" loading="lazy"></a>
+          <figcaption>분석 HTML 상단: 요약 카드와 카테고리별 막대 차트</figcaption>
+        </figure>
+        <figure><a href="docs/img/02_wee_analysis_table.jpg" target="_blank"><img
+              src="docs/img/02_wee_analysis_table.jpg" alt="분석 HTML: 요약표와 분류표 필터" loading="lazy"></a>
+          <figcaption>카테고리 요약표, 핵심 발견, 30건 분류표 필터</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section class="step" id="s3">
+      <div class="step-head"><span class="num">3</span>
+        <h2>테스트 주제 결정과 학교폭력 가이드북 검토</h2><span class="date">2026-10-15</span>
+      </div>
+      <div class="req"><b>결정</b>자해·자살은 테스트 케이스로 쓰기 위험하므로 <b>학교폭력</b>을 테스트 주제로 선택</div>
+      <div class="req"><b>요청</b>「2026학년도 학교폭력 사안처리 가이드북」(216쪽)을 요약하고, 테스트 답변 근거로 쓸 만한지 검토</div>
+      <h3>검토 결과</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>항목</th>
+              <th>평가</th>
+              <th>근거</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>신뢰성·최신성</td>
+              <td>◎</td>
+              <td>2026 개정판, 법령 근거, 딥페이크 등 최신 유형 포함</td>
+            </tr>
+            <tr>
+              <td>사실·절차 정확도 채점용</td>
+              <td>◎</td>
+              <td>신고처, 조치 번호, 요건, 기한 등 구체적 수치가 많음</td>
+            </tr>
+            <tr>
+              <td>텍스트 추출(RAG)</td>
+              <td>○</td>
+              <td>텍스트 PDF라 추출 양호. 흐름도·표·부록 양식은 노이즈</td>
+            </tr>
+            <tr>
+              <td>학생 눈높이 정서 상담</td>
+              <td>△</td>
+              <td>독자가 교사라 학생에게 직접 건넬 표현은 적음</td>
+            </tr>
+            <tr>
+              <td>위기 신호 대응</td>
+              <td>✕</td>
+              <td>216쪽 전체에 '자해'·'자살' 단어 없음</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="result"><b>결론</b> 사실·절차 근거로는 아주 좋지만 정서 상담 근거로는 부족 → 챗봇 역할을 <b>학교 1인 상담사의 절차·기한·법적 의무·조치·양식·기관 연계
+          안내</b>로 좁힘. 검토 내용은 <code>docs/가이드북_검토_요약.md</code>에 저장(8단계).</div>
+    </section>
+
+    <!-- 4 -->
+    <section class="step" id="s4">
+      <div class="step-head"><span class="num">4</span>
+        <h2>챗봇 v1: 가이드북 기반 RAG 챗봇</h2><span class="date">2026-10-15</span>
+      </div>
+      <div class="req"><b>요청</b>가이드북 하나를 기준으로, 상담사의 절차·기관 연계를 돕는 실행 가능한 챗봇. 모델은 <code>gemini-3.8-flash</code>, API 키는
+        환경변수 사용</div>
+      <h3>구성</h3>
+      <ul>
+        <li>PDF 216쪽 → 쪽 단위 청크 313개, 목차 기준 장 이름 부여 → BM25(kiwipiepy 형태소) 검색</li>
+        <li>Gemini OpenAI 호환 엔드포인트로 답변 생성, 환경변수 <code>GEMINI_API_KEY</code> 사용, conda <code>DS</code> 환경의 Streamlit 화면
+        </li>
+        <li>답변 규칙: 자료 안에서만 답하고 문장마다 <code>[p.쪽]</code> 인용, 성폭력은 수사기관 즉시 신고 의무 먼저, 자해·자살 신호는 가이드북 범위 밖임을 먼저 안내</li>
+        <li><code>run.bat</code> 실행 파일, <code>logs/chat_log.jsonl</code> 질문·답변 기록</li>
+      </ul>
+      <div class="issue"><b>문제</b> 상황 설명형 질문에서 "인지 후 48시간 이내 교육청 보고"(24쪽) 같은 핵심 절차를 검색에서 놓침</div>
+      <div class="result"><b>개선</b> Gemini가 질문을 가이드북 용어 검색어 3~5개로 바꿔 함께 검색 → 보고 의무, 48시간, 분리, 삭제 요청까지 근거와 함께 답함</div>
+      <div class="shots">
+        <figure><a href="docs/img/03_chatbot_v1_home.png" target="_blank"><img
+              src="docs/img/03_chatbot_v1_home.png" alt="챗봇 v1 첫 화면" loading="lazy"></a>
+          <figcaption>챗봇 v1 첫 화면: 근거 자료·모델 안내, 개인정보 주의, 예시 질문 6개, 대화 초기화</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section class="step" id="s5">
+      <div class="step-head"><span class="num">5</span>
+        <h2>오답 발견과 원인 분석</h2><span class="date">2026-10-15</span>
+      </div>
+      <div class="req"><b>제보</b>"학교폭력예방법에서 정의하는 학교폭력은 뭐야?"에 "가이드북에서 확인되지 않습니다"라고 답함. 실제로는 PDF 6쪽 제2조에 정의가 있음. 근거 쪽과 벡터
+        유사도도 보여 달라는 요청</div>
+      <div class="issue"><b>원인</b> 질문이 40자 미만이면 직전 질문을 앞에 붙여 검색하도록 해 둠 → 앞의 긴 분리·출석정지·행정심판 질문에 끌려가 53, 134쪽 등만 검색되고 6쪽은
+        후보에 없었음(로그로 확인)</div>
+      <div class="shots">
+        <figure><a href="docs/img/04_user_wrong_answer.png" target="_blank"><img src="docs/img/04_user_wrong_answer.png"
+              alt="정의 질문에 대한 오답 화면" loading="lazy"></a>
+          <figcaption>오답 화면: 정의를 "확인되지 않는다"고 답하고 엉뚱한 쪽만 검색됨</figcaption>
+        </figure>
+        <figure><a href="docs/img/05_pdf_p6_definition.png" target="_blank"><img src="docs/img/05_pdf_p6_definition.png"
+              alt="가이드북 6쪽 학교폭력예방법 제2조" loading="lazy"></a>
+          <figcaption>실제 정답 위치: 가이드북 6쪽, 학교폭력예방법 제2조(정의)</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section class="step" id="s6">
+      <div class="step-head"><span class="num">6</span>
+        <h2>챗봇 v2: 벡터 검색 추가와 근거 표</h2><span class="date">2026-10-15</span>
+      </div>
+      <h3>수정</h3>
+      <ul>
+        <li><b>후속 질문 판단을 Gemini에 맡김</b>: 이전 질문은 "그럼 양식은?" 같은 후속 질문일 때만 반영하고, 새 주제면 무시</li>
+        <li><b>하이브리드 검색</b>: <code>gemini-embedding-001</code>(3072차원) 벡터 코사인 유사도 + BM25를 RRF로 합산.
+          <code>index/embeddings.npy</code> 생성</li>
+        <li><b>답변 형식</b>: 정의·요건 같은 사실 질문은 바로 답하고, 상황 질문만 "지금 해야 할 일 / 연계 기관 / 유의사항 / 양식" 구성</li>
+        <li><b>근거 표</b>: 답변 아래에 순위, PDF 쪽, 인용 여부, 벡터 유사도(코사인), BM25, 각 순위, 장 이름 표시</li>
+      </ul>
+      <div class="result"><b>결과</b> 같은 순서(긴 사례 질문 → 정의 질문)로 다시 해도 6쪽이 검색 1위(코사인 0.843), 제2조제1호 정의를 6쪽 근거로 정확히 답함</div>
+      <div class="shots">
+        <figure><a href="docs/img/06_chatbot_v2_answer_table.png" target="_blank"><img
+              src="docs/img/06_chatbot_v2_answer_table.png" alt="챗봇 v2 답변과 근거 표" loading="lazy"></a>
+          <figcaption>v2 화면: 진술 불일치 시 조치 질문에 "지금 해야 할 일·유의사항·필요한 양식"으로 답하고, 아래 근거 표에 PDF 쪽·인용(✅)·코사인 유사도·BM25 표시</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- 7 -->
+    <section class="step" id="s7">
+      <div class="step-head"><span class="num">7</span>
+        <h2>근거 원문 보기 다듬기</h2><span class="date">2026-10-15 ~ 16</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>요청</th>
+              <th>반영</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>벡터 유사도 0.75 이상만 근거 원문에</td>
+              <td>임계값 필터 추가(이후 아래 요청으로 대체)</td>
+            </tr>
+            <tr>
+              <td>유사도 가장 높은 것부터</td>
+              <td>근거 원문을 코사인 내림차순 정렬</td>
+            </tr>
+            <tr>
+              <td>근거 원문은 인용된 것만</td>
+              <td>답변에 인용된 쪽의 청크만 표시, 인용 안 된 개수는 안내 문구로. 0.75 임계값은 제거</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>질문: 코사인이 높은데 왜 인용되지 않았나?</h3>
+      <p style="margin:4px 0">코사인 유사도는 질문과 <b>주제가 비슷한 정도</b>이지, 그 청크에 <b>답이 들어 있는지</b>가 아님.</p>
+      <ul>
+        <li>p.169(0.805)·p.166: 부록 양식. 주제어는 많지만 요건 설명이 아님</li>
+        <li>p.153: 사안조사 보고서 양식에 요건이 체크박스로 있지만, 같은 내용의 본문(67, 73쪽)이 더 좋은 근거라 그쪽이 인용됨</li>
+        <li>p.72: 흐름도라 텍스트로 뽑으면 문장이 깨짐</li>
+      </ul>
+      <div class="result"><b>정리</b> 검색은 넓게, 답변 단계에서 골라 쓰는 정상 동작. 양식 쪽이 자주 상위에 오르는 건 이후 개선 후보(양식 질문이 아닐 때 부록1 순위 낮추기).
+      </div>
+    </section>
+
+    <!-- 8 -->
+    <section class="step" id="s8">
+      <div class="step-head"><span class="num">8</span>
+        <h2>결과물 파일 저장 보완</h2><span class="date">2026-10-16</span>
+      </div>
+      <div class="req"><b>요청</b>근거 원문 텍스트도 로그에 저장하고, 가이드북 검토 요약도 파일로</div>
+      <ul>
+        <li><code>logs/chat_log.jsonl</code>: 근거마다
+          <code>id, page, section, cos, bm25, rrf, cited, matched_query, text</code> 저장(이후 질문부터 적용)</li>
+        <li><code>docs/가이드북_검토_요약.md</code>: 3단계 검토 내용과 그 뒤 결정·반영 사항</li>
+        <li>이 작업 로그(<code>workinglog.html</code>)와 스크린샷(<code>docs/img/</code>)</li>
+      </ul>
+      <h3>현재 화면 (v3)</h3>
+      <div class="shots">
+        <figure><a href="docs/img/07_chatbot_v3_answer.jpg" target="_blank"><img src="docs/img/07_chatbot_v3_answer.jpg"
+              alt="현재 챗봇 답변 화면" loading="lazy"></a>
+          <figcaption>정의 질문에 제2조제1호를 그대로 답하는 현재 화면</figcaption>
+        </figure>
+        <figure><a href="docs/img/08_chatbot_v3_table.jpg" target="_blank"><img src="docs/img/08_chatbot_v3_table.jpg"
+              alt="현재 근거 표" loading="lazy"></a>
+          <figcaption>근거 표: 인용된 7·9쪽(✅)과 검색만 된 쪽</figcaption>
+        </figure>
+        <figure><a href="docs/img/09_chatbot_v3_cited_sources.jpg" target="_blank"><img
+              src="docs/img/09_chatbot_v3_cited_sources.jpg" alt="인용된 근거만 보이는 근거 원문 보기" loading="lazy"></a>
+          <figcaption>근거 원문 보기: 인용된 근거 3개만, 검색 질문·검색어·제외 개수 안내</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- 9 -->
+    <section class="step" id="s9">
+      <div class="step-head"><span class="num">9</span>
+        <h2>같은 쪽 청크 합쳐 보기</h2><span class="date">2026-10-16</span>
+      </div>
+      <div class="req"><b>질문</b>"목격자 면담 시 주의할 점" 근거 표에서 순위 1과 8이 둘 다 p.48로 중복돼 보임</div>
+      <div class="issue"><b>원인</b> 48쪽은 약 1,250자라 청크 2개(p48-0, p48-1, 경계 150자 겹침)로 나뉘어 있었고, 표에는 쪽 번호만 보여서 같은 근거처럼 보였음</div>
+      <div class="result"><b>반영</b> 근거 표와 근거 원문 모두 같은 쪽은 한 줄로 합침. "청크 수" 열 추가, 점수는 그 쪽 청크 중 최고값, 원문은 겹친 부분을 한 번만 남겨 쪽 전체(1,256자)를 보여줌. 검색·Gemini 입력·로그는 청크 단위 그대로.</div>
+    </section>
+
+    <!-- 10 -->
+    <section class="step" id="s10">
+      <div class="step-head"><span class="num">10</span>
+        <h2>Gemini 노트북과 성능 비교</h2><span class="date">2026-10-16</span>
+      </div>
+      <div class="req"><b>방법</b>같은 가이드북 PDF 하나를 넣은 Gemini 노트북과 이 챗봇에 같은 질문을 던져 답변을 비교</div>
+
+      <h3>질문 1. "사안조사 보고서 작성 시 진술을 기록하는 방법을 알려주세요"</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>항목</th><th>Gemini 노트북</th><th>이 챗봇</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>다룬 내용</td><td>3개 주제, 6개 이상 항목: 육하원칙, 시간 흐름에 따른 경위, 양측 주장 병기, 확인된 사실 기록, <b>쟁점별 구분 기재</b>, <b>근거자료 출처·날짜 명시</b></td><td>3개 항목: 육하원칙, 가해사실 불인정·증언 거부 시 기록, 양측 주장 병기</td></tr>
+            <tr><td>근거 표시</td><td>번호 각주(①~⑥), 쪽 번호는 보이지 않음</td><td>문장마다 <code>[p.45]</code> 쪽 번호, 근거 표에 코사인·BM25·인용 여부</td></tr>
+            <tr><td>사용한 쪽</td><td>본문 + 사안조사 보고서 양식의 작성 요령(153~154쪽으로 추정)</td><td>45, 47, 49, 50쪽 (153~154쪽은 검색되지 않음)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="issue"><b>차이 원인</b> "시간의 흐름"(153쪽), "근거자료"(154쪽)는 부록 [양식2-4] 사안조사 보고서의 작성 요령에만 있음. 챗봇 검색은 상위 12개 청크 안에 다른 양식(162, 165쪽)을 가져오고 153~154쪽은 놓쳐서 답변이 짧아짐. 노트북은 문서 전체를 넓게 참고하는 것으로 보임.</div>
+      <div class="shots">
+        <figure><a href="docs/img/10_compare_q1_notebook.png" target="_blank"><img src="docs/img/10_compare_q1_notebook.png"
+              alt="Gemini 노트북 답변" loading="lazy"></a>
+          <figcaption>Gemini 노트북: 쟁점별 구분 기재, 근거자료 명시까지 포함 (사용자 제공)</figcaption>
+        </figure>
+        <figure><a href="docs/img/11_compare_q1_chatbot.png" target="_blank"><img src="docs/img/11_compare_q1_chatbot.png"
+              alt="챗봇 답변과 근거 표" loading="lazy"></a>
+          <figcaption>이 챗봇: 3개 항목, 쪽 번호와 근거 표 제공 (사용자 제공)</figcaption>
+        </figure>
+      </div>
+
+      <h3>추가 질문 (이 챗봇 결과)</h3>
+      <p style="margin:4px 0;font-size:14px;color:var(--text-2)">Gemini 노트북은 사용자 계정에서만 실행할 수 있어 아직 돌리지 못함. 아래 질문을 노트북에도 넣어 오른쪽 칸을 채우면 비교가 완성됨.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>질문</th><th>이 챗봇 결과</th><th>원문 대조</th><th>Gemini 노트북</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>2. 가해학생에게 내려질 수 있는 조치의 종류를 모두 알려주세요</td><td>제1~9호를 빠짐없이 나열, 특별교육 이수 의무(제17조제3항)와 학교장 긴급조치(제5항) 보충. 인용 p.110</td><td>✅ 110쪽 법 조문과 일치</td><td>확인 필요</td></tr>
+            <tr><td>3. SNS에 친구 얼굴을 합성한 딥페이크 영상이 퍼졌어요. 학교에서 어떻게 처리해야 하나요?</td><td>"피해학생 의사와 관계없이 수사기관 즉시 신고"를 맨 앞에. 8단계 절차(신고·대장·보고·분리·2호 조치·48시간 보고·삭제 지원), 112·117 안내. 인용 10개 쪽</td><td>✅ 33·37·104쪽 내용과 일치</td><td>확인 필요</td></tr>
+            <tr><td>4. 자해한 학생의 보호자 상담은 어떻게 해야 하나요? (범위 밖 질문)</td><td>위기 경고 후 "가이드북에서 확인되지 않습니다". 지어내지 않음. 인용 0개</td><td>✅ 가이드북에 자해 내용 없음</td><td>확인 필요</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="shots">
+        <figure><a href="docs/img/12_compare_q2_chatbot.jpg" target="_blank"><img src="docs/img/12_compare_q2_chatbot.jpg"
+              alt="가해학생 조치 질문 답변" loading="lazy"></a>
+          <figcaption>질문 2: 가해학생 조치 제1~9호</figcaption>
+        </figure>
+        <figure><a href="docs/img/13_compare_q3_chatbot.jpg" target="_blank"><img src="docs/img/13_compare_q3_chatbot.jpg"
+              alt="딥페이크 질문 답변" loading="lazy"></a>
+          <figcaption>질문 3: 딥페이크 사안, 수사기관 신고 의무 먼저 안내</figcaption>
+        </figure>
+      </div>
+
+      <h3>비교로 얻은 점</h3>
+      <ul>
+        <li><b>챗봇의 강점</b>: 쪽 번호·유사도·로그로 근거를 검증할 수 있음, 법 조문 나열처럼 범위가 분명한 질문은 정확, 범위 밖 질문에 지어내지 않음</li>
+        <li><b>챗봇의 약점</b>: 내용이 여러 쪽(본문 + 부록 양식)에 흩어진 질문은 일부만 찾아 답변이 짧아짐(재현율 문제)</li>
+        <li><b>개선 후보</b>: 검색 개수 늘리기, 인용된 쪽의 앞뒤 쪽·관련 양식 함께 넣기, 양식 작성 요령을 본문과 연결, Gemini 긴 문맥에 문서 전체를 넣는 방식과 비교 실험</li>
+        <li><b>범위 밖 질문 개선</b>: 자해 질문에 "학교폭력 제로센터 문의"를 권한 것은 맞지 않음 → 위기 질문은 Wee센터·1388(가이드북 28쪽) 등 위기 연계 기관을 안내하도록 수정 필요</li>
+      </ul>
+    </section>
+
+    <!-- 11 -->
+    <section class="step" id="s11">
+      <div class="step-head"><span class="num">11</span>
+        <h2>다음 방향과 주제별 DB 설계</h2><span class="date">2026-10-16</span>
+      </div>
+      <h3>정한 방향 (순서대로)</h3>
+      <ol>
+        <li><b>특정 학교 학칙 반영</b>: 학교마다 학칙이 다르므로 학교알리미 등에서 한 학교의 학칙을 받아 넣고, 그 학교에 맞게 답하도록 함</li>
+        <li><b>상담 기법으로 확장</b>: 그 뒤 「사이버 비행 청소년 상담개입 매뉴얼」(한국청소년상담복지개발원, 2023) 등을 넣어 사이버폭력 상담 개입까지</li>
+        <li><b>자료 평가 에이전트</b>: PDF 추가 시 최신성(판본·시행일), 출처 등급, 상담사 도움 정도에 더해 <b>전문성 인증 여부</b>(공공기관 발간, 학술지 심사 여부 등), 기존 자료와 충돌, 적용 지역, 텍스트 추출 품질, 개인정보, 주제 분류를 점검. 결과는 채택/조건부/제외로 내고 최종 등록은 상담사가 승인</li>
+      </ol>
+
+      <h3>주제별 DB 설계안</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>층</th><th>내용</th><th>예시</th></tr></thead>
+          <tbody>
+            <tr><td>공통 DB</td><td>모든 질문에서 함께 검색</td><td>법령, 기관 연락처, Wee 운영 가이드</td></tr>
+            <tr><td>주제 DB</td><td>질문 분류 결과에 맞는 것만 검색</td><td>학교폭력 / 가정(아동학대·가정폭력) / 학업·학교부적응 / 정서·위기(자해·자살) / 디지털·사이버</td></tr>
+            <tr><td>학교 DB</td><td>선택한 학교의 자료만 검색, 법령·지침보다 하위</td><td>학칙, 학교 위기관리 계획</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul>
+        <li><b>문서 정보(documents)</b>: 문서 ID, 제목, 발행처, 출처 등급, 자료 유형, 주제(여러 개 가능), 적용 지역, 학교 ID, 판본·발행일·시행일, 대체한 구버전, 평가 결과</li>
+        <li><b>청크(chunks)</b>: 청크 ID, 문서 ID, 쪽, 장, 본문, 주제, 임베딩, 형태소 토큰</li>
+        <li><b>질문 흐름</b>: 위기 신호 감지(최우선) → 주제 분류(여러 개 가능, 판단 근거 포함) → 원인별로 하위 질문 분해 → 주제 DB + 공통 DB 검색 → 주제별 섹션으로 답변 → 분류 결과까지 로그 저장</li>
+        <li><b>분류기 평가</b>: 1단계에서 주제를 붙여 둔 우수사례 30건을 그대로 분류 정답 세트로 사용</li>
+      </ul>
+    </section>
+
+    <!-- 12 -->
+    <section class="step" id="s12">
+      <div class="step-head"><span class="num">12</span>
+        <h2>이산중학교 학생생활규정 반영</h2><span class="date">2026-10-16</span>
+      </div>
+      <div class="req"><b>자료 선정</b>안내받은 PDF 2개(부산 전문상담교사 직무 가이드, Wee 상담개입 지도서)와 실제 학교 규정 2개(이산중, 동화고)를 직접 열어 비교. 지도서는 안내와 달리 초등용이었고, 부산 가이드는 지역 기준이 달라 제외. 가장 최근 개정(2026.8.27)이고 전문상담교사·상담·Wee센터 조항이 있는 <b>이산중학교(경기) 학생생활규정</b>을 선택</div>
+      <h3>바꾼 것</h3>
+      <ul>
+        <li><b>다중 문서</b>: <code>rag.py</code>의 <code>DOCS</code>에 가이드북과 이산중 규정을 등록. 청크 372개(가이드북 313 + 이산중 59), 이산중은 쪽마다 '편 &gt; 장' 이름을 자동 추출</li>
+        <li><b>문서별 검색</b>: 가이드북 최대 12개 + 이산중 최대 4개 청크를 따로 뽑아 합침. 22쪽짜리 규정이 216쪽 가이드북에 밀려 빠지지 않게 하기 위함</li>
+        <li><b>인용 형식</b>: <code>[가이드북 p.24]</code>, <code>[이산중 p.5]</code>. 근거 표에 "문서" 열 추가, 원본 쪽 이미지도 문서별로 표시</li>
+        <li><b>답변 규칙</b>: 학교폭력은 법령·가이드북, 학교폭력이 아닌 생활지도 위반은 이산중 학생생활교육규정으로 구분. 관련 조항이 있으면 "## 이산중학교 규정" 섹션 추가, 내용이 다르면 법령 우선</li>
+        <li><b>예시 질문</b>: 수업 중 상담과 비밀보장, 수업 방해 학생 처리, 출석정지 중 Wee센터 특별교육 3개 추가</li>
+      </ul>
+      <h3>테스트 결과</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>질문</th><th>인용</th><th>결과</th></tr></thead>
+          <tbody>
+            <tr><td>수업 시간에 상담해도 되나요? 비밀은 어디까지?</td><td>이산중 p.3·4 + 가이드북 6개 쪽</td><td>전문상담교사 상담은 수업 외 시간 원칙의 예외, 상담 내용 제3자 누설 금지(법령 예외)는 학교 규정으로, 학교폭력 비밀누설 금지(법 제21조)는 가이드북으로 나눠 답함 ✅</td></tr>
+            <tr><td>학교폭력은 아닌데 수업을 계속 방해하는 학생</td><td>이산중 p.5·14·15</td><td>"학교폭력이 아닌 생활지도 위반"으로 구분하고 단계별 지도(훈육·훈계 → 인권친화적 생활지도 → 학부모 상담 → 학생생활교육위원회), 위원회 의결 정족수, 학교 내 봉사 1일 2시간·5일 이내를 안내. 원문 대조 일치 ✅</td></tr>
+            <tr><td>학교장 자체해결 요건 (학교폭력 질문)</td><td>가이드북만</td><td>학교 규정 쪽도 검색은 됐지만 인용하지 않고 가이드북 근거로만 답함 ✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="shots">
+        <figure><a href="docs/img/14_school_answer.jpg" target="_blank"><img src="docs/img/14_school_answer.jpg"
+              alt="이산중 규정 기반 답변" loading="lazy"></a>
+          <figcaption>수업 방해 질문: 학교폭력이 아닌 생활지도 위반으로 구분하고 이산중 규정으로 답함</figcaption>
+        </figure>
+        <figure><a href="docs/img/15_school_sources_table.jpg" target="_blank"><img src="docs/img/15_school_sources_table.jpg"
+              alt="문서 열이 추가된 근거 표" loading="lazy"></a>
+          <figcaption>근거 표에 "문서" 열 추가 (가이드북 / 이산중)</figcaption>
+        </figure>
+      </div>
+      <div class="issue"><b>남은 점</b> 근거 표가 가이드북 → 이산중 순서라 학교 규정 질문에서도 이산중 행이 표 아래쪽에 있음. 답변 속 굵은 글씨(**…**)가 한글과 붙으면 기호 그대로 보이는 경우가 있음. 이 학교에 Wee 클래스가 실제로 있는지는 확인하지 못함 → 13단계에서 사용자가 학교 홈페이지로 확인.</div>
+    </section>
+
+    <!-- 13 -->
+    <section class="step" id="s13">
+      <div class="step-head"><span class="num">13</span>
+        <h2>이산중 전용 챗봇으로 전환</h2><span class="date">2026-10-16</span>
+      </div>
+      <div class="req"><b>결정</b>이산중학교에 특화된 챗봇으로 구현. 이산중 자료를 가장 먼저 확인한 뒤 가이드북 확인. 근거 표는 문서를 나누지 않고 코사인 순위로</div>
+      <div class="result"><b>확인</b> 사용자가 학교 홈페이지에서 이산중에 Wee 클래스가 있고 전문상담교사 1명이 배정된 것을 확인 → 챗봇 설정(<code>SCHOOL_INFO</code>)과 사이드바에 반영</div>
+      <h3>바꾼 것</h3>
+      <ul>
+        <li><b>확인 순서</b>: 이산중 규정 → 가이드북. 검색도 이산중을 먼저(최대 6개 청크, 기존 4개에서 늘림), Gemini에 넘기는 자료도 이산중이 먼저</li>
+        <li><b>답변 규칙</b>: "## 이산중학교 규정"을 먼저 쓰고 가이드북으로 보충. 관련 조항이 없으면 "이산중 규정에는 관련 조항이 없어 가이드북 기준으로 안내합니다"를 밝힘. 학교폭력 법정 절차는 가이드북 내용을 빠짐없이 함께 안내, 충돌 시 법령 우선은 유지</li>
+        <li><b>근거 표</b>: 이산중·가이드북 구분 없이 벡터 유사도(코사인) 높은 순. 문서 안 순위 열(벡터 순위·BM25 순위)은 섞이면 헷갈려서 뺌</li>
+        <li><b>화면</b>: 제목·사이드바를 "이산중학교 사안처리 도우미"로, 학교 정보와 확인 순서 표시, 예시 질문을 학교 규정 질문부터 배치. 굵은 글씨 뒤에 조사를 붙이지 않도록 규칙 추가</li>
+      </ul>
+      <h3>테스트 결과</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>질문</th><th>결과</th></tr></thead>
+          <tbody>
+            <tr><td>출석정지 학생을 Wee센터 특별교육에 보낼 수 있나요? 출결은?</td><td>이산중 규정(p.16: Wee센터 위탁 특별교육, 학부모 동행, 출석정지 기간은 미인정결석으로 기재·특기사항에 사유 미기재)을 먼저, 가이드북(p.59·114)을 보충. 원문 대조 일치 ✅</td></tr>
+            <tr><td>학교폭력 신고 후 교육지원청 보고 기한</td><td>"이산중 규정에는 관련 조항이 없어 가이드북 기준으로 안내합니다" 후 48시간 이내 보고 [가이드북 p.24·37] ✅</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="shots">
+        <figure><a href="docs/img/16_esan_first_cosine_table.jpg" target="_blank"><img src="docs/img/16_esan_first_cosine_table.jpg"
+              alt="코사인 순으로 합친 근거 표" loading="lazy"></a>
+          <figcaption>문서 구분 없이 코사인 순으로 정렬된 근거 표 (이산중 p.16이 가이드북 사이 4위)</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- 14 -->
+    <section class="step" id="s14">
+      <div class="step-head"><span class="num">14</span>
+        <h2>성능 개선: Gemini 노트북 수준 이상으로</h2><span class="date">2026-10-18</span>
+      </div>
+      <div class="req"><b>목표</b>Gemini 노트북과 비교해 최소 노트북 정도의 성능</div>
+      <h3>측정 방법</h3>
+      <ul>
+        <li><b>평가 세트</b> <code>eval/eval_set.json</code>: 질문 11개(법·절차 7, 학교 규정 3, 범위 밖 1)마다 원문으로 확인한 <b>정답 쪽</b>과 <b>핵심어</b>. Q1은 노트북 답변 6개 항목을 핵심어로 사용</li>
+        <li><b>지표</b>: 검색 재현율(정답 쪽이 Gemini에 넘어갔나), 인용 재현율(정답 쪽을 인용했나), 핵심 내용 포함률(핵심어 묶음이 답변에 있나)</li>
+        <li><b>노트북형 기준선</b>: 노트북은 직접 돌릴 수 없어서, 검색 없이 <b>문서 전체(26만 자)를 Gemini에 넣는 방식</b>(<code>--full</code>)을 노트북과 같은 조건의 기준선으로 측정</li>
+      </ul>
+      <h3>개선 내용</h3>
+      <ul>
+        <li><b>양식 연결</b>: 검색된 본문이 <code>&lt;양식2-4&gt;</code>처럼 부록 양식을 가리키면 그 양식의 앞 2쪽을 함께 넣음 → Q1에서 놓치던 153·154쪽(사안조사 보고서 작성 요령: 시간 흐름, 쟁점별 구분, 근거자료) 확보</li>
+        <li><b>검색 폭 확대</b>: 가이드북 최대 12 → 24청크, 이산중 6 → 12청크</li>
+        <li><b>답변 규칙</b>: 여러 쪽에 흩어진 내용을 빠짐없이 모으고, 기한·횟수·예외 조건 숫자를 빠뜨리지 않도록 지시</li>
+      </ul>
+      <h3>결과 (질문 11개, 핵심 내용 포함률)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>버전</th><th>검색 재현율</th><th>인용 재현율</th><th>핵심 내용 포함률</th><th>평균 시간</th></tr></thead>
+          <tbody>
+            <tr><td>개선 전(기존 RAG)</td><td>86.7%</td><td>83.3%</td><td>79.4%</td><td>15.7초</td></tr>
+            <tr><td><b>노트북형 기준선(문서 전체)</b></td><td>100%</td><td>91.7%</td><td><b>90.0%</b></td><td>17.6초</td></tr>
+            <tr><td>v4 (양식 연결 + 검색 확대)</td><td>88.3%</td><td>85.8%</td><td>89.7%</td><td>20.6초</td></tr>
+            <tr><td>v5 (검색 더 확대 + 숫자 규칙)</td><td>96.7%</td><td>93.3%</td><td>90.3%</td><td>19.4초</td></tr>
+            <tr><td><b>v6 (양식 3개까지)</b></td><td><b>100%</b></td><td><b>94.2%</b></td><td>89.7%</td><td>21.6초</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="result"><b>결과</b> 핵심 내용 포함률은 79% → 약 90%로 노트북형 기준선과 같은 수준, 검색·인용 재현율은 기준선보다 높음(인용 94% vs 92%). Q1(노트북 비교 질문)은 노트북에만 있던 "쟁점별 구분", "근거자료 명시"까지 포함. 쪽 번호·유사도로 근거를 확인할 수 있다는 점은 노트북보다 나음</div>
+      <div class="issue"><b>한계</b> 같은 설정도 실행마다 답변이 달라져 핵심 포함률이 ±3%p 정도 흔들림. 핵심어 일치로 채점해서, 다른 정답 경로를 택한 답(예: Q9가 단계별 지도 대신 개별학생교육지원 절차로 답함)은 낮게 나옴. 실제 노트북으로는 Q1만 비교했으므로 나머지 질문은 노트북에도 넣어 확인 필요</div>
+    </section>
+
+    <!-- 15 -->
+    <section class="step" id="s15">
+      <div class="step-head"><span class="num">15</span>
+        <h2>상담 기법 매뉴얼 추가</h2><span class="date">2026-10-18</span>
+      </div>
+      <div class="req"><b>목표</b>법적인 부분에서 상담 기법까지 확장. 상담 기법에 도움이 될 PDF를 넣고 확인</div>
+      <h3>자료 선정 (평가 기준 적용)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>후보</th><th>최신성</th><th>출처·전문성</th><th>학교폭력 관련성</th><th>상담사 도움</th><th>결정</th></tr></thead>
+          <tbody>
+            <tr><td>사이버 비행 청소년 상담개입 매뉴얼</td><td>2023</td><td>한국청소년상담복지개발원, 현장 전문가 162명 조사·9명 FGI·전문가 평가</td><td>사이버폭력 가해</td><td>12회기 개인상담 단계·활동</td><td><b>채택</b></td></tr>
+            <tr><td>디지털 미디어 위기 청소년 유형 및 개입 매뉴얼</td><td>2024</td><td>한국청소년상담복지개발원, 델파이 22명·FGI</td><td>디지털 미디어 폭력 피해·가해</td><td>피해 청소년 효과적 개입(인지·정서·행동)</td><td><b>채택</b></td></tr>
+            <tr><td>학교 위기대응 안내서(PFA-S)</td><td>2024</td><td>-</td><td>'학교폭력' 언급 0회</td><td>위기 심리지원</td><td>보류(위기 대응 단계에서)</td></tr>
+            <tr><td>또래 괴롭힘 관련 학술 논문</td><td>2013</td><td>학술지</td><td>높음</td><td>연구 결과라 실무 지침 아님</td><td>제외</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>바꾼 것</h3>
+      <ul>
+        <li><b>문서 4개</b>: 이산중 → 가이드북 → [사이버상담] → [디지털상담] 순서. 청크 696개. 매뉴얼은 책갈피가 없어 인쇄 목차와 쪽 차이(+8, +10)로 장 이름을 붙임</li>
+        <li><b>검색</b>: 매뉴얼마다 최대 7청크. 연구방법·델파이·전문가 평가·참고문헌 쪽은 상담 내용이 아니라서 순위를 낮춤</li>
+        <li><b>답변 규칙</b>: 상담 방법을 묻거나 필요할 때만 "## 상담 개입 참고" 섹션을 매뉴얼 근거로 작성. 매뉴얼은 청소년상담복지센터 기준이라 학교에 맞게 조정이 필요하다는 안내 포함. 자해·자살 상담은 자료에 없으므로 다른 상황의 요령을 옮겨 쓰지 않음</li>
+        <li><b>평가 질문 3개 추가</b>: 사이버폭력 가해 학생 회기 구성, 피해 학생 개입, 단톡방 저격 가해 학생(절차+상담)</li>
+      </ul>
+      <h3>결과 (v8, 질문 14개)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>구분</th><th>검색 재현율</th><th>핵심 내용 포함률</th></tr></thead>
+          <tbody>
+            <tr><td>법·절차·학교 규정 Q1~Q11</td><td>98.3%</td><td>86.7% (v6 89.7%, 실행 편차 범위)</td></tr>
+            <tr><td>상담 기법 Q12~Q14</td><td>61.1%</td><td><b>94.4%</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul>
+        <li>상담 질문의 검색 재현율이 낮은 것은 매뉴얼이 같은 내용을 여러 쪽(개요표·세부 설명·최종 구성)에 반복해서, 정답으로 정한 쪽 대신 옆쪽을 인용했기 때문. 답변 내용(핵심 포함률 94%)은 정확함</li>
+        <li>자해 학생 보호자 상담(Q11): 처음엔 학교폭력 보호자 상담 요령을 끌어와 답함 → 규칙 수정 후 "확인되지 않습니다" + Wee센터·1388 연계로 정확히 답함</li>
+      </ul>
+      <div class="shots">
+        <figure><a href="docs/img/17_counseling_answer.jpg" target="_blank"><img src="docs/img/17_counseling_answer.jpg"
+              alt="상담 개입 참고 섹션이 있는 답변" loading="lazy"></a>
+          <figcaption>단톡방 저격 가해 학생 질문: 학교 절차에 이어 "상담 개입 참고" 섹션을 가이드북·매뉴얼 근거로 작성</figcaption>
+        </figure>
+      </div>
+      <div class="issue"><b>남은 점</b> 절차+상담이 섞인 질문은 인용이 20개 쪽까지 늘어 답변이 길어짐. 질문당 평균 24초. 법·절차 질문의 핵심 포함률이 매뉴얼 추가 후 3%p 낮아졌는데 실행 편차 범위인지 반복 측정 필요</div>
+    </section>
+
+    <!-- 16 -->
+    <section class="step" id="s16">
+      <div class="step-head"><span class="num">16</span>
+        <h2>질문 유형별 라우팅</h2><span class="date">2026-10-18</span>
+      </div>
+      <div class="req"><b>비교 질문</b>"사이버 비행을 학생에게 이해하기 쉽게 설명하려면 뭐라고 하면 돼?"에 대한 Gemini 노트북과 이 챗봇의 답변 비교, 질문 유형(학교 맞춤형·단어 정의·상담 가이드 등)에 따라 먼저 볼 문서를 정하기</div>
+      <h3>두 답변 비교</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>항목</th><th>Gemini 노트북</th><th>이 챗봇(라우팅 전)</th></tr></thead>
+          <tbody>
+            <tr><td>질문 의도 맞춤</td><td>◎ 학생에게 할 말(한 줄 정의·비유·예시·핵심 2가지)</td><td>△ 학교 규정 → 학술적 정의 순서, 학생용 문장은 2줄</td></tr>
+            <tr><td>근거 표시</td><td>✕ 없음</td><td>◎ 줄마다 쪽 번호</td></tr>
+            <tr><td>자료 충실도</td><td>○ 예시 대부분이 사이버상담 p.14~15 유형표, p.46·49, 가이드북 p.9와 일치. "디지털 기록이 남아 찾아낼 수 있다"는 자료에서 확인 안 됨</td><td>◎ 모두 자료 근거</td></tr>
+            <tr><td>학교 맞춤</td><td>✕</td><td>○ 이산중 제37조 정보통신예절(다만 맨 앞에 와서 흐름을 끊음)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="issue"><b>원인</b> 질문 종류와 상관없이 "이산중 규정 먼저" 고정 순서와 "학생 말투 금지" 규칙을 적용해서, 맞는 자료(사이버상담 유형표)는 찾았지만 답의 모양이 질문과 맞지 않았음</div>
+      <div class="result"><b>RAG 서비스에 맞는 답</b> 노트북의 구성(질문 의도에 맞춘 형식) + 이 챗봇의 근거(줄마다 쪽 번호, 자료에 없는 말 금지) + 학교 맞춤(관련 있을 때만 이산중 규칙 한 줄)</div>
+      <h3>구현: 질문 유형 → 확인 순서 → 답변 형식</h3>
+      <ul>
+        <li>검색어 생성 호출에서 유형도 함께 분류(추가 호출 없음). 유형마다 1순위 문서에 검색 몫을 가장 많이 주고, Gemini에 넘기는 자료도 그 순서로 배치</li>
+        <li>학교 맞춤형: 이산중 → 가이드북 → 매뉴얼 / 학교폭력 절차·법: 가이드북 → 이산중 → 매뉴얼 / 용어 정의: 가이드북 → 사이버상담 → 디지털상담 → 이산중 / 상담 가이드·학생 눈높이 설명: 사이버상담 → 디지털상담 → 가이드북 → 이산중 / 위기: 자료 없음 안내 + 연계</li>
+        <li>유형마다 답변 형식 지정. 학생 눈높이 설명은 학생에게 읽어 줄 문장(따옴표)을 허용하되 자료의 정의·유형·사례만 쉬운 말로 바꾸고 줄마다 근거</li>
+        <li>이산중 규정은 학교 맞춤형에서만 맨 앞, 다른 유형에서는 관련 조항이 있을 때만 한 줄</li>
+        <li>화면: 답변 위에 "🔎 질문 유형 · 확인 순서" 표시, 사이드바에 유형별 확인 순서</li>
+      </ul>
+      <h3>결과</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>항목</th><th>라우팅 전(v8)</th><th>라우팅 후(v9)</th></tr></thead>
+          <tbody>
+            <tr><td>기존 질문 14개 핵심 포함률</td><td>88.3%</td><td><b>91.1%</b></td></tr>
+            <tr><td>학생 눈높이 설명(Q15) / 용어 정의(Q16)</td><td>-</td><td><b>100% / 100%</b></td></tr>
+            <tr><td>유형 분류 정확도(16개)</td><td>-</td><td>93.8% → 설명 보강 후 100%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin:4px 0;font-size:13px;color:var(--text-2)">v9 수치는 전체 실행 결과에 Q10·Q14·Q15·Q12·Q13 재실행(유형 설명·상담 경로 보강 후) 결과를 합친 값</p>
+      <div class="shots">
+        <figure><a href="docs/img/18_router_student_explain.jpg" target="_blank"><img src="docs/img/18_router_student_explain.jpg"
+              alt="학생 눈높이 설명 유형 답변" loading="lazy"></a>
+          <figcaption>같은 질문: "학생 눈높이 설명"으로 분류되어 사이버상담부터 확인하고, 학생에게 할 한 줄 설명부터 답함</figcaption>
+        </figure>
+      </div>
+      <div class="issue"><b>남은 점</b> 절차와 상담을 함께 묻는 질문(Q14)은 한 유형만 고르므로 다른 쪽 내용이 조금 빠질 수 있음(83%). 유형을 두 개까지 고르는 방식은 다음 후보</div>
+    </section>
+
+    <!-- 17 -->
+    <section class="step" id="s17">
+      <div class="step-head"><span class="num">17</span>
+        <h2>참고자료 타당성 평가 에이전트와 자료 추가</h2><span class="date">2026-10-18</span>
+      </div>
+      <div class="req"><b>요청</b>자료를 추가할 때 기준에 따라 타당성을 평가하는 AI 에이전트를 따로 폴더로 만들고, 서비스에서 PDF를 추가하면 AI가 추천/비추천을 판정한 뒤 넣을지 정하는 단계 추가</div>
+      <h3>평가 기준 12개 (<code>doc_agent/criteria.json</code>)</h3>
+      <p style="margin:4px 0;font-size:14px">1 최신성 · 2 출처 명확성 · 3 전문성 인증 · 4 상담사 활용성 · <b>5 중복·충돌★</b> · 6 적용 지역 · 7 자료 유형 · 8 구체성 · <b>9 텍스트 추출★</b> · <b>10 개인정보★</b> · 11 주제 분류(정보) · 12 이용 조건 (★ 필수 기준)</p>
+      <h3>에이전트 흐름</h3>
+      <ol>
+        <li><b>자동 측정</b>(Python): 쪽당 글자 수, 글자 없는 쪽 비율, 표지 연도·발행처, 개인정보 패턴, 지역, 주제 키워드, 기존 자료와 본문 임베딩 유사도</li>
+        <li><b>Gemini 판단</b>: 측정값 + 표지·목차·본문 표본 쪽을 읽고 기준마다 0/1/2점과 근거(쪽 번호), 인용 이름·역할·사용할 질문 유형·주의할 점 제안</li>
+        <li><b>최종 판정</b>(코드로 강제): 필수 기준 0점 또는 55% 미만 → 비추천 / 75% 이상이고 0점 기준 없음 → 추천 / 그 사이 → 조건부. 점수 누락은 0점</li>
+        <li><b>상담사 승인 → 등록</b>: 조건부는 주의 확인, 비추천은 사유 입력 후에만 추가 가능. 등록하면 그 자료 청크만 임베딩해 인덱스에 덧붙임(전체 재생성 없음). 해제도 화면에서</li>
+      </ol>
+      <h3>기존 후보 PDF 6개 판정</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>자료</th><th>판정</th><th>점수</th><th>사유</th></tr></thead>
+          <tbody>
+            <tr><td>2024 학교 위기대응 안내서(PFA-S)</td><td>✅ 추천</td><td>100%</td><td>교육부·학생정신건강지원센터, 2024 개정, 전문가 집필·자문, 공개 자료</td></tr>
+            <tr><td>2025 Wee 클래스 및 센터 운영 가이드</td><td>⚠️ 조건부</td><td>93.8%</td><td>내용은 우수하나 "무단전재·복제 금지"(이용 조건 0점)</td></tr>
+            <tr><td>25 Wee 희망대상 우수사례집</td><td>⚠️ 조건부</td><td>78.1%</td><td>사례집(자료 유형 0점), 무단전재 금지. 이름은 ○○로 가려져 있음</td></tr>
+            <tr><td>단위학교 위기관리 가이드라인(서울시교육청)</td><td>⚠️ 조건부</td><td>78.1%</td><td>2021년·서울 지역 자료, 활용성 판단 누락 → 0점 처리</td></tr>
+            <tr><td>2025 학교폭력 사안처리 가이드북</td><td>❌ 비추천</td><td>71.9%</td><td>필수 기준 미달: 등록된 2026판의 구버전(본문 유사도 최대 0.976)</td></tr>
+            <tr><td>또래 괴롭힘 대처행동 매개효과 논문(2013)</td><td>❌ 비추천</td><td>46.9%</td><td>10년 이상 된 학술 논문, 실무 지침 아님, 저자 이메일 노출</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="result"><b>화면 테스트</b> PFA-S를 화면에서 올림 → 추천(100%) → "추천대로 추가" → 청크 63개 인덱스 추가, 사이드바에 [위기대응] 표시 → 챗봇에 "학생이 자해했다는 사실을 알게 됐어요" 질문 시 [위기대응 p.6, p.8]을 근거로 위기관리위원회 소집·선별검사 절차 안내 → 등록 해제 후 인덱스 696개로 복원. 이전에 PFA-S를 '보류'로 정했으므로 테스트 뒤 해제해 둠</div>
+      <ul>
+        <li>위기(자해·자살) 유형에 쓰도록 등록된 자료는 위기 질문에서 1순위로 확인하도록 함(기본 자료에는 위기 대응 자료가 없기 때문)</li>
+        <li>답변 규칙 10을 "등록된 위기 대응 자료가 있으면 그 절차만 근거로, 없으면 확인되지 않는다고 안내"로 바꿈</li>
+      </ul>
+      <div class="shots">
+        <figure><a href="docs/img/19_agent_report.jpg" target="_blank"><img src="docs/img/19_agent_report.jpg"
+              alt="AI 평가 결과 화면" loading="lazy"></a>
+          <figcaption>자료 추가 화면: PFA-S 평가 결과(추천, 기준별 점수와 근거)</figcaption>
+        </figure>
+        <figure><a href="docs/img/20_registered_docs.jpg" target="_blank"><img src="docs/img/20_registered_docs.jpg"
+              alt="등록된 자료 목록" loading="lazy"></a>
+          <figcaption>등록 후: 사이드바와 등록된 자료 목록에 [위기대응] 추가</figcaption>
+        </figure>
+      </div>
+      <div class="issue"><b>남은 점</b> 판정에 Gemini 판단이 들어가므로 같은 PDF도 점수가 조금 달라질 수 있음(필수 기준·0점 규칙은 코드로 고정). 추가 자료의 장 이름은 쪽 앞부분 제목 줄로 자동 추출해 정확하지 않을 수 있음. 평가에 PDF당 약 10~30초, 등록(임베딩)에 수십 초</div>
+    </section>
+
+    <!-- 18 -->
+    <section class="step" id="s18">
+      <div class="step-head"><span class="num">18</span>
+        <h2>자료 저장소(DB) 전환·삭제·학기별 점검</h2><span class="date">2026-10-19</span>
+      </div>
+      <div class="req"><b>요청</b>공통/주제/학교 3층 DB 설계에 맞는 DB와 현재 관리 방식·수정안, 사용자가 PDF를 넣고 지우는 점을 고려한 설계와 구현, 이미 올린 PDF 삭제 기능, 6개월(한 학기)마다 자동 점검 후 사용 전 알림</div>
+      <h3>이전 방식의 문제</h3>
+      <ul>
+        <li>기본 4개 자료는 코드에 고정, 추가 자료는 registry.json → 목록이 두 곳</li>
+        <li>청크는 chunks.json, 임베딩은 embeddings.npy → 두 파일의 행 순서가 같아야 하고 트랜잭션이 없음. 추가·삭제마다 파일 전체를 다시 씀</li>
+        <li>층·주제·평가 이력·알림을 담을 곳이 없음, 같은 PDF를 이름만 바꿔 올리면 막지 못함</li>
+      </ul>
+      <h3>설계: SQLite 한 파일 + 층·주제 꼬리표 (<code>docs/DB_설계.md</code>)</h3>
+      <ul>
+        <li><b>DB 선택</b>: SQLite(설치 없음, 트랜잭션, CASCADE 삭제). 벡터 검색은 메모리(numpy). 여러 학교·사용자 서버로 갈 때 같은 표 구조로 PostgreSQL + pgvector</li>
+        <li><b>표</b>: documents(층·종류·학교·발행 연도·상태·파일 해시) / doc_topics / doc_qtypes / chunks(본문·형태소·임베딩) / reviews(입고·정기 평가) / alerts(사용 전 알림) / schools / meta</li>
+        <li><b>층과 주제</b>: 물리적으로 나누지 않고 꼬리표로 거름. 질문 유형과 함께 질문 주제(0~3개)도 판단해, 추가 자료는 층이 공통·학교이거나 주제가 겹칠 때만 확인</li>
+        <li><b>이전</b>: 기존 청크 696개와 임베딩을 다시 계산하지 않고 그대로 옮김. 옛 파일은 index/legacy_backup/</li>
+      </ul>
+      <h3>자료 생애</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>동작</th><th>결과</th></tr></thead>
+          <tbody>
+            <tr><td>추가</td><td>파일 해시로 같은 PDF 차단 → 평가·승인 → 한 트랜잭션으로 등록, 임베딩 실패 시 되돌림. 평가의 주의할 점은 알림으로</td></tr>
+            <tr><td>사용 중지 / 다시 사용</td><td>검색에서만 뺌(기본 자료도 가능)</td></tr>
+            <tr><td><b>완전 삭제</b></td><td>확인 체크 후 문서·청크·평가 기록·알림 CASCADE 삭제 + data/·inbox/의 PDF 삭제. 기본 4개 자료는 불가</td></tr>
+            <tr><td>다시 평가</td><td>등록 자료 탭에서 한 자료만 즉시 재평가</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>학기별 정기 점검과 사용 전 알림</h3>
+      <ul>
+        <li>182일마다 모든 활성 자료 재평가(오늘 날짜 기준 최신성, 자기 자신은 중복 비교에서 제외) → 직전 평가와 비교해 🔴 긴급(비추천 전환·파일 없음) / 🟠 주의(판정 하락·새 0점·최신성 하락·발행 3년 경과·법령 시행일 이후 확인 필요) / 🔵 참고(주의할 점)</li>
+        <li>앱을 열 때 점검 시기가 지났으면 백그라운드로 자동 점검. 앱을 열지 않아도 되도록 run_review.bat을 작업 스케줄러에 등록하는 방법을 README에 정리(등록은 하지 않음)</li>
+        <li>알림 위치: 챗봇 사이드바 "🔔 자료 유의사항 N건", 답변이 인용한 자료에 주의·긴급 알림이 있으면 답변 아래 "사용 전 확인", 자료 관리의 알림 목록에서 "확인함"</li>
+      </ul>
+      <div class="result"><b>첫 정기 점검(4개 자료)</b> 가이드북·사이버상담·디지털상담 조건부(무단전재 금지 문구), 이산중 추천. 🟠 주의 2건: 가이드북·이산중이 학교폭력예방법 시행일(2026-06-02)과 같은 해 자료라 개정 조문 확인 필요. 🔵 참고 9건. 다음 점검일 2027-04-19</div>
+      <div class="result"><b>화면 테스트</b> 보고 기한 질문 → 가이드북 인용 답변 아래 "사용 전 확인" 표시 / PFA-S 추가(청크 63개, 알림 2건) → 같은 PDF 재업로드 차단 → 완전 삭제 후 저장소 4개 자료·696청크·알림 11건으로 복원, PDF 두 사본 삭제 확인</div>
+      <div class="result"><b>품질 회귀 확인</b> 16개 질문 핵심 포함률 91.2%(전환 전과 같은 수준). 전환 뒤 Q1에서 양식 연결이 엉뚱한 양식부터 고르는 문제를 발견해 "여러 본문이 함께 가리키는 양식 우선"으로 고침 → Q1·Q6 100%</div>
+      <ul>
+        <li>자료 관리 화면의 탭이 선택할 때마다 첫 탭으로 돌아가는 문제를 고침(선택이 유지되는 메뉴로 변경)</li>
+      </ul>
+      <div class="shots">
+        <figure><a href="docs/img/21_use_alert.jpg" target="_blank"><img src="docs/img/21_use_alert.jpg" alt="사용 전 확인 알림" loading="lazy"></a>
+          <figcaption>답변이 인용한 가이드북에 주의 알림이 있어 "사용 전 확인" 표시</figcaption></figure>
+        <figure><a href="docs/img/22_manage_add_duplicate.jpg" target="_blank"><img src="docs/img/22_manage_add_duplicate.jpg" alt="자료 관리와 중복 차단" loading="lazy"></a>
+          <figcaption>자료 관리: 사이드바 유의사항 13건, 같은 PDF 재업로드 차단</figcaption></figure>
+        <figure><a href="docs/img/23_manage_docs_delete.jpg" target="_blank"><img src="docs/img/23_manage_docs_delete.jpg" alt="등록 자료와 완전 삭제" loading="lazy"></a>
+          <figcaption>등록 자료: 사용 중지·다시 평가·완전 삭제(확인 체크)</figcaption></figure>
+      </div>
+      <div class="issue"><b>남은 점</b> 법령 비교는 발행 '연도'만 알아 같은 해면 무조건 확인 알림이 뜸(이산중 규정은 8월 개정이라 실제로는 시행일 이후). 발행 날짜를 저장하면 정확해짐. 작업 스케줄러 등록은 사용자 확인 후 진행. 정기 점검은 자료당 15~25초, Gemini API 사용</div>
+    </section>
+
+    <!-- 19 -->
+    <section class="step" id="s19">
+      <div class="step-head"><span class="num">19</span>
+        <h2>알림 아이콘, 학업중단 숙려제 매뉴얼, 지역 연계 기관</h2><span class="date">2026-10-19</span>
+      </div>
+      <div class="req"><b>요청</b>알림·정기 점검을 휴대폰 앱처럼 알림 아이콘과 숫자 배지로 표시 / 5단계(원인별 솔루션 비교)에 필요한 자료 찾기: 경기도교육청 학업중단 숙려제 운영 매뉴얼 확인 / 이산중이 있는 화성시의 청소년상담복지센터로 연계</div>
+      <h3>🔔 알림 아이콘</h3>
+      <ul>
+        <li>사이드바 제목 옆 🔔 버튼 오른쪽 위에 확인하지 않은 알림 수를 빨간 배지로 표시(0건이면 숨김, 정기 점검 중이면 파란 점)</li>
+        <li>누르면 별도 "알림·정기 점검" 화면(점검 현황, 지금 점검 실행, 알림 목록과 확인함). 자료 관리에서는 이 탭을 빼고 자료 추가·등록 자료만 남김</li>
+      </ul>
+      <h3>학업중단 숙려제 운영 매뉴얼(학업·학교부적응 주제의 첫 절차 자료)</h3>
+      <ul>
+        <li>경기도교육청 누리집에서 「2026 학업중단 숙려제 운영 매뉴얼」(75쪽) 확인: 적용 대상·기간(1~7주)·출결, 학업중단 예방 위원회, 나이스 등록, Q&amp;A, 서식, 지원 기관 안내</li>
+        <li>사용자가 자료 관리에서 평가 후 등록 → [학업숙려제] 청크 91개. 이산중 학생생활규정 제40조도 "경기도교육청 학업중단 숙려제 운영 매뉴얼에 따른다"고 정해 두어 학교 규정과 바로 이어짐</li>
+      </ul>
+      <h3>지역 연계 기관: 화성시청소년상담복지센터</h3>
+      <ul>
+        <li>사용자가 찾은 기관을 <code>rag.LOCAL_AGENCIES</code>에 등록: 전화 031-225-1318, 031-267-8771 · 팩스 031-267-8774 · 화성시 태안로 145 유앤아이센터 2층(병점동). 출처는 2025 청소년상담복지센터 현황(2025.10) CSV와 대조(사용자 메모의 031-267-8774는 CSV에서 팩스 번호)</li>
+        <li>답변 규칙 8-1: 자료가 청소년상담복지센터나 외부 상담기관 연계를 안내하면 일반 명칭 대신 이 센터를 이름·전화와 함께 안내하고 [지역기관]을 단다. 연계 근거는 원래 자료의 쪽 번호로 달고, Wee센터·경찰·아동보호전문기관은 이 센터로 바꾸지 않음</li>
+        <li>사이드바에 "연계 기관" 표시, 학교 이름을 "이산중학교(경기 화성시)"로</li>
+      </ul>
+      <div class="result"><b>테스트</b> ① 학업중단 의사 학생의 숙려제 상담 연계 → 학교 맞춤형으로 분류, 이산중 제40조 + 학업숙려제 매뉴얼로 절차 6단계, 연계 기관에 화성시청소년상담복지센터(031-225-1318)[지역기관]. ② 학교폭력 피해학생 외부 상담 연계 → 긴급조치·제로센터·보호조치 절차 뒤 화성시 센터 안내, Wee센터·117은 따로 유지</div>
+      <div class="shots">
+        <figure><a href="docs/img/24_sidebar_bell_agency.jpg" target="_blank"><img src="docs/img/24_sidebar_bell_agency.jpg" alt="알림 아이콘과 연계 기관" loading="lazy"></a>
+          <figcaption>사이드바: 🔔 알림 배지와 연계 기관(화성시청소년상담복지센터)</figcaption></figure>
+        <figure><a href="docs/img/30_user_bell_reference.webp" target="_blank"><img src="docs/img/30_user_bell_reference.webp" alt="알림 배지 참고 사진" loading="lazy"></a>
+          <figcaption>사용자가 보낸 참고 사진: 휴대폰 앱 아이콘의 빨간 숫자 배지</figcaption></figure>
+      </div>
+      <h3>자료 추가 중복 오류와 답변 화면 읽기 쉽게</h3>
+      <ul>
+        <li>정서행동 매뉴얼 등록 때 "인용 이름이 이미 쓰고 있습니다" 오류: 실제로는 첫 요청에서 등록 완료(청크 246개), 같은 요청이 한 번 더 들어간 것. 같은 PDF면 완료로 처리, 이름 중복은 버튼 누르기 전에 표시하고 대체 이름(예: 정서행동2026) 제안</li>
+        <li>답변 본문 글씨 1.25배, 첫 줄 요약은 파란 강조 상자, 소제목 크기 축소, 근거 표시 [자료 p.쪽]는 작은 회색 글씨로</li>
+        <li>답변 규칙 12: 항목마다 핵심(해야 할 행동·기한 숫자·담당·기관명·법정 의무)만 굵게, 섹션 안 묶음은 번호 목록 대신 ### 소제목</li>
+      </ul>
+      <div class="shots">
+        <figure><a href="docs/img/31_user_name_clash.png" target="_blank"><img src="docs/img/31_user_name_clash.png" alt="인용 이름 중복 오류" loading="lazy"></a>
+          <figcaption>사용자 화면: 정서행동 등록 때 '인용 이름이 이미 쓰고 있습니다'(실제로는 첫 요청에서 등록 완료)</figcaption></figure>
+        <figure><a href="docs/img/32_user_answer_before.png" target="_blank"><img src="docs/img/32_user_answer_before.png" alt="바꾸기 전 답변 화면" loading="lazy"></a>
+          <figcaption>사용자 화면(바꾸기 전): 소제목이 본문보다 지나치게 크고, 근거 표시가 섞여 핵심이 한눈에 안 보임</figcaption></figure>
+        <figure><a href="docs/img/25_answer_readable.jpg" target="_blank"><img src="docs/img/25_answer_readable.jpg" alt="읽기 쉽게 바꾼 답변" loading="lazy"></a>
+          <figcaption>바꾼 뒤: 요약 강조 상자, 1.25배 글씨, 작은 회색 근거 표시</figcaption></figure>
+      </div>
+      <div class="issue"><b>남은 점</b> 학업중단 질문에서도 확인 순서상 [학업숙려제]가 마지막(추가 자료는 기본 자료 뒤에 붙음). 답은 잘 찾았지만, 5단계 비교에서 순서가 결과에 영향을 주는지 볼 것. 교육지원청 Wee센터·아동보호전문기관·정신건강복지센터 등 다른 지역 기관은 아직 없음</div>
+    </section>
+
+    <!-- 20 -->
+    <section class="step" id="s20">
+      <div class="step-head"><span class="num">20</span>
+        <h2>본문 기반 중복 확인과 개정판 교체</h2><span class="date">2026-10-19</span>
+      </div>
+      <div class="req"><b>요청</b>중복 자료는 파일 이름이 아니라 내용까지 확인해 판단 / 2025년 판을 쓰다가 2026 개정판을 올리면 같은 내용의 전년도 파일을 삭제(삭제 전 사용자가 최종 판단)</div>
+      <h3>이전 방식</h3>
+      <ul>
+        <li>업로드 때는 파일 바이트(sha256)가 완전히 같을 때만 막음 → 다시 저장·인쇄한 PDF나 개정판은 못 알아봄</li>
+        <li>평가 에이전트의 중복 기준은 파일 이름 유사도와 본문 표본 임베딩을 보지만 AI 판단에만 쓰이고, 이전 판을 정리하는 기능은 없었음</li>
+      </ul>
+      <h3>본문 비교 (<code>doc_agent/dedupe.py</code>, API 호출 없음, 1초 안팎)</h3>
+      <ul>
+        <li>숫자·연도를 지운 단어 4개 묶음 집합으로 <b>새 자료 중 겹침</b>과 <b>등록 자료 중 겹침</b>을 잼(기한 숫자·연도만 바뀐 문장도 같은 문장으로 봄) + 표지 연도와 등록 발행 연도 비교</li>
+        <li>판단: 같은 자료(바이트 동일 또는 양쪽 85% 이상·같은 연도 → 평가 차단) / 개정판(30% 이상 겹침·연도 더 최근) / 구버전(더 오래됨, 추가하지 않길 권함) / 일부 겹침</li>
+      </ul>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>실제 PDF로 확인</th><th>새 자료 중 겹침</th><th>등록 자료 중 겹침</th><th>판단</th></tr></thead>
+          <tbody>
+            <tr><td>2025 학교폭력 가이드북 → 등록된 2026</td><td>88%</td><td>82%</td><td>구버전</td></tr>
+            <tr><td>2025 정서행동 매뉴얼 → 등록된 2026</td><td>26%</td><td>54%</td><td>구버전</td></tr>
+            <tr><td>2025 Wee 가이드 → (테스트로 등록한) 2024</td><td>63%</td><td>48%</td><td>개정판</td></tr>
+            <tr><td>PFA-S ↔ 서울 위기관리 가이드라인(관련 없음)</td><td>3%</td><td>3%</td><td>-</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>개정판 교체 (<code>ingest.replace_edition</code>)</h3>
+      <ul>
+        <li>개정판이면 등록 정보 위에 "이전 판 처리" 선택: <b>교체(권장)</b> / 이전 판 사용 중지 후 새 자료로 추가 / 둘 다 유지</li>
+        <li>교체는 <b>"이전 판을 삭제하고 이 판으로 바꾸는 데 동의합니다" 체크</b>를 해야 버튼이 켜짐(사용자 최종 판단)</li>
+        <li>유지: 인용 이름·질문 유형별 확인 순서·평가 이력 / 교체: 파일·제목·연도·청크 / 삭제: 이전 판 PDF(data/·inbox/), 이전 판 청크, 이전 판 열린 알림(확인 처리) / 새로 "개정판으로 교체됨" 알림</li>
+        <li>새 판 임베딩을 먼저 만든 뒤 한 번에 바꾸므로 중간에 실패하면 이전 판이 그대로 남음. 기본 자료(가이드북 등)도 교체 가능: 2026학년도 판 전용 장 구간표는 새 판에서 자동으로 일반 규칙으로 바뀌고, 답변 규칙의 자료 이름도 새 제목으로 채워짐</li>
+      </ul>
+      <div class="result"><b>테스트</b> 실제 저장소에서 2024 Wee 가이드를 임시 등록(청크 185) → 2025 판 업로드 시 개정판 판단 → 교체: 인용 이름 유지, 청크 147개로 교체, 이전 판 PDF 두 사본 삭제, 이전 판 알림 닫힘 → 같은 2025 판을 다시 올리면 "같은 자료" → 임시 자료 삭제 후 저장소가 테스트 전과 같음(6개 자료·1,033청크) 확인. 화면에서 2025 가이드북 업로드 시 구버전 경고 확인</div>
+      <div class="shots">
+        <figure><a href="docs/img/26_dedupe_older.jpg" target="_blank"><img src="docs/img/26_dedupe_older.jpg" alt="구버전 경고" loading="lazy"></a>
+          <figcaption>2025 가이드북을 올리면 등록된 2026 판보다 오래된 판이라고 경고</figcaption></figure>
+      </div>
+      <h3>기본 자료 완전 삭제 열기와 빈 자리 등록</h3>
+      <ul>
+        <li>요청: 2026 가이드북을 지우고 → 2025 판 업로드 → 2026 판 업로드로 교체 결과를 직접 확인하고 싶음</li>
+        <li>기본 자료도 완전 삭제 가능. 단, 인용 이름(예: 가이드북)을 직접 입력해야 버튼이 켜짐. 지우면 질문 유형별 확인 순서·답변 규칙의 자료 줄에서 빠짐(없는 자료를 인용하지 않게 인용 파싱도 고침)</li>
+        <li>지운 기본 자료 자리는 비어 있고, 자료 추가에서 "등록 위치: 기본 자료 자리 [가이드북]"을 고르면 원래 ID·이름으로 들어가 확인 순서·양식 연결이 되살아남</li>
+        <li>사전 확인(코드, 저장소 백업 후 복원): 2026 삭제 → 확인 순서에서 가이드북 빠짐 → 2025를 빈 자리로 등록(청크 324, 절차 질문 1순위 복귀) → 2026 업로드 시 개정판(겹침 83%/87%) → 교체 후 청크 313·장 이름·부록 양식 구간이 처음과 같음, 2025 PDF 삭제</li>
+      </ul>
+      <div class="shots">
+        <figure><a href="docs/img/27_base_delete_confirm.jpg" target="_blank"><img src="docs/img/27_base_delete_confirm.jpg" alt="기본 자료 완전 삭제 확인" loading="lazy"></a>
+          <figcaption>기본 자료 완전 삭제: 체크 + 인용 이름 입력</figcaption></figure>
+        <figure><a href="docs/img/36_user_slot_register.png" target="_blank"><img src="docs/img/36_user_slot_register.png" alt="빈 기본 자리로 등록" loading="lazy"></a>
+          <figcaption>사용자 화면: 2025 판을 '기본 자료 자리 [가이드북]'으로 등록(제목 유사도 100%로 미리 선택)</figcaption></figure>
+      </div>
+      <h3>사용자 시험에서 나온 문제: 2026 판이 "일부 겹침"으로 나옴</h3>
+      <ul>
+        <li>원인: 2025 가이드북은 표지가 그림이라 표지 글자에서 연도를 못 읽어, 등록할 때 발행 연도가 비어 있었음 → 비교 때 연도를 몰라 "연도로 판을 구분할 수 없음"</li>
+        <li>수정: 등록·교체 때 연도를 표지 글자 → 파일 이름 → 제목 순으로 찾음. 비교 때 등록 자료 연도가 비어 있으면 제목·파일 이름에서 찾음. 현재 [가이드북] 기록에 2025를 채움 → 같은 업로드가 "개정판(2025 → 2026), 겹침 83%/87%"로 나옴</li>
+      </ul>
+      <div class="shots">
+        <figure><a href="docs/img/33_user_overlap_bug.png" target="_blank"><img src="docs/img/33_user_overlap_bug.png" alt="일부 겹침으로 나온 화면" loading="lazy"></a>
+          <figcaption>사용자 화면(고치기 전): 겹침 83%/87%인데 등록 연도가 '?'라 '일부 겹침'</figcaption></figure>
+      </div>
+      <h3>화면 글자 1.25배와 자료 추가 단계 표시</h3>
+      <ul>
+        <li><code>.streamlit/config.toml</code>의 <code>baseFontSize = 20</code>으로 화면 전체 글자 16px → 20px(표 포함). 답변 본문은 화면 글자보다 조금만 크게 다시 맞춤</li>
+        <li>자료 추가를 "1 PDF 올리기 → 2 중복·판 확인 → 3 AI 평가 → 4 등록 승인" 단계 표시줄로 나눔(지난 단계 ✓, 지금 단계 파란색)</li>
+        <li>중복·판 확인은 표 대신 카드: 판단(🟥 이미 등록 / 🟦 개정판 / 🟧 구버전 / ⬜ 일부 겹침), 비교 대상, 발행 연도(올린 → 등록), 양쪽 겹침 비율, 다음에 할 일을 한눈에</li>
+        <li>다른 파일을 올리면 이전 평가 결과가 남아 보이던 문제도 고침</li>
+      </ul>
+      <div class="shots">
+        <figure><a href="docs/img/39_user_newer_card.png" target="_blank"><img src="docs/img/39_user_newer_card.png" alt="개정판 판단 카드" loading="lazy"></a>
+          <figcaption>사용자 화면: 2025 판이 등록된 상태에서 2026 판을 올리면 🟦 개정판, 2026(표지 p.1) → 2025(본문 p.103), 겹침 83%/87%</figcaption></figure>
+      </div>
+      <h3>발행 연도를 PDF 본문에서 찾고 출처 표시</h3>
+      <ul>
+        <li>질문: "2026년판인지는 본문 내용으로 확인한 것인가?" → 같은 자료의 다른 판인지는 본문으로 판단했지만, 2025 판 연도는 표지가 그림이라 파일 이름·제목에서 읽은 것이었음</li>
+        <li>연도 찾는 순서: <b>표지(1쪽) → 발행 정보(마지막 3쪽) → 본문 표현("20xx학년도", "20xx년 개정·발행·시행") → 등록 정보 → 파일 이름 → 제목</b>. 2~3쪽은 "2023년에 개발한 ○○ 가이드"처럼 다른 자료 이야기가 있어 표지로 보지 않음</li>
+        <li>등록할 때 저장하는 연도도 같은 순서(평가 에이전트가 앞 6쪽에서 읽은 연도보다 PDF 글자를 먼저)</li>
+        <li>비교 카드에 "올린: 본문 p.103 · 등록: 표지 p.1"처럼 출처와 그 문장을 보여 주고, 파일 이름·제목·등록 정보에서 읽은 연도면 ⚠️ 확인 요청</li>
+      </ul>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>PDF (파일 이름 없이 글자만)</th><th>찾은 연도</th><th>출처</th></tr></thead>
+          <tbody>
+            <tr><td>2025 학교폭력 가이드북(표지 그림)</td><td>2025</td><td>본문 p.103 "2025학년도 학교생활기록부 기재 요령"</td></tr>
+            <tr><td>2026 학교폭력 가이드북</td><td>2026</td><td>표지 p.1 "2026년도 일부개정"</td></tr>
+            <tr><td>2024 Wee 가이드(이전에는 2023으로 잘못 읽음)</td><td>2024</td><td>본문 p.35</td></tr>
+            <tr><td>2025·2026 정서행동, 2025 Wee, PFA-S, 2026 아동학대</td><td>각 연도 맞음</td><td>표지 p.1</td></tr>
+            <tr><td>서울 위기관리 가이드라인</td><td>없음</td><td>PDF·파일 이름 어디에도 연도 없음</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="result"><b>화면 확인</b> 2026 판이 등록된 상태에서 2025 판을 연도 없는 이름(학폭가이드_예전판.pdf)으로 올려도 "구버전, 2025(본문 p.103) → 2026(표지 p.1), 겹침 88%/82%". 사용자가 진행한 2025 → 2026 교체 결과: [가이드북] 2026, 청크 313</div>
+      <div class="shots">
+        <figure><a href="docs/img/29_year_source.jpg" target="_blank"><img src="docs/img/29_year_source.jpg" alt="연도 출처 표시" loading="lazy"></a>
+          <figcaption>비교 카드: 연도와 그 출처(본문 p.103, 표지 p.1)</figcaption></figure>
+      </div>
+      <h3>등록 후 "이미 등록된 자료"로 보이던 문제 → 완료 화면</h3>
+      <ul>
+        <li>사용자 시험: 2025 판을 빈 기본 자리로 평가·등록 → 화면이 "🟥 이미 등록된 자료, AI 평가를 막았습니다"로 바뀜. 실제로는 등록 성공(청크 324, 연도 2025)</li>
+        <li>원인: 성공 메시지는 화면 맨 위에 한 번만 뜨고, 올린 PDF가 업로드 칸에 남아 방금 등록한 자료와 다시 비교됨</li>
+        <li>수정: 등록·교체가 끝나면 업로드 칸을 비우고 <b>완료 화면</b>(4단계 모두 ✓, "✅ 등록 완료: [가이드북] · 청크 324개 임베딩", 교체면 이전 판 연도·삭제한 파일·알림 안내)을 보여 줌. "다른 자료 추가하기" / "등록 자료에서 확인" 버튼. 단계 안 소제목(평가 결과·등록 위치·등록 정보·이전 판 처리)은 단계 제목보다 작게</li>
+      </ul>
+      <div class="shots">
+        <figure><a href="docs/img/37_user_already_bug.png" target="_blank"><img src="docs/img/37_user_already_bug.png" alt="등록 후 이미 등록된 자료로 보이던 화면" loading="lazy"></a>
+          <figcaption>사용자 화면(고치기 전): 등록 성공 뒤 업로드 칸에 남은 PDF가 다시 비교돼 '이미 등록된 자료'</figcaption></figure>
+        <figure><a href="docs/img/38_user_done.png" target="_blank"><img src="docs/img/38_user_done.png" alt="등록 완료 화면" loading="lazy"></a>
+          <figcaption>사용자 화면(고친 뒤): 4단계 모두 ✓, '등록 완료: [가이드북] · 청크 324개 임베딩'</figcaption></figure>
+      </div>
+      <h3>사용자 화면 시험: 2025 → 2026 가이드북 교체 (성공)</h3>
+      <ul>
+        <li>2026 가이드북 완전 삭제 → 2025 판을 빈 기본 자리로 평가·등록(조건부 93.8%, 이용 조건 0점) → 2026 판 업로드 시 개정판 → AI 평가 → 이전 판 처리 "교체" + 삭제 동의 → 교체</li>
+        <li>결과: [가이드북] 2026 판, 청크 313(처음과 같음), 2025 PDF 삭제</li>
+        <li>이 시험에서 고친 문구: 동의 체크의 "[가이드북](2025)"이 링크로 보이던 것, 안내 문장에 연도가 두 번 붙던 것</li>
+      </ul>
+      <div class="shots">
+        <figure><a href="docs/img/34_user_steps_eval.png" target="_blank"><img src="docs/img/34_user_steps_eval.png" alt="단계 표시와 평가 중" loading="lazy"></a>
+          <figcaption>사용자 화면: 1 → 2 ✓, 3 AI 평가 진행 중(2025 판, 빈 자리라 '새 자료')</figcaption></figure>
+        <figure><a href="docs/img/35_user_eval_result.png" target="_blank"><img src="docs/img/35_user_eval_result.png" alt="AI 평가 결과" loading="lazy"></a>
+          <figcaption>사용자 화면: 2025 가이드북 평가 결과 조건부 93.8%(이용 조건 0점)</figcaption></figure>
+        <figure><a href="docs/img/40_user_replace_form.png" target="_blank"><img src="docs/img/40_user_replace_form.png" alt="이전 판 처리와 교체" loading="lazy"></a>
+          <figcaption>사용자 화면: 이전 판 처리 '교체' 선택, 삭제 동의 체크 후 '[가이드북] 새 판으로 교체'</figcaption></figure>
+      </div>
+      <div class="issue"><b>남은 점</b> 판 구분은 PDF에서 읽은 연도에 기대므로, 연도가 PDF 어디에도 없는 자료(예: 서울 위기관리 가이드라인)는 파일 이름·제목에 기대야 함 → 화면에 연도 출처를 보여 주고 ⚠️로 확인 요청. "이전 판 처리" 선택 화면과 교체는 사용자가 화면에서 직접 시험해 확인함(2025 → 2026)</div>
+    </section>
+
+    <!-- files -->
+    <section class="step" id="files">
+      <div class="step-head"><span class="num">≡</span>
+        <h2>현재 파일 구성</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="files">
+          <thead>
+            <tr>
+              <th>파일</th>
+              <th>내용</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>run.bat</code></td>
+              <td>더블클릭 실행. 인덱스가 없으면 만들고 http://localhost:8501 실행</td>
+            </tr>
+            <tr>
+              <td><code>app.py</code></td>
+              <td>Streamlit 화면(답변, 근거 표, 인용된 근거 원문, 원본 쪽 이미지)</td>
+            </tr>
+            <tr>
+              <td><code>rag.py</code></td>
+              <td>청크 생성, 하이브리드 검색, 질문 정리·검색어 생성, 프롬프트, Gemini 호출, 로그</td>
+            </tr>
+            <tr>
+              <td><code>build_index.py</code></td>
+              <td>PDF → <code>index/chunks.json</code> + <code>index/embeddings.npy</code></td>
+            </tr>
+            <tr>
+              <td><code>data/</code></td>
+              <td>2026학년도 학교폭력 사안처리 가이드북.pdf, 이산중학교 학생생활규정(2026.8.27 개정).pdf</td>
+            </tr>
+            <tr>
+              <td><code>logs/chat_log.jsonl</code></td>
+              <td>질문·답변·근거(점수·원문) 기록</td>
+            </tr>
+            <tr>
+              <td><code>docs/가이드북_검토_요약.md</code></td>
+              <td>가이드북 요약과 적합성 검토</td>
+            </tr>
+            <tr>
+              <td><code>wee_case_analysis.html</code></td>
+              <td>우수사례집 42건 주제 분석</td>
+            </tr>
+            <tr>
+              <td><code>README.md</code></td>
+              <td>실행 방법과 동작 방식</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- next -->
+    <section class="step next" id="next">
+      <div class="step-head"><span class="num">→</span>
+        <h2>다음 계획</h2><span class="date">사용자 메모 기준</span>
+      </div>
+      <ol>
+        <li><s>Gemini 노트북과 답변 성능 비교</s> → 노트북형 기준선 이상 달성(14단계). 실제 노트북으로 질문 2~14 확인은 남음</li>
+        <li><s>특정 학교 학칙 넣고 그 학교에 맞게 답하기</s> → 이산중학교 학생생활규정 반영 완료(12단계)</li>
+        <li><s>상담 기법 자료 추가</s> → 사이버상담·디지털상담 매뉴얼 추가(15단계)</li>
+        <li><s>PDF 추가 시 자료 평가 에이전트로 채택 여부 판단</s> → 12개 기준으로 추천·조건부·비추천을 판정하고 상담사가 승인해 등록(17단계)</li>
+        <li><s>DB를 공통 / 주제별 / 학교별로 분리</s> → SQLite 저장소에 공통·주제·학교 층과 주제 꼬리표로 구현, 자료 삭제와 학기별 정기 점검 추가(18단계)</li>
+        <li><b>다음 차례</b>: 문제 상황을 원인별(학폭·가정·학업 등)로 나눠 각각 맞는 솔루션을 찾는지 비교 분석.
+          학업·학교부적응은 숙려제 매뉴얼로 채움(19단계). <b>가정 · 정서·위기 주제 자료는 아직 0건</b>이라 이 주제의 자료부터 넣어야 함
+          (후보: 2026 아동학대 예방 및 사안처리 절차 가이드북(전북교육청), 2026 학생정서행동특성검사 및 관리 매뉴얼)</li>
+      </ol>
+      <p style="margin:8px 0 0;color:var(--text-2);font-size:14px">개선 후보: 흩어진 내용 검색 재현율 높이기(질문 1), 위기 질문 연계 기관 안내 수정(질문 4),
+        양식이 아닌 질문에서 부록1 순위 낮추기, 질문당 Gemini 3회 호출(20~30초) 줄이기.</p>
+    </section>
+
+    <footer>사진은 작업 중 브라우저 화면과 사용자 제공 스크린샷입니다(<code>docs/img/</code>). 사진을 누르면 원본 크기로 열립니다.</footer>
+  </main>
+</body>
+
+</html>

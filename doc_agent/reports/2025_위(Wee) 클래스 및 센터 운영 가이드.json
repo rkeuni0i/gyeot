@@ -1,0 +1,201 @@
+{
+ "file": "2025_위(Wee) 클래스 및 센터 운영 가이드.pdf",
+ "evaluated_at": "2026-10-18 23:44:54",
+ "model": "gemini-3.8-flash",
+ "criteria_version": "1.0",
+ "verdict": "조건부",
+ "weighted_score": 93.8,
+ "reasons": [
+  "0점 기준이 있어 추천 불가: 12. 이용 조건"
+ ],
+ "scores": {
+  "recency": {
+   "name": "1. 최신성",
+   "weight": 2,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "표지 및 판권지에 2025년 12월 31일 발행으로 명시되어 있으며, 2024년판을 개정한 최신 지침서임(p.1, p.5, p.149)."
+  },
+  "source": {
+   "name": "2. 출처 명확성",
+   "weight": 2,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "표지에 '교육부, 17개 시도교육청'이 명시되어 있고 판권지에 국무총리 산하 정부출연연구기관인 한국청소년정책연구원이 발행처로 명시됨(p.1, p.149)."
+  },
+  "authority": {
+   "name": "3. 전문성 인증",
+   "weight": 2,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "교육부 및 17개 시도교육청 주관의 위(Wee) 프로젝트 공식 운영 가이드이자 국책연구기관 연구보고(연구보고 25-위센터04)로 발간됨(p.1, p.149)."
+  },
+  "usefulness": {
+   "name": "4. 상담사 활용성",
+   "weight": 2,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "Wee 클래스 업무 운영, 접수면접 체크리스트(p.48), NEIS 연계 상담관리대장 관리 기준(p.90), 교사 자문 방법(p.104), 외부 전문기관 연계망 및 긴급지원팀 활용(p.118, p.132) 등 상담교사 실무 지침이 풍부함."
+  },
+  "duplicate": {
+   "name": "5. 기존 자료와 중복·충돌",
+   "weight": 2,
+   "must_pass": true,
+   "score": 2,
+   "evidence": "기존 등록 자료(학폭 사안처리, 학생생활규정, 사이버/디지털 미디어 상담)와 성격이 다른 '위(Wee) 클래스 총괄 운영 매뉴얼'이며, 기존 자료와의 내용 유사도(max_cos 0.868) 역시 중복 수준이 아님."
+  },
+  "region": {
+   "name": "6. 적용 지역 범위",
+   "weight": 1,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "교육부 및 전국 17개 시도교육청 공통으로 개발 및 적용되는 전국 단위 가이드라인임(p.1)."
+  },
+  "doc_type": {
+   "name": "7. 대상 독자·자료 유형",
+   "weight": 1,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "단순 이론서가 아닌 현장 상담교사가 활용할 수 있는 업무 절차, 양식, 집단상담 계획, 서식 모음이 담긴 실무 운영 가이드임(p.5, p.48, p.62, p.90)."
+  },
+  "actionability": {
+   "name": "8. 구체성(실행 가능성)",
+   "weight": 1,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "상담 단계별 절차, NEIS 기안 결재 방법(과제카드, 열람제한 영구 설정), 접수면접 서식, 유관기관별 전화번호 및 역할이 매우 구체적으로 제공됨(p.48, p.90, p.118)."
+  },
+  "extraction": {
+   "name": "9. 텍스트 추출 품질",
+   "weight": 1,
+   "must_pass": true,
+   "score": 2,
+   "evidence": "쪽당 글자 수 중앙값 769자, 저문자 쪽 비율 14%로 양호하며 본문 텍스트가 정상적으로 추출됨."
+  },
+  "privacy": {
+   "name": "10. 개인정보 포함 여부",
+   "weight": 1,
+   "must_pass": true,
+   "score": 2,
+   "evidence": "실제 개인정보는 없으며 'OO중', 'OOO' 등 서식 예시 형태로 마스킹 처리되어 있음(p.90)."
+  },
+  "topic": {
+   "name": "11. 주제 분류",
+   "weight": 0,
+   "must_pass": false,
+   "score": null,
+   "evidence": "학교 운영 / 상담 기법 / 정서·위기(자해·자살)"
+  },
+  "license": {
+   "name": "12. 이용 조건",
+   "weight": 1,
+   "must_pass": false,
+   "score": 0,
+   "evidence": "판권지에 '사전 승인없이 보고서 내용의 무단전재․복제를 금함.' 문구가 명시되어 있음(p.149)."
+  }
+ },
+ "proposal": {
+  "short": "Wee가이드",
+  "title": "2025 위(Wee) 클래스 및 센터 운영 가이드(교육부·한국청소년정책연구원, 2025)",
+  "role": "manual",
+  "use_in": [
+   "school",
+   "procedure",
+   "counseling",
+   "student_explain"
+  ],
+  "topics": [
+   "학교 운영",
+   "상담 기법",
+   "정서·위기(자해·자살)",
+   "학교폭력"
+  ],
+  "summary": "Wee 클래스 및 센터의 행정·운영 체계, 상담 관리, 위기 개입 및 유관기관 연계 전반을 다룬 최신 공식 표준 매뉴얼입니다. 접수면접부터 집단상담, NEIS 상담관리대장 작성법, 학생 유형별 자문 및 정신건강 긴급지원팀 연계 절차 등 중학교 상담교사의 실무 전반을 구체적으로 지원합니다.",
+  "cautions": [
+   "판권지에 무단전재·복제 금지 문구가 있으므로 내부 서비스 참고용으로 사용하고 원문 전체 유출 및 상업적 배포에 주의해야 합니다.",
+   "학교 및 지역청 여건에 따라 내부 결재 기준이나 서식이 일부 상이할 수 있으므로 단위학교(이산중) 규정 및 시도교육청 세부 지침과 대조하여 적용해야 합니다."
+  ]
+ },
+ "measured": {
+  "file": "2025_위(Wee) 클래스 및 센터 운영 가이드.pdf",
+  "pages": 150,
+  "chars_total": 103734,
+  "chars_per_page_median": 769,
+  "low_text_pages_ratio": 0.14,
+  "low_text_pages": [
+   1,
+   2,
+   3,
+   4,
+   10,
+   12,
+   14,
+   16,
+   20,
+   21,
+   22,
+   46,
+   82,
+   98,
+   100,
+   134,
+   135,
+   136,
+   146,
+   148,
+   150
+  ],
+  "years_on_cover": [
+   2024,
+   2025
+  ],
+  "pdf_metadata_date": "20260420",
+  "publisher_candidates": [
+   "시도교육청"
+  ],
+  "region_mentions_on_cover": {},
+  "topic_keyword_counts": {
+   "학교폭력": 63,
+   "가정": 24,
+   "학업·학교부적응": 25,
+   "정서·위기": 206,
+   "디지털·사이버": 35,
+   "상담 기법": 171,
+   "학교 운영": 293
+  },
+  "pii_pattern_counts": {
+   "휴대전화": 0,
+   "주민번호": 0,
+   "이메일": 0
+  },
+  "masked_name_count": 4,
+  "restriction_phrases": [
+   "무단전재․복제를 금함."
+  ],
+  "first_page_text": "연구보고 25-위센터04 2025 위(Wee) 클래스 및 센터 운영 가이드 교육 17개 시도교육청",
+  "filename_similarity_to_existing": {
+   "guide": 0.367,
+   "esan": 0.151,
+   "cyber": 0.185,
+   "digital": 0.278
+  },
+  "content_overlap_with_existing": {
+   "guide": {
+    "samples": 4,
+    "max_cos": 0.868,
+    "mean_cos": 0.81
+   },
+   "digital": {
+    "samples": 1,
+    "max_cos": 0.731,
+    "mean_cos": 0.731
+   },
+   "cyber": {
+    "samples": 2,
+    "max_cos": 0.816,
+    "mean_cos": 0.78
+   }
+  }
+ },
+ "seconds": 11.3
+}

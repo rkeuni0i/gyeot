@@ -1,0 +1,189 @@
+{
+ "file": "2026 학업중단 숙려제 운영 매뉴얼.pdf",
+ "evaluated_at": "2026-10-19 09:30:38",
+ "model": "gemini-3.8-flash",
+ "criteria_version": "1.0",
+ "verdict": "추천",
+ "weighted_score": 100.0,
+ "reasons": [
+  "가중 점수 100.0% ≥ 75%, 필수 기준 통과, 0점 기준 없음"
+ ],
+ "scores": {
+  "recency": {
+   "name": "1. 최신성",
+   "weight": 2,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "표본 쪽(p.3, p.6)에 '2026학년도 학업중단 숙려제 운영 개요 및 매뉴얼'로 명시되어 있으며, 현재 날짜(2026-10-19) 기준 당해 연도 최신 지침임."
+  },
+  "source": {
+   "name": "2. 출처 명확성",
+   "weight": 2,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "표본 쪽(p.6)에 '초·중등교육법' 및 '경기도교육청 학업중단 예방 및 교육지원 조례'가 명시되어 있고, 경기도 관내 Wee센터 목록(p.60) 등을 포함하는 경기도교육청 공식 발간물임."
+  },
+  "authority": {
+   "name": "3. 전문성 인증",
+   "weight": 2,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "초·중등교육법 제28조 및 조례에 근거하여 시도교육청(경기도교육청)이 일선 학교에 배포하는 공식 행정·상담 지침 매뉴얼임(p.6)."
+  },
+  "usefulness": {
+   "name": "4. 상담사 활용성",
+   "weight": 2,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "학업중단 위기학생 대상 숙려제 신청, 상담 운영 요건(주 2회 이상 전문상담), 매일프로그램, 출결 및 성적 처리, 외부기관 연계 등 상담사가 현장에서 즉시 적용해야 하는 필수 정보를 포괄함(p.3, p.12, p.24)."
+  },
+  "duplicate": {
+   "name": "5. 기존 자료와 중복·충돌",
+   "weight": 2,
+   "must_pass": true,
+   "score": 2,
+   "evidence": "기존 등록 자료(학교폭력 가이드북, 규정, 사이버/디지털 상담 매뉴얼)와 최대 유사도가 0.795 수준이며, 학업중단 숙려제를 단독으로 다루는 신규 자료로서 중복이나 충돌이 없음."
+  },
+  "region": {
+   "name": "6. 적용 지역 범위",
+   "weight": 1,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "경기도교육청 지침으로, 서비스 대상인 경기도 이산중학교에 완벽히 부합하며 관할 교육지원청(화성오산 등) 및 지역 연계 기관 정보가 포함됨(p.60)."
+  },
+  "doc_type": {
+   "name": "7. 대상 독자·자료 유형",
+   "weight": 1,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "학업중단 예방 위원회 운영, 운영 과정별 역할, 서식 및 질의응답을 담은 학교 현장 실무 매뉴얼임(p.4, p.49 부록)."
+  },
+  "actionability": {
+   "name": "8. 구체성(실행 가능성)",
+   "weight": 1,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "숙려 기간(최소 1주~최대 7주), 주당 2회 상담 요건, 정기시험 기간 분할 처리 예시(p.12), 상황별 Q&A(p.24, p.30, p.36), 표준 서식(p.54) 등 실행 절차가 극히 구체적임."
+  },
+  "extraction": {
+   "name": "9. 텍스트 추출 품질",
+   "weight": 1,
+   "must_pass": true,
+   "score": 2,
+   "evidence": "페이지당 글자 수 중앙값이 892자이며, 저텍스트 페이지 비율이 8%에 불과하여 표 및 본문 텍스트 추출 품질이 매우 우수함."
+  },
+  "privacy": {
+   "name": "10. 개인정보 포함 여부",
+   "weight": 1,
+   "must_pass": true,
+   "score": 2,
+   "evidence": "서식 예시의 인명은 '김경기'(p.54) 등 가명 처리되어 있으며, 수록된 전화번호는 공공기관(Wee센터 등) 공식 업무 연락처이므로 개인 식별 위험이 없음."
+  },
+  "topic": {
+   "name": "11. 주제 분류",
+   "weight": 0,
+   "must_pass": false,
+   "score": null,
+   "evidence": "학업·학교부적응"
+  },
+  "license": {
+   "name": "12. 이용 조건",
+   "weight": 1,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "경기도교육청이 관내 학교에 공개 배포하는 공공 업무 매뉴얼로, 재배포 제한 및 저작권 침해 우려가 없는 공공 자료임."
+  }
+ },
+ "proposal": {
+  "short": "학업숙려제",
+  "title": "2026 학업중단 숙려제 운영 매뉴얼(경기도교육청, 2026)",
+  "role": "procedure",
+  "use_in": [
+   "procedure",
+   "school",
+   "counseling"
+  ],
+  "topics": [
+   "학업·학교부적응",
+   "학교 운영"
+  ],
+  "summary": "경기도교육청에서 발간한 2026학년도 학업중단 숙려제 공식 운영 매뉴얼로, 위기학생 판정 기준, 숙려 기간(1~7주) 및 주 2회 상담 요건, 출결·성적 처리 방식을 상세히 안내합니다. 이산중학교 전문상담교사가 학업중단 징후 학생을 조기 발견하고 상담 개입, 위원회 운영, 외부기관(Wee센터, 꿈드림) 연계 및 나이스 행정 처리를 완결하는 데 필수적인 기준이 됩니다.",
+  "cautions": [
+   "담임교사의 수시 상담은 법정 숙려 상담으로 인정되지 않으므로, 반드시 전문상담(교)사 등 자격자가 주 2회 이상 실시해야 함(p.24).",
+   "중학교는 의무교육 단계이므로 자퇴 처리가 불가하며 유예·면제 처리 절차 및 학업중단 예방 위원회 심의 절차를 준수해야 함.",
+   "정기시험 기간이 겹치는 경우 숙려 기간에서 제외하여 연속성 및 횟수(최대 2회) 산정에 차질이 없도록 유의할 것(p.12, p.36)."
+  ]
+ },
+ "measured": {
+  "file": "2026 학업중단 숙려제 운영 매뉴얼.pdf",
+  "pages": 75,
+  "chars_total": 67647,
+  "chars_per_page_median": 892,
+  "low_text_pages_ratio": 0.08,
+  "low_text_pages": [
+   1,
+   2,
+   13,
+   47,
+   48,
+   75
+  ],
+  "years_on_cover": [
+   2026
+  ],
+  "pdf_metadata_date": "20260224",
+  "publisher_candidates": [
+   "경기도교육청",
+   "교육부"
+  ],
+  "region_mentions_on_cover": {
+   "경기": 1
+  },
+  "topic_keyword_counts": {
+   "학교폭력": 5,
+   "가정": 0,
+   "학업·학교부적응": 549,
+   "정서·위기": 0,
+   "디지털·사이버": 30,
+   "상담 기법": 3,
+   "학교 운영": 12
+  },
+  "pii_pattern_counts": {
+   "휴대전화": 0,
+   "주민번호": 0,
+   "이메일": 1
+  },
+  "masked_name_count": 13,
+  "restriction_phrases": [],
+  "first_page_text": "",
+  "filename_similarity_to_existing": {
+   "guide": 0.381,
+   "esan": 0.217,
+   "cyber": 0.345,
+   "digital": 0.308
+  },
+  "content_overlap_with_existing": {
+   "digital": {
+    "samples": 1,
+    "max_cos": 0.74,
+    "mean_cos": 0.74
+   },
+   "guide": {
+    "samples": 4,
+    "max_cos": 0.795,
+    "mean_cos": 0.766
+   },
+   "esan": {
+    "samples": 2,
+    "max_cos": 0.75,
+    "mean_cos": 0.747
+   },
+   "cyber": {
+    "samples": 1,
+    "max_cos": 0.754,
+    "mean_cos": 0.754
+   }
+  }
+ },
+ "seconds": 23.7
+}

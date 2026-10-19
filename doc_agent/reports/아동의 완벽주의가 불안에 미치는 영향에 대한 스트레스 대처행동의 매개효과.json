@@ -1,0 +1,181 @@
+{
+ "file": "아동의 완벽주의가 불안에 미치는 영향에 대한 스트레스 대처행동의 매개효과.pdf",
+ "evaluated_at": "2026-10-19 10:47:58",
+ "model": "gemini-3.8-flash",
+ "criteria_version": "1.0",
+ "verdict": "비추천",
+ "weighted_score": 46.9,
+ "reasons": [
+  "가중 점수 46.9% < 55%"
+ ],
+ "scores": {
+  "recency": {
+   "name": "1. 최신성",
+   "weight": 2,
+   "must_pass": false,
+   "score": 0,
+   "evidence": "p.1 및 p.21에 명시된 학술지 발행 연도가 2008년(Vol. 20 No. 3)으로, 이론·연구 자료 기준(최근 5년 이내 2점, 10년 이내 1점, 10년 초과 0점)에 따라 18년이 경과하여 0점 처리함."
+  },
+  "source": {
+   "name": "2. 출처 명확성",
+   "weight": 2,
+   "must_pass": false,
+   "score": 1,
+   "evidence": "p.1에 '한국심리학회지 : 상담 및 심리치료', 명지대학교 석사학위논문 기반 발간으로 출처가 명시되어 있으나 공공 지침이나 교육부/교육청 발행물이 아닌 학술 논문이므로 1점."
+  },
+  "authority": {
+   "name": "3. 전문성 인증",
+   "weight": 2,
+   "must_pass": false,
+   "score": 1,
+   "evidence": "한국심리학회(상담 및 심리치료) 등재 학술지에 게재된 논문으로 학술적 심사(peer review)는 거쳤으나, 교육행정 지침이나 공공 표준 가이드라인이 아니므로 1점."
+  },
+  "usefulness": {
+   "name": "4. 상담사 활용성",
+   "weight": 2,
+   "must_pass": false,
+   "score": 1,
+   "evidence": "완벽주의와 불안 간의 스트레스 대처행동 매개효과에 대한 실증 연구로 아동·청소년 불안 이해에 이론적 배경 지식을 제공하나, 학교 현장에서 상담사가 즉시 적용할 수 있는 구체적 상담 회기 매뉴얼, 사안 처리 절차, 기관 연계 정보는 없어 1점."
+  },
+  "duplicate": {
+   "name": "5. 기존 자료와 중복·충돌",
+   "weight": 2,
+   "must_pass": true,
+   "score": 2,
+   "evidence": "기존 등록 자료들과 제목 유사도(최대 0.212) 및 내용 코사인 유사도(최대 0.755)가 낮으며, 아동 완벽주의 및 불안 매개효과라는 고유 학술 주제를 다루고 있어 중복이나 충돌은 없음."
+  },
+  "region": {
+   "name": "6. 적용 지역 범위",
+   "weight": 1,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "p.1 및 p.5에 따르면 서울과 경기 지역 초등학교 5~6학년을 표집하여 연구를 수행한 전국/일반 심리학적 연구이므로 경기도 이산중학교에 무리 없이 적용 가능(2점)."
+  },
+  "doc_type": {
+   "name": "7. 대상 독자·자료 유형",
+   "weight": 1,
+   "must_pass": false,
+   "score": 0,
+   "evidence": "실무 매뉴얼이나 가이드북이 아닌 학술지 게재 통계 실증 연구논문(서론-연구방법-결과-논의 구성)이므로 0점."
+  },
+  "actionability": {
+   "name": "8. 구체성(실행 가능성)",
+   "weight": 1,
+   "must_pass": false,
+   "score": 0,
+   "evidence": "회귀분석 수치와 통계 검증(p.6~p.13) 위주의 논문으로, 학교 현장에서 바로 쓸 수 있는 구체적인 상담 기법, 상담 활동지, 개입 회기 계획, 행정 양식 등이 전혀 없음(0점)."
+  },
+  "extraction": {
+   "name": "9. 텍스트 추출 품질",
+   "weight": 1,
+   "must_pass": true,
+   "score": 2,
+   "evidence": "총 21쪽 중 저텍스트 페이지 비율이 0.0%이고 쪽당 글자 수 중앙값이 1,388자로 텍스트 추출 품질이 양호함(2점)."
+  },
+  "privacy": {
+   "name": "10. 개인정보 포함 여부",
+   "weight": 1,
+   "must_pass": true,
+   "score": 1,
+   "evidence": "p.1 교신저자 각주에 저자의 실명, 전화번호(02-300-0600), 개인 이메일 주소(min7531@hanmail.net)가 노출되어 있어 외부 API 전송 시 개인정보 유출 주의 필요(1점)."
+  },
+  "topic": {
+   "name": "11. 주제 분류",
+   "weight": 0,
+   "must_pass": false,
+   "score": null,
+   "evidence": "정서·위기(자해·자살) / 상담 기법 (아동의 완벽주의 성향 및 스트레스 대처행동과 불안 간의 관계 분석)"
+  },
+  "license": {
+   "name": "12. 이용 조건",
+   "weight": 1,
+   "must_pass": false,
+   "score": 0,
+   "evidence": "한국심리학회 학술지 게재 논문으로 학회 및 저작권자의 전재/재배포 정책에 따라 상용 외부 API 전송 및 전문 인덱싱에 저작권 제약이 발생할 수 있음(0점)."
+  }
+ },
+ "proposal": {
+  "short": "완벽주의불안",
+  "title": "아동의 완벽주의가 불안에 미치는 영향에 대한 스트레스 대처행동의 매개효과(한국심리학회지: 상담 및 심리치료, 2008)",
+  "role": "reference",
+  "use_in": [
+   "counseling"
+  ],
+  "topics": [
+   "정서·위기",
+   "상담 기법"
+  ],
+  "summary": "초등학교 고학년 아동을 대상으로 완벽주의 성향(자기지향적, 사회부과적)이 불안에 미치는 영향에서 스트레스 대처행동의 매개효과를 분석한 연구 논문입니다. 소극·회피적 대처와 공격적 대처가 완벽주의와 불안 사이를 매개함을 보여주어, 완벽주의 성향으로 불안을 호소하는 학생 상담 시 대처행동 양식을 평가하고 수정하는 이론적 근거를 제공합니다.",
+  "cautions": [
+   "2008년에 발간된 오래된 순수 학술 논문으로, 학교폭력이나 위기개입 매뉴얼과 같은 현장 실무 지침서가 아닙니다.",
+   "초등학생(5~6학년) 대상 설문 연구 결과이므로 중학교 상담 현장에 일반화하여 적용할 때 발달적 차이를 감안해야 합니다.",
+   "구체적인 상담 기법, 회기 프로그램, 양식 등이 포함되어 있지 않으므로 실행 지침서로 활용하기 부적합합니다.",
+   "논문 첫 페이지에 저자의 이메일 및 유선전화번호가 포함되어 있으므로 외부 API 전송 시 비식별화 처리가 필요합니다."
+  ]
+ },
+ "measured": {
+  "file": "아동의 완벽주의가 불안에 미치는 영향에 대한 스트레스 대처행동의 매개효과.pdf",
+  "pages": 21,
+  "chars_total": 31759,
+  "chars_per_page_median": 1388,
+  "low_text_pages_ratio": 0.0,
+  "low_text_pages": [],
+  "years_on_cover": [
+   2004,
+   2006,
+   2007
+  ],
+  "pdf_metadata_date": "20080829",
+  "publisher_candidates": [
+   "명지대학교",
+   "한국심리학회"
+  ],
+  "region_mentions_on_cover": {
+   "서울": 4,
+   "경기": 3
+  },
+  "topic_keyword_counts": {
+   "학교폭력": 0,
+   "가정": 0,
+   "학업·학교부적응": 0,
+   "정서·위기": 121,
+   "디지털·사이버": 0,
+   "상담 기법": 0,
+   "학교 운영": 0
+  },
+  "pii_pattern_counts": {
+   "휴대전화": 0,
+   "주민번호": 0,
+   "이메일": 1
+  },
+  "masked_name_count": 0,
+  "restriction_phrases": [],
+  "first_page_text": "한국심리학회지 : 상담 및 심리치료 The Korean Journal of Counseling and Psychotherapy 2008, Vol. 20 No. 3, 863 -883 아동의 완벽주의가 불안에 미치는 영",
+  "filename_similarity_to_existing": {
+   "guide": 0.065,
+   "esan": 0.091,
+   "cyber": 0.154,
+   "digital": 0.212,
+   "add_학업숙려제": 0.2,
+   "add_정서행동": 0.123
+  },
+  "content_overlap_with_existing": {
+   "add_정서행동": {
+    "samples": 8,
+    "max_cos": 0.755,
+    "mean_cos": 0.726
+   },
+   "digital": {
+    "samples": 1,
+    "max_cos": 0.751,
+    "mean_cos": 0.751
+   },
+   "cyber": {
+    "samples": 1,
+    "max_cos": 0.691,
+    "mean_cos": 0.691
+   }
+  }
+ },
+ "seconds": 14.3
+}

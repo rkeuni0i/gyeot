@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>곁 서비스 안내</title>
+<link rel="icon" href="docs/brand/gyeot_mark.svg" type="image/svg+xml">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f6f5f2; --surface: #fcfcfb; --surface-2: #f1f0ec; --text: #0b0b0b; --text-2: #52514e; --muted: #77766f;
+  --border: #e3e1db; --accent: #2a78d6; --accent-soft: #e8f0fb; --ok: #1d7a46; --ok-soft: #e6f4ec;
+  --warn: #9a6200; --warn-soft: #fdf3e1; --bad: #b42318; --bad-soft: #fdecea; --code-bg: #efeee9;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #121211; --surface: #1a1a19; --surface-2: #222220; --text: #ffffff; --text-2: #c3c2b7; --muted: #9a998f;
+    --border: #2e2e2c; --accent: #3987e5; --accent-soft: #1d2a3b; --ok: #5fcf8f; --ok-soft: #13291d;
+    --warn: #f0b84a; --warn-soft: #33290f; --bad: #f28b82; --bad-soft: #3a1714; --code-bg: #262624;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #121211; --surface: #1a1a19; --surface-2: #222220; --text: #ffffff; --text-2: #c3c2b7; --muted: #9a998f;
+  --border: #2e2e2c; --accent: #3987e5; --accent-soft: #1d2a3b; --ok: #5fcf8f; --ok-soft: #13291d;
+  --warn: #f0b84a; --warn-soft: #33290f; --bad: #f28b82; --bad-soft: #3a1714; --code-bg: #262624;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; line-height: 1.7; font-size: 15px; }
+main { max-width: 1040px; margin: 0 auto; padding: 40px 16px 72px; }
+h1 { font-size: 30px; margin: 0 0 6px; letter-spacing: -0.02em; }
+h2 { font-size: 21px; margin: 44px 0 10px; letter-spacing: -0.01em; }
+h3 { font-size: 16px; margin: 0 0 6px; }
+.sub { color: var(--text-2); margin: 0; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+.grid { display: grid; gap: 12px; }
+.g4 { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.g3 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.stat .v { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+.stat .l { color: var(--text-2); font-size: 13px; }
+.stat .d { color: var(--muted); font-size: 12.5px; }
+code { background: var(--code-bg); padding: 1px 6px; border-radius: 5px; font-size: 13px; font-family: Consolas, "D2Coding", monospace; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+th { color: var(--text-2); font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; }
+.pill { display: inline-block; padding: 0 8px; border-radius: 999px; font-size: 12px; border: 1px solid var(--border); color: var(--text-2); white-space: nowrap; margin: 1px 2px 1px 0; }
+.pill.a { border-color: var(--accent); color: var(--text); background: var(--accent-soft); }
+
+/* 구조도 */
+.flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr; align-items: stretch; gap: 8px; }
+.flow .box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+.flow .box b { display: block; margin-bottom: 4px; }
+.flow .box small { color: var(--text-2); font-size: 13px; line-height: 1.55; display: block; }
+.flow .arrow { align-self: center; color: var(--muted); font-size: 20px; }
+.store { margin-top: 10px; background: var(--surface-2); border: 1px dashed var(--border); border-radius: 12px; padding: 12px 14px; font-size: 13.5px; color: var(--text-2); }
+@media (max-width: 760px) { .flow { grid-template-columns: 1fr; } .flow .arrow { transform: rotate(90deg); justify-self: center; } }
+
+/* 시뮬레이션 */
+.scen-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.scen-tabs button { font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); cursor: pointer; }
+.scen-tabs button[aria-selected="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--text); font-weight: 600; }
+.sim { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.sim-head { padding: 16px 20px 0; }
+.sim-head p { margin: 2px 0 0; color: var(--text-2); font-size: 14px; }
+.dots { display: flex; gap: 6px; padding: 14px 20px; flex-wrap: wrap; }
+.dots button { font: inherit; font-size: 12.5px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; }
+.dots button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.dots button.done { color: var(--text-2); border-color: var(--accent); }
+.step { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-top: 1px solid var(--border); }
+.step .txt { padding: 20px; }
+.step .shot { background: var(--surface-2); border-left: 1px solid var(--border); display: flex; align-items: center; justify-content: center; padding: 14px; min-height: 260px; }
+.step .shot img { max-width: 100%; max-height: 420px; border-radius: 8px; border: 1px solid var(--border); display: block; }
+.step .shot .noimg { color: var(--muted); font-size: 13px; text-align: center; }
+.lane { border-radius: 10px; padding: 10px 12px; margin: 8px 0; font-size: 14px; }
+.lane.user { background: var(--accent-soft); }
+.lane.sys { background: var(--surface-2); }
+.lane.out { background: var(--ok-soft); }
+.lane .who { font-size: 12px; font-weight: 700; color: var(--text-2); display: block; margin-bottom: 2px; }
+.lane ul { margin: 2px 0 0; padding-left: 18px; }
+.nav { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-top: 1px solid var(--border); }
+.nav button { font: inherit; font-size: 14px; padding: 7px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
+.nav button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.nav button:disabled { opacity: .4; cursor: default; }
+.nav span { color: var(--muted); font-size: 13px; }
+@media (max-width: 760px) { .step { grid-template-columns: 1fr; } .step .shot { border-left: none; border-top: 1px solid var(--border); } }
+
+.sev { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+.sev.c { background: var(--bad); } .sev.w { background: var(--warn); } .sev.i { background: var(--accent); }
+.note { background: var(--warn-soft); border-left: 3px solid var(--warn); padding: 10px 12px; border-radius: 0 8px 8px 0; font-size: 14px; margin-top: 10px; }
+footer { color: var(--muted); font-size: 12.5px; margin-top: 44px; }
+</style>
+</head>
+<body>
+<main>
+  <h1><img src="docs/brand/gyeot_mark.svg" alt="" style="height:1.05em;vertical-align:-.15em;margin-right:.15em">곁 <span style="font-weight:500;font-size:.6em;color:var(--text-2)">상담실 곁의 사안처리 동료</span></h1>
+  <p class="sub">이산중학교 사안처리·상담 도우미 · 학교에 혼자 근무하는 전문상담교사가 학교 규정·학교폭력 절차·상담 개입 방법을 근거와 함께 바로 확인하는 웹 서비스 · 2026-10-19 기준</p>
+
+  <div class="grid g4" style="margin-top:22px">
+    <div class="card stat"><div class="l">근거 자료</div><div class="v">4개 · 청크 696개</div><div class="d">이산중 규정, 학교폭력 가이드북, 상담 매뉴얼 2종</div></div>
+    <div class="card stat"><div class="l">질문 유형</div><div class="v">6가지</div><div class="d">유형마다 먼저 볼 자료와 답변 형식이 다름</div></div>
+    <div class="card stat"><div class="l">답변 품질(평가 16문항)</div><div class="v">핵심 91%</div><div class="d">노트북형 기준선(90%)과 같거나 높음, 근거 쪽 표시</div></div>
+    <div class="card stat"><div class="l">자료 점검</div><div class="v">학기마다</div><div class="d">182일마다 자동 재평가, 사용 전 알림</div></div>
+  </div>
+
+  <!-- 구조 -->
+  <h2>1. 한눈에 보는 구조</h2>
+  <div class="flow">
+    <div class="box"><b>① 질문</b><small>상담사가 상황이나 궁금한 점을 입력(예시 질문 버튼도 있음)</small></div>
+    <div class="arrow">→</div>
+    <div class="box"><b>② 질문 이해</b><small>Gemini가 질문을 정리하고 검색어·<b>질문 유형</b>·<b>주제</b>를 판단</small></div>
+    <div class="arrow">→</div>
+    <div class="box"><b>③ 자료 검색</b><small>유형별 순서대로 문서마다 찾음(벡터 + 형태소 하이브리드), 본문이 가리키는 양식 쪽도 함께</small></div>
+    <div class="arrow">→</div>
+    <div class="box"><b>④ 답변</b><small>자료 안에서만 답하고 문장마다 [자료 p.쪽] 근거, 알림이 있으면 "사용 전 확인"</small></div>
+  </div>
+  <div class="store">🗄️ <b>자료 저장소</b> <code>index/mindguide.db</code>(SQLite): 문서·층(공통/주제/학교)·주제·질문 유형·청크·임베딩·평가 기록·알림을 한 파일에 보관.
+    <b>자료 관리</b> 화면에서 추가(AI 평가 → 승인)·사용 중지·완전 삭제, <b>학기별 정기 점검</b>이 같은 저장소를 씁니다.</div>
+
+  <!-- 화면 -->
+  <h2>2. 화면과 기능</h2>
+  <div class="grid g3">
+    <div class="card"><h3>💬 챗봇</h3>
+      <ul style="margin:0;padding-left:18px;font-size:14px">
+        <li>질문 입력, 예시 질문 11개, 대화 초기화</li>
+        <li>답변 위: 🔎 질문 유형·확인 순서</li>
+        <li>답변: 유형별 형식, 문장마다 근거 쪽</li>
+        <li>답변 아래: 사용 전 확인(알림), 근거 표(코사인 순), 인용된 근거 원문·원본 쪽 이미지</li>
+        <li>사이드바: 근거 자료 목록, 🔔 유의사항 N건, 질문 유형별 확인 순서</li>
+        <li>모든 질문·답변·근거가 <code>logs/chat_log.jsonl</code>에 저장</li>
+      </ul></div>
+    <div class="card"><h3>📚 자료 관리</h3>
+      <ul style="margin:0;padding-left:18px;font-size:14px">
+        <li><b>자료 추가</b>: PDF 업로드 → 같은 PDF 차단 → AI 평가(12개 기준) → 추천/조건부/비추천 → 상담사 승인 → 바로 검색</li>
+        <li><b>등록 자료</b>: 상태·층·주제·청크·최근 판정·알림·다음 점검일, 사용 중지·다시 평가·완전 삭제</li>
+        <li><b>알림·정기 점검</b>: 마지막/다음 점검일, 지금 점검, 알림 "확인함"</li>
+      </ul></div>
+    <div class="card"><h3>⚙️ 자동으로 일어나는 일</h3>
+      <ul style="margin:0;padding-left:18px;font-size:14px">
+        <li>앱을 열 때 점검 시기(182일)가 지났으면 백그라운드 정기 점검</li>
+        <li>자료 추가 때 평가의 주의할 점 → 알림</li>
+        <li>답변이 인용한 자료에 주의·긴급 알림이 있으면 답변 아래 표시</li>
+        <li>(선택) <code>run_review.bat</code>을 작업 스케줄러에 등록하면 앱을 열지 않아도 점검</li>
+      </ul></div>
+  </div>
+
+  <!-- 시뮬레이션 -->
+  <h2>3. 사용 흐름 시뮬레이션</h2>
+  <p class="sub" style="margin-bottom:12px">시나리오를 고르고 <b>다음</b>을 눌러 한 단계씩 따라가 보세요. 파란 칸은 상담사가 하는 일, 회색 칸은 서비스 안에서 일어나는 일, 초록 칸은 결과입니다. 사진은 실제 화면입니다.</p>
+  <div class="scen-tabs" id="scenTabs" role="tablist"></div>
+  <div class="sim" id="sim">
+    <div class="sim-head"><h3 id="simTitle"></h3><p id="simDesc"></p></div>
+    <div class="dots" id="dots"></div>
+    <div class="step">
+      <div class="txt" id="stepTxt"></div>
+      <div class="shot" id="stepShot"></div>
+    </div>
+    <div class="nav"><button id="prev">← 이전</button><span id="pos"></span><button id="next" class="primary">다음 →</button></div>
+  </div>
+
+  <!-- 질문 유형 -->
+  <h2>4. 질문 유형별로 먼저 보는 자료</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>질문 유형</th><th>예시 질문</th><th>확인 순서</th><th>답변 형식</th></tr></thead>
+    <tbody>
+      <tr><td><b>학교 맞춤형</b></td><td>수업 시간에 상담해도 되나요? / 수업 방해 학생 처리</td><td>이산중 → 가이드북 → 매뉴얼</td><td>이산중 규정 → 지금 해야 할 일</td></tr>
+      <tr><td><b>학교폭력 절차·법</b></td><td>교육지원청 보고 기한 / 자체해결 요건 / 분리 기간</td><td>가이드북 → 이산중 → 매뉴얼</td><td>사실은 바로, 상황은 법정 절차 순서(기한·담당)</td></tr>
+      <tr><td><b>용어·개념 정의</b></td><td>사이버 비행이 뭐야? 사이버폭력과 차이는?</td><td>가이드북 → 사이버상담 → 디지털상담 → 이산중</td><td>법적 정의 → 매뉴얼 정의·유형 → 비슷한 용어 차이</td></tr>
+      <tr><td><b>상담 가이드</b></td><td>사이버폭력 가해 학생 회기 구성 / 피해 학생 개입</td><td>사이버상담 → 디지털상담 → 가이드북 → 이산중</td><td>상담 개입 참고(단계·활동) + 절차도 물으면 지금 해야 할 일</td></tr>
+      <tr><td><b>학생 눈높이 설명</b></td><td>사이버 비행을 학생에게 쉽게 설명하려면?</td><td>사이버상담 → 디지털상담 → 가이드북 → 이산중</td><td>한 줄 설명·비유·예시·꼭 알려줄 점(학생 말투, 줄마다 근거)</td></tr>
+      <tr><td><b>위기(자해·자살)</b></td><td>자해한 학생의 보호자 상담은?</td><td>(위기 대응 자료가 등록되면 1순위) → 이산중 → 가이드북</td><td>위기관리 절차·Wee센터·1388 연계, 자료에 없으면 없다고 안내</td></tr>
+    </tbody>
+  </table></div>
+
+  <!-- 자료 -->
+  <h2>5. 지금 등록된 근거 자료</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>인용 이름</th><th>자료</th><th>층</th><th>주제</th><th>청크</th></tr></thead>
+    <tbody>
+      <tr><td><b>이산중</b></td><td>이산중학교 학생생활규정(2026.8.27 개정)</td><td>학교</td><td><span class="pill">학교 운영</span><span class="pill">학교폭력</span></td><td>59</td></tr>
+      <tr><td><b>가이드북</b></td><td>2026학년도 학교폭력 사안처리 가이드북</td><td>주제</td><td><span class="pill">학교폭력</span></td><td>313</td></tr>
+      <tr><td><b>사이버상담</b></td><td>사이버 비행 청소년 상담개입 매뉴얼(한국청소년상담복지개발원, 2023)</td><td>주제</td><td><span class="pill">디지털·사이버</span><span class="pill">상담 기법</span><span class="pill">학교폭력</span></td><td>141</td></tr>
+      <tr><td><b>디지털상담</b></td><td>디지털 미디어 위기 청소년 유형 및 개입 매뉴얼(한국청소년상담복지개발원, 2024)</td><td>주제</td><td><span class="pill">디지털·사이버</span><span class="pill">상담 기법</span></td><td>183</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">첫 정기 점검(2026-10-19) 알림 11건: <span class="sev w"></span>주의 2건(가이드북·이산중이 학교폭력예방법 시행일 2026-06-02과 같은 해 자료 → 개정 조문 확인), <span class="sev i"></span>참고 9건(무단전재 금지 문구, 법적 절차는 가이드북 우선 등). 다음 정기 점검 2027-04-19.</div>
+
+  <!-- 평가 기준 -->
+  <h2>6. 자료 추가 때 AI가 보는 12개 기준</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>기준</th><th>보는 것</th></tr></thead>
+    <tbody>
+      <tr><td>1 최신성</td><td>판본·발행 연도·법령 시행일(오늘 기준)</td></tr>
+      <tr><td>2 출처 명확성</td><td>교육부·교육청·공공기관·학술지 등 발행처</td></tr>
+      <tr><td>3 전문성 인증</td><td>공식 지침, 전문가 검토·자문·학술 심사</td></tr>
+      <tr><td>4 상담사 활용성</td><td>절차·개입·설명에 바로 쓸 수 있는지</td></tr>
+      <tr><td><b>5 중복·충돌 ★</b></td><td>등록 자료의 구버전·거의 같은 문서인지(본문 유사도)</td></tr>
+      <tr><td>6 적용 지역</td><td>전국 공통·경기인지, 다른 시도 고유 규정인지</td></tr>
+      <tr><td>7 자료 유형</td><td>실무 매뉴얼 / 연구보고서 / 논문·사례집</td></tr>
+      <tr><td>8 구체성</td><td>절차 순서·기한·담당·연락처·양식·활동</td></tr>
+      <tr><td><b>9 텍스트 추출 ★</b></td><td>스캔본·표 비중(검색되는지)</td></tr>
+      <tr><td><b>10 개인정보 ★</b></td><td>가려지지 않은 이름·연락처(외부 API 전송)</td></tr>
+      <tr><td>11 주제 분류</td><td>학교폭력·가정·학업·정서위기·디지털·상담 기법·학교 운영</td></tr>
+      <tr><td>12 이용 조건</td><td>공개 자료인지, 전재·재배포 제한</td></tr>
+    </tbody>
+  </table></div>
+  <p class="sub" style="font-size:14px;margin-top:8px">★ 필수 기준 중 0점 또는 55% 미만 → <b>비추천</b> · 75% 이상이고 0점 없음 → <b>추천</b> · 그 사이 → <b>조건부</b>. 비추천도 상담사가 사유를 적으면 추가할 수 있습니다.</p>
+
+  <!-- 실행 -->
+  <h2>7. 실행과 파일</h2>
+  <div class="grid g3">
+    <div class="card"><h3>실행</h3><p style="margin:0;font-size:14px"><code>run.bat</code> 더블클릭 → <code>http://localhost:8501</code>. 저장소가 없으면 먼저 만듭니다. API 키는 환경변수 <code>GEMINI_API_KEY</code>, 모델 <code>gemini-3.8-flash</code>.</p></div>
+    <div class="card"><h3>주요 파일</h3><p style="margin:0;font-size:14px"><code>app.py</code> 화면 · <code>add_page.py</code> 자료 관리 · <code>rag.py</code> 검색·답변 · <code>store.py</code> 저장소 · <code>doc_agent/</code> 평가·등록·정기 점검 · <code>eval/</code> 성능 평가</p></div>
+    <div class="card"><h3>더 보기</h3><p style="margin:0;font-size:14px"><a href="README.md">README.md</a> 사용법 · <a href="docs/DB_설계.md">docs/DB_설계.md</a> 저장소 설계 · <a href="workinglog.html">workinglog.html</a> 작업 과정(18단계)</p></div>
+  </div>
+
+  <footer>사진은 작업 중 실제 화면 캡처입니다(<code>docs/img/</code>). 실제 학생 이름·학교명·연락처는 입력하지 마세요. 질문과 검색된 원문 일부가 Google Gemini API로 전송됩니다.</footer>
+</main>
+
+<script>
+const SCENARIOS = [
+  {
+    id: "ask", tab: "💬 질문하고 답 받기", title: "시나리오 1 · 상담 중 궁금한 점을 질문한다",
+    desc: "상담사가 사이버 비행을 학생에게 설명해야 하는 상황. 질문 → 유형 판단 → 검색 → 근거 있는 답변 → 확인까지.",
+    steps: [
+      { name: "질문 입력", img: "docs/img/03_chatbot_v1_home.png",
+        user: ["챗봇 화면에서 질문을 입력하거나 왼쪽 예시 질문을 누른다", "예: \"사이버 비행을 학생에게 이해하기 쉽게 설명하려면 뭐라고 하면 돼?\""],
+        sys: ["실제 학생 이름·학교명은 넣지 말라는 안내가 사이드바에 있음"], out: [] },
+      { name: "유형·주제 판단", img: "docs/img/18_router_student_explain.jpg",
+        user: [],
+        sys: ["Gemini가 한 번의 호출로 질문을 정리하고 검색어 3~5개, 질문 유형, 주제를 판단",
+              "이 질문 → 유형 \"학생 눈높이 설명\", 주제 \"디지털·사이버\""],
+        out: ["답변 위에 🔎 질문 유형: 학생 눈높이 설명 · 확인 순서: 사이버상담 → 디지털상담 → 가이드북 → 이산중"] },
+      { name: "자료 검색", img: "docs/img/16_esan_first_cosine_table.jpg",
+        user: [],
+        sys: ["확인 순서대로 문서마다 따로 찾음(1순위 문서에 가장 많은 몫)",
+              "벡터(Gemini 임베딩 코사인) + 형태소(BM25) 하이브리드, 본문이 가리키는 부록 양식 쪽도 함께",
+              "추가 자료는 층·주제가 맞을 때만 포함"], out: [] },
+      { name: "답변", img: "docs/img/18_router_student_explain.jpg",
+        user: ["답변을 읽는다"],
+        sys: ["자료 안의 내용만 쓰고, 문장마다 [사이버상담 p.15]처럼 근거를 닮"],
+        out: ["한 줄로 설명하기 → 이렇게 비유해 보세요 → 학생이 겪을 수 있는 예시 → 꼭 알려줄 점 → 우리 학교 규칙(제37조) → 상담사 참고"] },
+      { name: "사용 전 확인", img: "docs/img/21_use_alert.jpg",
+        user: ["답변 아래 노란 상자가 있으면 먼저 읽는다"],
+        sys: ["답변이 인용한 자료에 확인하지 않은 주의·긴급 알림이 있는지 저장소에서 확인"],
+        out: ["예: [가이드북] 법령 개정 이후 확인 필요 — 학교폭력예방법 시행일(2026-06-02) 이후 바뀐 조문 확인"] },
+      { name: "근거 확인", img: "docs/img/09_chatbot_v3_cited_sources.jpg",
+        user: ["근거 표에서 쪽과 유사도를 보고, '근거 원문 보기'를 열어 원문·원본 쪽 이미지로 대조"],
+        sys: ["근거 표: 문서 구분 없이 코사인 높은 순, 같은 쪽 청크는 한 줄로", "근거 원문: 답변에 인용된 쪽만, 유사도 높은 순"],
+        out: ["질문·답변·근거(쪽·코사인·원문)가 logs/chat_log.jsonl에 저장"] },
+    ]
+  },
+  {
+    id: "add", tab: "📥 자료 추가하기", title: "시나리오 2 · 새 PDF를 근거 자료로 넣는다",
+    desc: "학교 위기대응 안내서(PFA-S)를 추가하는 경우. AI가 판정하고 상담사가 승인해야 들어간다.",
+    steps: [
+      { name: "업로드", img: "docs/img/22_manage_add_duplicate.jpg",
+        user: ["사이드바에서 📚 자료 관리 → 📥 자료 추가", "PDF를 올린다"],
+        sys: ["파일 해시로 같은 PDF가 이미 있는지 확인 → 있으면 평가 버튼을 막고 안내"], out: [] },
+      { name: "AI 평가", img: "docs/img/19_agent_report.jpg",
+        user: ["AI 평가 실행을 누른다(1분 안팎)"],
+        sys: ["① 자동 측정: 쪽당 글자 수, 연도·발행처, 개인정보 패턴, 지역, 기존 자료와 본문 유사도",
+              "② Gemini 판단: 12개 기준마다 0/1/2점과 근거 쪽",
+              "③ 코드로 최종 판정: 추천 / 조건부 / 비추천"],
+        out: ["PFA-S → 추천(100%): 교육부·학생정신건강지원센터, 2024 개정, 전문가 자문, 공개 자료"] },
+      { name: "승인", img: "docs/img/19_agent_report.jpg",
+        user: ["인용 이름·정식 이름·층·주제·질문 유형을 확인하고 고친다",
+               "추천 → 추천대로 추가 / 조건부 → 주의 확인 체크 후 추가 / 비추천 → 사유 입력 후에만 추가"],
+        sys: [], out: [] },
+      { name: "등록", img: "docs/img/20_registered_docs.jpg",
+        user: [],
+        sys: ["PDF를 data/로 복사, 저장소에 문서·주제·질문 유형·입고 평가 기록",
+              "그 자료 청크만 임베딩해 저장(전체 재생성 없음). 실패하면 등록 전체를 되돌림",
+              "평가의 주의할 점은 🔵 참고 알림으로 남김"],
+        out: ["[위기대응] 등록 완료: 청크 63개, 사이드바 근거 자료에 바로 추가"] },
+      { name: "바로 사용", img: "",
+        user: ["챗봇에 \"학생이 자해했다는 사실을 알게 됐어요. 학교에서 어떻게 대응해야 하나요?\""],
+        sys: ["위기 유형 → 등록된 위기 대응 자료를 1순위로 확인"],
+        out: ["[위기대응 p.6, p.8] 근거로 위기관리위원회 소집·선별검사·특별상담실 절차 안내"] },
+    ]
+  },
+  {
+    id: "manage", tab: "🗂️ 자료 정리·삭제", title: "시나리오 3 · 등록된 자료를 끄거나 지운다",
+    desc: "더 이상 쓰지 않거나 잘못 넣은 자료를 관리하는 경우.",
+    steps: [
+      { name: "목록 보기", img: "docs/img/23_manage_docs_delete.jpg",
+        user: ["📚 자료 관리 → 🗂️ 등록 자료"],
+        sys: ["자료별 상태·층·주제·청크 수·최근 판정·알림 수·다음 점검일 표시"], out: [] },
+      { name: "사용 중지", img: "docs/img/23_manage_docs_delete.jpg",
+        user: ["자료를 골라 사용 중지(다시 사용으로 되돌릴 수 있음)"],
+        sys: ["저장소에서 상태만 inactive로 바꿈. 청크는 남기고 검색에서만 뺌", "기본 4개 자료도 가능"],
+        out: ["사이드바와 질문 유형별 확인 순서에서 빠짐"] },
+      { name: "다시 평가", img: "",
+        user: ["지금 다시 평가를 누른다"],
+        sys: ["그 자료만 오늘 기준으로 재평가, 직전 평가와 비교해 알림 생성"], out: ["알림·정기 점검 탭에 결과"] },
+      { name: "완전 삭제", img: "docs/img/23_manage_docs_delete.jpg",
+        user: ["\"PDF 파일까지 완전히 지웁니다\" 체크 → 완전 삭제"],
+        sys: ["문서 행을 지우면 청크·평가 기록·알림이 함께 지워짐(CASCADE)", "data/와 doc_agent/inbox/의 PDF도 삭제", "기본 4개 자료는 완전 삭제 불가(사용 중지만)"],
+        out: ["테스트: [위기대응] 삭제 후 저장소 4개 자료·청크 696개·알림 11건으로 복원, PDF 두 사본 삭제"] },
+    ]
+  },
+  {
+    id: "review", tab: "🔔 학기별 점검·알림", title: "시나리오 4 · 한 학기가 지나 자료를 점검한다",
+    desc: "182일마다 모든 자료를 다시 평가해 상담사가 쓰기 전에 알아야 할 점을 알려준다.",
+    steps: [
+      { name: "자동 시작", img: "",
+        user: ["평소처럼 앱을 연다"],
+        sys: ["마지막 점검 후 182일이 지났으면 백그라운드로 정기 점검 시작(사이드바에 '진행 중')",
+              "앱을 열지 않아도 되게 run_review.bat을 작업 스케줄러에 등록할 수 있음"], out: [] },
+      { name: "재평가", img: "",
+        user: [],
+        sys: ["활성 자료마다 평가 에이전트로 오늘 기준 재평가(자기 자신은 중복 비교에서 제외)",
+              "직전 평가와 비교, 등록된 학교폭력예방법 시행일과 자료 발행 연도 비교"],
+        out: ["첫 점검: 가이드북·사이버상담·디지털상담 조건부, 이산중 추천"] },
+      { name: "알림 생성", img: "",
+        user: [],
+        sys: ["🔴 긴급: 비추천으로 바뀜, PDF 파일 없음",
+              "🟠 주의: 판정 하락, 새로 0점, 최신성 하락, 발행 3년 경과, 법령 개정 이후 확인 필요",
+              "🔵 참고: 이번 평가의 주의할 점(같은 알림은 다시 만들지 않음)"],
+        out: ["주의 2건 + 참고 9건, 다음 점검일 2027-04-19"] },
+      { name: "사용 전 알림", img: "docs/img/21_use_alert.jpg",
+        user: ["질문하면 인용된 자료의 알림을 답변 아래에서 본다", "사이드바 🔔 유의사항 N건을 펼쳐 본다"],
+        sys: [], out: ["답변을 쓰기 전에 바뀐 법령·주의할 점을 확인"] },
+      { name: "확인 처리", img: "",
+        user: ["📚 자료 관리 → 🔔 알림·정기 점검에서 내용을 확인하고 '확인함'"],
+        sys: ["알림에 확인 시각·확인자 기록, 이후 답변 아래에 다시 뜨지 않음"],
+        out: ["필요하면 그 자료를 사용 중지하거나 새 판본을 추가"] },
+    ]
+  },
+];
+
+const $ = id => document.getElementById(id);
+let cur = 0, idx = 0;
+
+function lane(cls, who, items) {
+  if (!items.length) return "";
+  return `<div class="lane ${cls}"><span class="who">${who}</span><ul>${items.map(i => `<li>${i}</li>`).join("")}</ul></div>`;
+}
+function render() {
+  const s = SCENARIOS[cur], st = s.steps[idx];
+  $("simTitle").textContent = s.title;
+  $("simDesc").textContent = s.desc;
+  $("dots").innerHTML = s.steps.map((x, i) =>
+    `<button data-i="${i}" class="${i === idx ? "on" : i < idx ? "done" : ""}">${i + 1}. ${x.name}</button>`).join("");
+  $("stepTxt").innerHTML = `<h3>${idx + 1}. ${st.name}</h3>` + lane("user", "👤 상담사", st.user) +
+    lane("sys", "⚙️ 서비스 내부", st.sys) + lane("out", "✅ 결과", st.out);
+  $("stepShot").innerHTML = st.img
+    ? `<a href="${st.img}" target="_blank"><img src="${st.img}" alt="${st.name} 화면"></a>`
+    : `<div class="noimg">이 단계는 화면 밖(서비스 내부)에서 일어납니다</div>`;
+  $("pos").textContent = `${idx + 1} / ${s.steps.length}`;
+  $("prev").disabled = idx === 0;
+  $("next").textContent = idx === s.steps.length - 1 ? (cur < SCENARIOS.length - 1 ? "다음 시나리오 →" : "처음으로") : "다음 →";
+  [...$("scenTabs").children].forEach((b, i) => b.setAttribute("aria-selected", i === cur));
+}
+$("scenTabs").innerHTML = SCENARIOS.map((s, i) => `<button role="tab" data-s="${i}">${s.tab}</button>`).join("");
+$("scenTabs").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; cur = +b.dataset.s; idx = 0; render(); });
+$("dots").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; idx = +b.dataset.i; render(); });
+$("prev").onclick = () => { if (idx > 0) { idx--; render(); } };
+$("next").onclick = () => {
+  const s = SCENARIOS[cur];
+  if (idx < s.steps.length - 1) idx++;
+  else { cur = (cur + 1) % SCENARIOS.length; idx = 0; }
+  render();
+};
+document.addEventListener("keydown", e => { if (e.key === "ArrowRight") $("next").click(); if (e.key === "ArrowLeft") $("prev").click(); });
+render();
+</script>
+</body>
+</html>

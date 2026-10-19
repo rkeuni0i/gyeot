@@ -1,0 +1,176 @@
+{
+ "file": "2026학년도 학교폭력 사안처리 가이드북.pdf",
+ "evaluated_at": "2026-10-19 12:59:11",
+ "model": "gemini-3.8-flash",
+ "criteria_version": "1.0",
+ "verdict": "조건부",
+ "weighted_score": 87.5,
+ "reasons": [
+  "0점 기준이 있어 추천 불가: 12. 이용 조건"
+ ],
+ "scores": {
+  "recency": {
+   "name": "1. 최신성",
+   "weight": 2,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "표지(p.1)에 '2026년도 일부개정', 판권지(p.215)에 발행일 '2026. 02. 06.'이 명시된 최신 판본으로 2026년 기준 3년 이내의 현행 지침임."
+  },
+  "source": {
+   "name": "2. 출처 명확성",
+   "weight": 2,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "판권지(p.215)에 발행처가 '교육부·이화여자대학교 학교폭력예방연구소'로 명시된 국가 교육 부처 공식 지침임."
+  },
+  "authority": {
+   "name": "3. 전문성 인증",
+   "weight": 2,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "교육부 학교폭력대책과 담당자(과장, 서기관, 교육연구사 등) 및 17개 시·도교육청 장학사진의 공식 검토를 거쳐 발간됨(p.215)."
+  },
+  "usefulness": {
+   "name": "4. 상담사 활용성",
+   "weight": 2,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "학교폭력 사안 접수 및 초기대응, 긴급조치, 분리제도, 관계회복 프로그램, 치료비 지원 절차, 상담 개입 및 학생·보호자 설명 요령 등 상담사가 즉각 활용할 수 있는 내용이 풍부함(p.3, p.26, p.46, p.66, p.106)."
+  },
+  "duplicate": {
+   "name": "5. 기존 자료와 중복·충돌",
+   "weight": 2,
+   "must_pass": true,
+   "score": 1,
+   "evidence": "기존에 등록된 '2025_학교폭력 사안처리 가이드북.pdf'와 내용 유사도가 매우 높으며(max_cos 0.97, mean_cos 0.943), 해당 문서의 최신 개정판(2026년도판)이므로 기존 2025년 판본과의 교체가 필요함."
+  },
+  "region": {
+   "name": "6. 적용 지역 범위",
+   "weight": 1,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "교육부 주관으로 발행된 전국 공통 적용 가이드북으로 경기도 이산중학교에도 그대로 적용됨."
+  },
+  "doc_type": {
+   "name": "7. 대상 독자·자료 유형",
+   "weight": 1,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "학교 현장에서 사안처리와 상담을 직접 수행하는 교원 및 전문상담사를 위한 실무 업무 매뉴얼임."
+  },
+  "actionability": {
+   "name": "8. 구체성(실행 가능성)",
+   "weight": 1,
+   "must_pass": false,
+   "score": 2,
+   "evidence": "가해학생 분리 기한(최대 7일), 분쟁조정 개시(5일 이내), 자체해결 4대 요건 서면 확인, 공제회 치료비 청구 기준(시행규칙 제9조의3), 공문 서식 및 사안보고 양식(p.146, p.166 등)이 구체적으로 제시됨."
+  },
+  "extraction": {
+   "name": "9. 텍스트 추출 품질",
+   "weight": 1,
+   "must_pass": true,
+   "score": 2,
+   "evidence": "전체 216쪽 중 글자가 적은 쪽 비율이 2.8%(low_text_pages_ratio 0.028)에 불과하고 중앙값 1,031자로 본문 텍스트가 정상 추출됨."
+  },
+  "privacy": {
+   "name": "10. 개인정보 포함 여부",
+   "weight": 1,
+   "must_pass": true,
+   "score": 2,
+   "evidence": "실제 개인정보(주민번호, 휴대전화, 이메일) 노출이 없으며, 양식 내 예시 번호(2026-1 등)나 빈칸 형태로 구성되어 개인정보 유출 위험이 없음."
+  },
+  "topic": {
+   "name": "11. 주제 분류",
+   "weight": 0,
+   "must_pass": false,
+   "score": null,
+   "evidence": "학교폭력"
+  },
+  "license": {
+   "name": "12. 이용 조건",
+   "weight": 1,
+   "must_pass": false,
+   "score": 0,
+   "evidence": "판권지(p.215)에 '본 출판물은 저작권법에 의해 보호받는 저작물이므로 무단 전재와 복제를 금합니다.'라는 제한 문구가 명시되어 있어 대외 재배포가 제한되며 내부 시스템 참조용으로 활용해야 함."
+  }
+ },
+ "proposal": {
+  "short": "가이드북2",
+  "title": "2026 학교폭력 사안처리 가이드북(교육부·이화여자대학교 학교폭력예방연구소, 2026)",
+  "role": "procedure",
+  "use_in": [
+   "procedure",
+   "definition",
+   "counseling",
+   "student_explain"
+  ],
+  "topics": [
+   "학교폭력"
+  ],
+  "summary": "교육부와 이화여대 학교폭력예방연구소에서 발간한 2026학년도 학교폭력 사안처리 공식 매뉴얼로, 학교폭력 인지·신고부터 사안조사, 학교장 자체해결, 심의위원회 조치 이행까지 전 절차를 다룹니다. 피해학생 분리 및 긴급조치, 관계회복 대화모임, 학교안전공제회 치료비 구상 청구 등 상담교사가 사안 초기부터 종결 시까지 지켜야 할 법적 절차와 개입 지침을 제공합니다.",
+  "cautions": [
+   "기존 등록 자료인 '2025_학교폭력 사안처리 가이드북(교육부, 2025)'의 신규 개정판이므로, 검색 혼선 및 규정 충돌을 막기 위해 기존 2025 판본을 삭제하고 본 자료로 교체 등록해야 합니다.",
+   "2026년 개정 법률에 따른 사이버폭력 정의(딥페이크 영상물 합성·반포 명시 등) 및 학교폭력 전담조사관 제도의 세부 조사 절차가 반영되어 있으므로 구버전 기준과 혼동하지 않도록 주의해야 합니다.",
+   "무단 전재 및 복제 금지 문구가 기재된 공식 출판물이므로 시스템 답변 생성 및 내부 참조용으로만 사용하고 원본 파일의 무단 대외 반출을 삼가야 합니다."
+  ]
+ },
+ "measured": {
+  "file": "2026학년도 학교폭력 사안처리 가이드북.pdf",
+  "pages": 216,
+  "chars_total": 220472,
+  "chars_per_page_median": 1031,
+  "low_text_pages_ratio": 0.028,
+  "low_text_pages": [
+   4,
+   5,
+   18,
+   71,
+   90,
+   216
+  ],
+  "years_on_cover": [
+   2026
+  ],
+  "pdf_metadata_date": "20260210",
+  "publisher_candidates": [
+   "이화여자대학교",
+   "학교폭력예방연구소"
+  ],
+  "region_mentions_on_cover": {},
+  "topic_keyword_counts": {
+   "학교폭력": 1207,
+   "가정": 5,
+   "학업·학교부적응": 2,
+   "정서·위기": 24,
+   "디지털·사이버": 59,
+   "상담 기법": 16,
+   "학교 운영": 19
+  },
+  "pii_pattern_counts": {
+   "휴대전화": 0,
+   "주민번호": 0,
+   "이메일": 0
+  },
+  "masked_name_count": 10,
+  "restriction_phrases": [
+   "저작권법에 의해 보호받는 저작물이므로 무단 전재와 복제를 금"
+  ],
+  "first_page_text": "2026년도 일부개정 이화여자대학교 INSTITUTE OF SCHOOL VIOLENCE PREVENTION 학교폭력예방연구소 학교폭력 사안처리 가이드북",
+  "filename_similarity_to_existing": {
+   "esan": 0.208,
+   "cyber": 0.2,
+   "digital": 0.209,
+   "guide": 0.829,
+   "add_학업숙려제": 0.381,
+   "add_정서행동": 0.383
+  },
+  "content_overlap_with_existing": {
+   "guide": {
+    "samples": 8,
+    "max_cos": 0.97,
+    "mean_cos": 0.943
+   }
+  }
+ },
+ "seconds": 18.9
+}

@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wee 사례 주제 분석</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f6f5f2;
+  --surface: #fcfcfb;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #77766f;
+  --border: #e3e1db;
+  --grid: #ecebe6;
+  --series-1: #2a78d6;
+  --accent-soft: #e8f0fb;
+  --tag-bg: #efeee9;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #121211;
+    --surface: #1a1a19;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #9a998f;
+    --border: #2e2e2c;
+    --grid: #262624;
+    --series-1: #3987e5;
+    --accent-soft: #1d2a3b;
+    --tag-bg: #262624;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #121211;
+  --surface: #1a1a19;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #9a998f;
+  --border: #2e2e2c;
+  --grid: #262624;
+  --series-1: #3987e5;
+  --accent-soft: #1d2a3b;
+  --tag-bg: #262624;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  line-height: 1.6;
+  font-size: 15px;
+}
+main { max-width: 1120px; margin: 0 auto; padding: 40px 16px 64px; }
+h1 { font-size: 28px; margin: 0 0 6px; letter-spacing: -0.02em; }
+h2 { font-size: 20px; margin: 48px 0 6px; letter-spacing: -0.01em; }
+.sub { color: var(--text-secondary); margin: 0; }
+.note { color: var(--text-muted); font-size: 13px; margin: 6px 0 16px; }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 24px; }
+.stat .label { color: var(--text-secondary); font-size: 13px; }
+.stat .value { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; }
+.stat .desc { color: var(--text-muted); font-size: 13px; }
+.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
+.chart h3 { margin: 0 0 2px; font-size: 15px; }
+.chart .note { margin-bottom: 14px; }
+.bar-row { display: grid; grid-template-columns: 170px 1fr 28px; align-items: center; gap: 10px; padding: 3px 0; position: relative; }
+.bar-row .name { font-size: 13px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar-track { height: 18px; position: relative; background: linear-gradient(to right, var(--grid) 1px, transparent 1px) 0 0 / 20% 100%; }
+.bar { height: 100%; background: var(--series-1); border-radius: 0 4px 4px 0; min-width: 2px; }
+.bar-row .val { font-size: 13px; color: var(--text-primary); font-variant-numeric: tabular-nums; text-align: right; }
+.bar-row:hover .name { color: var(--text-primary); }
+.bar-row:hover .bar { filter: brightness(1.12); }
+.tip {
+  position: absolute; left: 180px; top: -30px; z-index: 2;
+  background: var(--text-primary); color: var(--surface);
+  font-size: 12px; padding: 4px 8px; border-radius: 6px; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity .12s;
+}
+.bar-row:hover .tip { opacity: 1; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { font-size: 12px; color: var(--text-secondary); font-weight: 600; background: var(--surface); position: sticky; top: 0; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--accent-soft); }
+td.num { font-variant-numeric: tabular-nums; color: var(--text-muted); white-space: nowrap; }
+td.nowrap { white-space: nowrap; }
+.cat { display: inline-block; font-weight: 700; padding: 1px 8px; border-radius: 6px; border: 1px solid var(--series-1); color: var(--text-primary); white-space: nowrap; }
+.tag { display: inline-block; background: var(--tag-bg); color: var(--text-secondary); padding: 0 6px; border-radius: 5px; font-size: 12px; margin: 1px 2px 1px 0; }
+.legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 6px 16px; font-size: 13px; color: var(--text-secondary); margin-top: 12px; }
+.legend b { color: var(--text-primary); }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.filters button {
+  font: inherit; font-size: 13px; padding: 4px 10px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); cursor: pointer;
+}
+.filters button[aria-pressed="true"] { border-color: var(--series-1); color: var(--text-primary); background: var(--accent-soft); }
+ul.insights { margin: 0; padding-left: 20px; }
+ul.insights li { margin: 4px 0; }
+footer { color: var(--text-muted); font-size: 12px; margin-top: 40px; }
+@media (max-width: 560px) {
+  .bar-row { grid-template-columns: 110px 1fr 24px; }
+  .tip { left: 120px; }
+  h1 { font-size: 23px; }
+}
+</style>
+</head>
+<body>
+<main>
+  <h1>Wee 희망대상 우수사례집 상담 주제 분석</h1>
+  <p class="sub">제14회 위(Wee) 희망대상 우수사례집(2025) · 사례 42건(개인 30건, 기관 12건)을 상담 주제(카테고리)별로 분류</p>
+
+  <div class="stats">
+    <div class="card stat"><div class="label">분석 사례</div><div class="value">42건</div><div class="desc">개인 30 (대상 5 · 최우수 10 · 우수 15) / 기관 12</div></div>
+    <div class="card stat"><div class="label">주 호소 1위</div><div class="value">자해·자살 위기</div><div class="desc">개인 30건 중 8건이 주 카테고리</div></div>
+    <div class="card stat"><div class="label">배경 요인 1위</div><div class="value">가정문제</div><div class="desc">30건 중 21건에 등장 (주 카테고리는 1건)</div></div>
+    <div class="card stat"><div class="label">기관 사례 공통 동기</div><div class="value">5 / 12</div><div class="desc">자해·자살 예방 및 위기 대응</div></div>
+  </div>
+
+  <h2>1. 카테고리별 결과 (개인 사례 30건)</h2>
+  <p class="note">주 카테고리는 사례마다 1개씩 정했습니다. 관련 이슈는 주호소문제와 상담자가 파악한 문제에 함께 나타난 주제를 모두 센 값이라 중복이 있습니다.</p>
+  <div class="charts">
+    <div class="card chart">
+      <h3>주 카테고리 건수</h3>
+      <p class="note">사례별로 가장 중심이 되는 주제 · 합계 30건</p>
+      <div id="chart-primary"></div>
+    </div>
+    <div class="card chart">
+      <h3>관련 이슈로 언급된 건수</h3>
+      <p class="note">30건 중 해당 주제가 등장한 사례 수 (중복 포함)</p>
+      <div id="chart-mention"></div>
+    </div>
+  </div>
+
+  <div class="table-wrap" style="margin-top:12px">
+    <table>
+      <thead><tr><th>코드</th><th>카테고리</th><th>주 카테고리 건수</th><th>관련 이슈 언급 건수</th><th>해당 사례(주 카테고리)</th></tr></thead>
+      <tbody id="summary-body"></tbody>
+    </table>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <h3 style="margin:0 0 8px;font-size:15px">핵심 발견</h3>
+    <ul class="insights">
+      <li><b>주된 호소로는 '자해·자살 위기'가 가장 많습니다(8건).</b> 대상 5건 중 3건이 이 주제로, 상위 수상작에 집중돼 있습니다.</li>
+      <li><b>배경 요인으로는 '가정문제'가 압도적입니다(21건).</b> 가정폭력, 학대, 부모 이혼·갈등, 조손·한부모 가정 등이 다른 문제의 바탕에 깔려 있지만, 그 자체가 주된 호소인 사례는 1건뿐입니다.</li>
+      <li><b>또래관계·학교폭력은 19건에 등장합니다.</b> 대부분 우울, 자해, 등교거부 같은 다른 문제와 겹쳐서 나타납니다.</li>
+      <li>대부분의 사례가 복합 문제입니다. 2, 13, 20, 25번처럼 주 카테고리를 다르게 볼 여지가 있는 사례도 있습니다.</li>
+    </ul>
+  </div>
+
+  <h2>2. 개인 사례 30건 분류표</h2>
+  <p class="note">카테고리를 눌러 주 카테고리별로 걸러 볼 수 있습니다.</p>
+  <div class="filters" id="filters"></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>수상</th><th>제목(요약)</th><th>내담자</th><th>주호소 요약</th><th>주 카테고리</th><th>관련 이슈</th></tr></thead>
+      <tbody id="case-body"></tbody>
+    </table>
+  </div>
+
+  <h2>3. 기관 사례 12건</h2>
+  <p class="note">기관 사례는 특정 내담자가 아니라 운영 프로그램을 다루므로, 핵심 대상 문제와 가장 가까운 카테고리로 정리했습니다.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>수상</th><th>기관</th><th>핵심 대상 문제</th><th>가까운 카테고리</th></tr></thead>
+      <tbody id="org-body"></tbody>
+    </table>
+  </div>
+
+  <h2>카테고리 범례</h2>
+  <div class="card legend" id="legend"></div>
+
+  <h2>다음 단계(테스트 카테고리 선정) 참고</h2>
+  <div class="card">
+    <ul class="insights">
+      <li><b>빈도만 보면 '자해·자살 위기'가 1순위입니다.</b> 다만 챗봇 테스트로 쓰기엔 위험도가 가장 높은 주제라, 답변 품질뿐 아니라 위기 시 전문기관(청소년상담 1388, 자살예방 109 등) 연결 여부도 평가 기준에 넣어야 합니다.</li>
+      <li><b>대안 ① 또래관계·학교폭력 피해</b>: 관련 이슈 19건으로 많고, 테스트 상황을 설정하기 쉽습니다.</li>
+      <li><b>대안 ② 가정문제</b>: 관련 이슈 21건으로 가장 많이 등장하는 배경 요인입니다.</li>
+    </ul>
+  </div>
+
+  <footer>분류 기준: 개인 사례는 사례집의 '주호소문제'와 '상담자가 파악한 내담자 문제' 항목을 바탕으로 판단했습니다. 주 카테고리는 분석자가 하나로 정한 것입니다.</footer>
+</main>
+
+<script>
+const CATS = {
+  A: "자해·자살 위기",
+  B: "우울·무기력·낮은 자존감",
+  C: "불안·사회불안·대인 위축",
+  D: "또래관계·따돌림·학교폭력 피해",
+  E: "가정문제(가정폭력·학대·이혼·부모갈등)",
+  F: "분노조절·ADHD·행동문제",
+  G: "학교부적응·등교거부·학업중단 위기",
+  H: "스마트폰·온라인 과몰입",
+  I: "학업·성취 압박"
+};
+const CASES = [
+  [1,"대상","죄책감에서 희망으로, 나를 찾아가는 여정","중1 여, 조손가정","우울, 자해·자살 생각, 낮은 자존감","A","BE"],
+  [2,"대상","다시 몰아치는 바람 찾아와도, 우리 사랑은","초5 남","어머니 사망 후 공황·불안장애, 자살 충동","A","CDEG"],
+  [3,"대상","예전에도, 지금도, 앞으로도 언제나 반짝이는 너를 응원해","고3 여","우울·불안, 죽고 싶다는 생각, 관계 두려움","B","ACE"],
+  [4,"대상","악몽 속에 혼자 두지 않을게","중3 여","성희롱 피해 후 악몽·가위눌림, 신체화","D","CE"],
+  [5,"대상","끝까지 함께하니 삶이 꽃피다","고3 여","가정폭력 외상, 공황, 반복적 자해·자살 시도","A","CE"],
+  [6,"최우수","다시 웃게 되기까지","고1 여","자해 충동, 우울, 친구관계, 학업 자신감 저하","A","BDI"],
+  [7,"최우수","쉽게 고통을 덜어주고 싶지만","고3 여","부모 이혼·체벌, 가출·약물 과다복용, 자살 시도","A","DEG"],
+  [8,"최우수","너의 마음에도, 봄이 머물도록","고3 남","불안·공포, 환청, 자해로 입원","A","C"],
+  [9,"최우수","너의 목소리를 기다리며, 함께 걸어온 성장의 길","초 고학년 여","불안으로 말하기 어려움, 위축","C",""],
+  [10,"최우수","세상이 위험했던 나, Wee(우리) 안에서 길을 찾다","고 여","만성 불안, 우울·무기력, 섭식 문제","C","B"],
+  [11,"최우수","통제가 아닌 공감의 상담","초6 남","스마트폰 과의존, 부모 이혼, 온라인 협박, 등교 어려움","H","DEG"],
+  [12,"최우수","내 안의 빛을 만나다: 포기 끝에서 피어난 용기","고3 남, 시각장애","무기력, 무망감(\"죽는 게 낫겠다\")","B","AD"],
+  [13,"최우수","8등분의 사랑과 관심, 그리고 네모 화면으로부터 깨어나기","중3 여","온라인 관계 몰입·갈등, 자해, 가정 스트레스","H","AEG"],
+  [14,"최우수","위로에서 희망으로 - 맞춤형 통합지원이 이끈 자기 회복의 여정","고3 남","또래와 단절, 부모 기대에 따른 성취 압박, 완벽주의","I","BDG"],
+  [15,"최우수","나를 미워하던 내가 나를 응원하게 되다","고2 여","감정·분노조절 어려움, 자기혐오","B","CF"],
+  [16,"우수","엄마 없는 것은 네 잘못이 아니야!!","특성화고3 남","ADHD·우울, 공격 행동, 자퇴 희망","G","AEF"],
+  [17,"우수","희망을 담은 모래, 약속의 목요일","초 고학년 여, 다문화","난독증·학습 어려움, 엄마와의 갈등","G","DE"],
+  [18,"우수","우리 같이 한 발자국만 걸어보자","고2 여","따돌림, 가정폭력, 강도 높은 자해","A","BDE"],
+  [19,"우수","화를 조절하고 싶어요","초 고학년 남","ADHD·적대적 반항장애, 아버지 학대","F","E"],
+  [20,"우수","겨울을 이겨낸 새싹","초4 여","외모 놀림, 대인공포, 잦은 결석, 온라인 과몰입","D","CGH"],
+  [21,"우수","나는 더 이상 혼자가 아니야!","초 고학년 여","왕따, 고자질·짜증 등 정서조절 문제","D","EF"],
+  [22,"우수","한그루의 우산이 되어","고1 남","가정폭력으로 긴급 보호, 학업중단 위기","E","G"],
+  [23,"우수","다시 만난 우리, 계속되는 성장 이야기","초 고학년 여","사회불안, 등교 거부, 자해 충동","C","ADG"],
+  [24,"우수","하나, 둘, 셋, 숨 고르기","고1 여, 다문화","학교폭력·따돌림, 등교 거부, 자살 사고","D","ABEG"],
+  [25,"우수","만화 속 주인공에서 내 삶의 주인공으로","고3 여, 지적장애","자퇴 의사, 어머니와의 갈등, 자해·자살 시도","G","ABDEF"],
+  [26,"우수","잇다, 희망은 있다!","고2 여","심각한 자해, 선택적 함구, 가정폭력·학교폭력 외상","A","BCDE"],
+  [27,"우수","원래 괜찮은 아이","고 여","교우관계 불안, 급식 거부, 어머니와의 불화","D","EHI"],
+  [28,"우수","포기하지 않는 마음 곁에서","초6 여, 이주배경","ADHD로 인한 주의집중·행동조절 어려움","F","DE"],
+  [29,"우수","진심이의 '회피'가 '해피'가 될 때까지 함께 버텨주기","중 여","사회불안, 또래 갈등 회피","C","DE"],
+  [30,"우수","기쁨이 슬픔이 버럭이 까칠이, 이젠 누가 나와도 괜찮아요","고2 여, 이혼가정","우울·무기력·과수면, 친구와의 갈등","B","DEG"]
+];
+const ORGS = [
+  [31,"대상","파주중학교","취약계층·다문화 학생의 복합 위기, 통합지원","통합지원·예방"],
+  [32,"대상","대전 남학생 가정형 Wee센터","가정 위기로 인한 학업중단 위기 학생 보호","G, E"],
+  [33,"최우수","인천 초등 가정형 Wee센터 사랑나무","아동학대·가정폭력·학교폭력·자해","E, A"],
+  [34,"최우수","건양대학교병설건양고등학교","기숙사 생활 적응, 학업중단 위기","G"],
+  [35,"최우수","수현초등학교","신설 Wee클래스, 부모-학교 연대, 감정코칭","통합지원·예방"],
+  [36,"최우수","대전복수고등학교","위기학생 상담, 생명존중 교육","A"],
+  [37,"최우수","대구침산초등학교","저소득·다문화 가정 학생의 신체·정서 지원","E(복지)"],
+  [38,"최우수","소담중학교","학업중단 예방, 우울·자해 조기 발견","G, A"],
+  [39,"최우수","포항교육지원청 Wee센터","고위기 학생 원스톱 지원, 학교폭력 예방","A, D"],
+  [40,"최우수","청주교육지원청 Wee센터","정신건강 위기 대응, 생명존중 캠페인","A"],
+  [41,"최우수","한양공업고등학교","학습·심리·진로 맞춤 통합지원","통합지원·예방"],
+  [42,"최우수","풍천풍서초등학교","자해 유행을 계기로 한 전수 스크리닝 상담","A"]
+];
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const codes = Object.keys(CATS);
+const primary = {}, mention = {}, members = {};
+codes.forEach(k => { primary[k] = 0; mention[k] = 0; members[k] = []; });
+CASES.forEach(([n,, , , , p, tags]) => {
+  primary[p]++; members[p].push(n);
+  new Set([p, ...tags]).forEach(t => mention[t]++);
+});
+
+function barChart(el, data, total, unit) {
+  const max = Math.max(...data.map(d => d.v));
+  const scaleMax = Math.ceil(max / 5) * 5;
+  el.innerHTML = data.map(d => `
+    <div class="bar-row">
+      <span class="name" title="${esc(CATS[d.k])}">${d.k}. ${esc(CATS[d.k].split("(")[0])}</span>
+      <div class="bar-track"><div class="bar" style="width:${d.v / scaleMax * 100}%"></div></div>
+      <span class="val">${d.v}</span>
+      <span class="tip">${esc(CATS[d.k])} · ${d.v}건 (${Math.round(d.v / total * 100)}%${unit})</span>
+    </div>`).join("");
+}
+barChart(document.getElementById("chart-primary"),
+  codes.map(k => ({k, v: primary[k]})).sort((a, b) => b.v - a.v), 30, "");
+barChart(document.getElementById("chart-mention"),
+  codes.map(k => ({k, v: mention[k]})).sort((a, b) => b.v - a.v), 30, ", 30건 대비");
+
+document.getElementById("summary-body").innerHTML = codes
+  .map(k => ({k, p: primary[k], m: mention[k]}))
+  .sort((a, b) => b.p - a.p || b.m - a.m)
+  .map(r => `<tr><td><span class="cat">${r.k}</span></td><td>${esc(CATS[r.k])}</td><td class="nowrap"><b>${r.p}</b>건</td><td class="nowrap">${r.m}건</td><td class="num">${members[r.k].map(n => "#" + n).join(", ")}</td></tr>`)
+  .join("");
+
+const caseBody = document.getElementById("case-body");
+function renderCases(filter) {
+  caseBody.innerHTML = CASES.filter(c => !filter || c[5] === filter).map(([n, award, title, client, issue, p, tags]) => `
+    <tr>
+      <td class="num">${n}</td>
+      <td class="nowrap">${award}</td>
+      <td>${esc(title)}</td>
+      <td>${esc(client)}</td>
+      <td>${esc(issue)}</td>
+      <td><span class="cat" title="${esc(CATS[p])}">${p}</span> ${esc(CATS[p].split("(")[0])}</td>
+      <td>${tags ? [...tags].map(t => `<span class="tag" title="${esc(CATS[t])}">${t}</span>`).join("") : "–"}</td>
+    </tr>`).join("");
+}
+const filters = document.getElementById("filters");
+const opts = [["", "전체 30"], ...codes.filter(k => primary[k]).map(k => [k, `${k}. ${CATS[k].split("(")[0]} ${primary[k]}`])];
+filters.innerHTML = opts.map(([k, label]) => `<button type="button" data-k="${k}" aria-pressed="${k === ""}">${esc(label)}</button>`).join("");
+filters.addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  filters.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  renderCases(b.dataset.k);
+});
+renderCases("");
+
+document.getElementById("org-body").innerHTML = ORGS.map(([n, award, org, focus, cat]) =>
+  `<tr><td class="num">${n}</td><td class="nowrap">${award}</td><td>${esc(org)}</td><td>${esc(focus)}</td><td class="nowrap">${esc(cat)}</td></tr>`).join("");
+
+document.getElementById("legend").innerHTML = codes.map(k => `<div><b>${k}</b> ${esc(CATS[k])}</div>`).join("");
+</script>
+</body>
+</html>
