@@ -7,6 +7,23 @@ PILL_DONE = "#E7F1D3"    # 지난 단계
 INK = "#1C2A18"
 MUTED = "#6B7A63"
 
+# 주제별 색(등록 자료 표 등). 서로 구분되는 부드러운 색 7개, 글자는 진한 색 그대로
+TOPIC_COLORS = {
+    "학교폭력": "#E9A3A3",        # 장밋빛
+    "가정": "#F1C48E",            # 살구
+    "학업·학교부적응": "#E6D47F",  # 모래빛 노랑
+    "정서·위기": "#C9A8E2",        # 라벤더
+    "디지털·사이버": "#93C6EA",    # 하늘
+    "상담 기법": "#9ED2B2",        # 민트
+    "학교 운영": "#C8C3B4",        # 따뜻한 회색
+}
+
+
+def topic_column(label="주제"):
+    """st.dataframe에서 주제 목록을 주제별 색 라벨로 보여 주는 열 설정."""
+    return st.column_config.MultiselectColumn(label, options=list(TOPIC_COLORS), color=list(TOPIC_COLORS.values()))
+
+
 PRETENDARD = "https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/woff2/PretendardVariable.woff2"
 
 GLOBAL_CSS = f"""<style>
@@ -25,11 +42,13 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stSidebar"], butto
 
 /* 사이드바: 흰 카드 느낌, 글자는 조금 작게 */
 /* 글자가 커진 만큼 사이드바 기본 폭도 넓게(오른쪽 끝을 끌어 조절 가능) */
-[data-testid="stSidebar"] {{ border-right: 1px solid #E3EDD2; min-width: 480px; }}
+/* 사이드바가 본문 위에 떠 있는 것처럼: 경계선 대신 오른쪽으로 옅은 그림자 */
+[data-testid="stSidebar"] {{ border-right: none; min-width: 480px; z-index: 999991;  /* 위쪽 머리줄(z 999990)보다 위: 그림자가 끝까지 */
+    box-shadow: 6px 0 24px rgba(40, 48, 32, .10), 1px 0 0 rgba(40, 48, 32, .06); }}
 [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
 [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] li {{ font-size: .8rem; line-height: 1.55; }}
 [data-testid="stSidebar"] [data-testid="stExpander"] summary p {{ font-size: .82rem; font-weight: 600; }}
-[data-testid="stSidebar"] hr {{ margin: .6rem 0; border-color: #E3EDD2; }}
+[data-testid="stSidebar"] hr {{ margin: .6rem 0; border-color: #E6E8E2; }}
 /* 사이드바 접기 버튼은 항상 보이게, 오른쪽 끝을 끌어 폭 조절(손잡이에 연두색) */
 [data-testid="stSidebarCollapseButton"] {{ visibility: visible !important; opacity: 1 !important; }}
 [data-testid="stSidebarResizeHandle"]:hover {{ background: {PILL_ACTIVE}; }}
@@ -49,7 +68,9 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stSidebar"], butto
 .st-key-ex_pick [data-testid="stButtonGroup"] button:hover {{ background: {PILL_DONE} !important; }}
 .st-key-ex_pick [data-testid="stButtonGroup"] button, .st-key-ex_pick [data-testid="stButtonGroup"] button p {{
     white-space: normal !important; overflow: visible !important; text-overflow: clip !important; max-width: 100%; height: auto; }}
-[data-testid="stSidebar"] [data-testid="stButtonGroup"] button {{ flex: 1 1 0; margin-right: 0; }}
+/* 사이드바 챗봇·자료 관리 버튼 사이 20pt(약 27px) */
+[data-testid="stSidebar"] [data-testid="stButtonGroup"] > div {{ column-gap: 27px !important; }}
+[data-testid="stSidebar"] [data-testid="stButtonGroup"] button {{ flex: 1 1 0; margin-right: 0 !important; }}
 
 /* 기본 버튼도 연두 알약 */
 [data-testid="stBaseButton-secondary"] {{ background: {PILL}; border: none; color: {INK}; }}
@@ -71,7 +92,7 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stSidebar"], butto
 /* 대화 영역: 말풍선 배경 없이, 질문과 답 사이 가는 선 */
 [data-testid="stChatMessage"] {{ background: transparent !important; padding: .9rem 0; }}
 [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {{
-    border-top: 1px solid #D9E7C3; margin-top: .6rem; }}
+    border-top: 1px solid #DFE2DA; margin-top: .6rem; }}
 [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stMarkdownContainer"] p {{
     font-weight: 600; }}
 .gy-ai-label {{ font-size: .72rem; font-weight: 700; letter-spacing: .04em; color: {PILL_ACTIVE};

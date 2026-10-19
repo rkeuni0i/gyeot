@@ -281,12 +281,10 @@ with st.sidebar:
     c_bell.button(":material/notifications:", key="bell_btn", on_click=go_alerts,
                   help=(f"알림·정기 점검 · 확인하지 않은 알림 {len(_alerts)}건 (긴급 {n_crit}, 주의 {n_warn})"
                         f" · 다음 정기 점검 {rs['next_due']}" + (" · 지금 점검 중" if rs["running"] else "")))
-    st.divider()
     st.segmented_control("화면", NAV, key="nav", label_visibility="collapsed", on_change=nav_changed, width="stretch")
     page = st.session_state.nav or NAV[0]
     if st.session_state.get("view") == "alerts":
         page = "알림"
-    st.divider()
 
     st.markdown(f"**학교** : {SCHOOL_NAME}  \n{SCHOOL_INFO}  \n**연계 기관**  \n"
                 + "  \n".join(f"· {a['name']} ☎ {a['phone']}" for a in LOCAL_AGENCIES))

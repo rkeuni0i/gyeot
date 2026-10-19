@@ -407,11 +407,12 @@ def tab_docs():
         last = store.last_review(con, d)
         rows.append({"인용 이름": m["short"], "자료": m["title"], "구분": "기본" if m["is_base"] else "추가",
                      "상태": "사용 중" if m["status"] == "active" else "사용 중지",
-                     "층": LAYER_LABELS[m["layer"]].split("(")[0], "주제": ", ".join(m["topics"]),
+                     "층": LAYER_LABELS[m["layer"]].split("(")[0], "주제": list(m["topics"]),
                      "청크": counts.get(d, 0), "최근 판정": last["verdict"] if last else "-",
                      "알림": sum(1 for a in alerts if a["doc_id"] == d), "다음 점검": m["next_review_due"] or "-"})
     con.close()
-    st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
+    st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True,
+                 column_config={"주제": ui_style.topic_column()})  # 주제별 색 라벨
 
     target = st.selectbox("자료 선택", list(docs), format_func=lambda d: f"[{docs[d]['short']}] {docs[d]['title']}")
     m = docs[target]
