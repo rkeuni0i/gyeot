@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사례 1 답변 비교</title>
+<link rel="icon" href="brand/gyeot_mark.svg" type="image/svg+xml">
+<style>
+:root { color-scheme: light; --bg:#F3F4F0; --surface:#FFFFFF; --surface-2:#EEF0EA; --line:#DCDFD6; --text:#1C2A18; --text-2:#4C5A45;
+  --muted:#77836F; --green:#4E8A2E; --good:#2E8B5E; --good-bg:#E3F2E8; --mid:#B5730F; --mid-bg:#FBF0DC; --bad:#B4413B; --bad-bg:#F8E3E1; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { color-scheme: dark; --bg:#13160F; --surface:#1B2016; --surface-2:#232A1D;
+  --line:#333C2B; --text:#E8EEE2; --text-2:#BAC4B2; --muted:#8E9986; --green:#8CC664; --good:#6CCB95; --good-bg:#1D3226; --mid:#E6A847;
+  --mid-bg:#3A2C14; --bad:#F08A80; --bad-bg:#3A1F1C; } }
+:root[data-theme="dark"] { color-scheme: dark; --bg:#13160F; --surface:#1B2016; --surface-2:#232A1D; --line:#333C2B; --text:#E8EEE2;
+  --text-2:#BAC4B2; --muted:#8E9986; --green:#8CC664; --good:#6CCB95; --good-bg:#1D3226; --mid:#E6A847; --mid-bg:#3A2C14; --bad:#F08A80; --bad-bg:#3A1F1C; }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--text); font-family:"Pretendard","Malgun Gothic",system-ui,sans-serif; line-height:1.7; font-size:16px; }
+main { max-width:1100px; margin:0 auto; padding:36px 16px 80px; }
+h1 { font-size:30px; margin:0 0 4px; } h2 { font-size:22px; margin:0 0 12px; } h3 { font-size:17px; margin:18px 0 6px; }
+.sub { color:var(--text-2); } .meta { color:var(--muted); font-size:14px; }
+section { background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:24px; margin:16px 0; }
+.q { background:var(--surface-2); border-radius:12px; padding:14px 18px; }
+table { width:100%; border-collapse:collapse; font-size:14.5px; } .table-wrap { overflow-x:auto; }
+th, td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { background:var(--surface-2); color:var(--text-2); font-weight:600; }
+.b { display:inline-block; padding:1px 9px; border-radius:999px; font-size:13px; font-weight:700; white-space:nowrap; }
+.ok { background:var(--good-bg); color:var(--good); } .mid { background:var(--mid-bg); color:var(--mid); } .no { background:var(--bad-bg); color:var(--bad); }
+.part { display:inline-block; padding:1px 9px; border-radius:8px; font-size:13px; font-weight:700; background:var(--surface-2); color:var(--green); }
+.shots { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:10px; }
+figure { margin:0; } figure img { width:100%; border:1px solid var(--line); border-radius:12px; display:block; }
+figcaption { color:var(--muted); font-size:13px; margin-top:4px; }
+ol.fix li { margin:8px 0; } code { background:var(--surface-2); padding:1px 6px; border-radius:6px; font-size:13.5px; }
+.pending { border:2px dashed var(--line); background:transparent; }
+@media (max-width:760px) { .shots { grid-template-columns:1fr; } section { padding:18px 14px; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>사례 1 답변 비교: 곁 vs Gemini 노트북</h1>
+  <p class="sub">Wee 희망대상 우수사례집 #11 「통제가 아닌 공감의 상담」 응용 · 스마트폰 과의존 + 온라인 협박 + 결석 + 가정 변화</p>
+  <p class="meta">2026-10-19 · 같은 질문, 같은 등록 자료(곁: 이산중 규정·가이드북·상담 매뉴얼 2종·학업숙려제·정서행동·마음건강·아동학대·성사안안내)</p>
+
+  <section>
+    <h2>질문</h2>
+    <div class="q">중학교 1학년 남학생이 최근 2주 동안 지각과 결석이 잦아 담임 의뢰로 상담실에 왔어요. 밤새 스마트폰 게임과 SNS를 하느라 아침에 못 일어나고, 학원도 그만뒀대요. 상담 중에 온라인에서 알게 된 사람에게 사진을 보냈는데 '학교에 퍼뜨리겠다'는 협박 메시지를 받고 있다고 털어놨어요. 부모님은 최근 이혼하셨고요. 학교에서 지금 해야 할 절차와 결석이 계속될 때의 조치, 그리고 상담에서 스마트폰 과의존을 어떻게 다루면 좋을지 알려주세요.</div>
+    <h3>질문 분해(유형별)</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th style="width:8%">#</th><th style="width:42%">질문 속 표현</th><th style="width:18%">유형</th><th>찾아야 할 근거(지금 등록 자료 기준)</th></tr></thead>
+      <tbody>
+        <tr><td><span class="part">①</span></td><td>밤새 스마트폰 게임과 SNS를 하느라 아침에 못 일어나고</td><td>스마트폰 과의존</td><td>디지털상담 과의존 유형·특성(p.87, 97), 회복 개입·중간자극(p.61–63)</td></tr>
+        <tr><td><span class="part">②</span></td><td>온라인에서 알게 된 사람에게 사진을 보냈는데 '학교에 퍼뜨리겠다'는 협박</td><td>사이버 폭력(성격 확인 필요)</td><td>가이드북 사이버폭력 증거·삭제(p.32–33) · 성적 사진이면 성범죄 신고 의무(가이드북 p.33, 37 / 성사안안내 p.29) · 디성센터 연락처·삭제 지원(성사안안내 p.14–17)</td></tr>
+        <tr><td><span class="part">③</span></td><td>부모님은 최근 이혼하셨고요</td><td>가정 환경</td><td>보호자 상담(사이버상담 부록), 기저 스트레스 탐색(디지털상담 p.87), 지역 기관 연계</td></tr>
+        <tr><td><span class="part">④</span></td><td>학교에서 지금 해야 할 절차와 결석이 계속될 때의 조치</td><td>절차(법령)</td><td>신고 접수·48시간 보고·양식1-3(가이드북 p.24, 37, 148) · 미인정 결석 → 숙려제 대상·안내 의무(학업숙려제 p.3, 28), 출결 처리(p.11) · 이산중 미인정 결석 규정(이산중 p.16–17)</td></tr>
+        <tr><td><span class="part">⑤</span></td><td>상담에서 스마트폰 과의존을 어떻게 다루면 좋을지</td><td>상담 개입</td><td>디지털상담 p.61–63, 87, 97 · 회기 구성(사이버상담 p.61–67)</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>원하는 답변 및 참고 자료(정답 기준)</h2>
+    <ul>
+      <li>증거 확보와 삭제·차단 요청, 신고 접수, 48시간 이내 교육지원청 보고 → [가이드북 p.24, 33, 148] ✅</li>
+      <li>피해로 인한 결석의 출석 인정 → [가이드북 p.107], 이산중 미인정 결석 규정 → [이산중 p.16–17] ✅</li>
+      <li>과의존 상담: 사용 목적과 패턴 구분, 이혼 같은 기저 스트레스 탐색 → [디지털상담 p.87, 97], 회기 구성 → [사이버상담 p.61–67] ✅</li>
+      <li>연계: 화성시청소년상담복지센터 ✅</li>
+      <li>⚠️ 조심할 점: "사진"을 성범죄로 단정하고 "수사기관 즉시 신고 의무"를 맨 앞에 쓰면 안 된다. 질문에는 어떤 사진인지 나와 있지 않으므로, 사진 내용에 따라 사이버폭력과 성폭력이 갈린다고 확인을 권해야 맞다.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>[곁 답변]</h2>
+    <p class="meta">질문 유형: 상담 가이드 · 확인 순서: 사이버상담 → 디지털상담 → 가이드북 → 학업숙려제 → 마음건강 → 성사안안내 → 이산중생활규정 · 인용 21쪽 · 생성 검색어: 성폭력 수사기관 신고, 디지털 미디어 폭력 피해 청소년 효과적인 개입, 사이버폭력 증거, 출결처리, 외부기관 연계</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th style="width:8%">분해</th><th>답변 내용</th><th style="width:28%">근거 대조</th><th style="width:10%">판정</th></tr></thead>
+      <tbody>
+        <tr><td><span class="part">②</span></td><td>첫 줄부터 "디지털 성폭력 사안에 해당 → 수사기관 즉시 신고 의무"로 단정</td><td>신고 의무 문장 자체는 가이드북 p.33·성사안안내 p.29와 일치. 하지만 사진 성격 확인 없음</td><td><span class="b no">단정</span></td></tr>
+        <tr><td><span class="part">②④</span></td><td>48시간 보고 + 성폭력 유선 별도 보고 + 양식1-3, 비밀 유지와 누설 처벌(1년 이하 징역)</td><td>가이드북 p.37, 45, 148, 51과 일치</td><td><span class="b ok">정확</span></td></tr>
+        <tr><td><span class="part">②</span></td><td>증거 목록(협박 대화 캡처·원본·URL), 디성센터·방송통신심의위원회 삭제·차단·모니터링 신청</td><td>가이드북 p.32–33, 성사안안내 p.17과 일치. 연락처(p.14–16)는 빠짐</td><td><span class="b ok">정확</span></td></tr>
+        <tr><td><span class="part">④</span></td><td>피해로 등교 못 하면 출석인정 결석 / 미인정 결석 지속 시 숙려제 안내·위원회 협의 / 숙려 상담 출결</td><td>p.107은 학교폭력 피해 결석에만 해당 → 지금 결석(밤샘 사용)과 섞음. 숙려제 p.28, 11은 정확. 연속 7일·누적 30일 기준 없음</td><td><span class="b mid">일부</span></td></tr>
+        <tr><td><span class="part">③</span></td><td>이혼으로 인한 지지 기반 약화 탐색</td><td>[디지털상담 p.69]는 디지털 폭력 개입 인터뷰, 이혼 언급 없음</td><td><span class="b no">근거 불일치</span></td></tr>
+        <tr><td><span class="part">⑤</span></td><td>야간 사용 패턴·트리거 점검, 의도적 통제, 문제 해결 기술·대인관계 회복</td><td>[사이버상담 p.30]은 해외 프로그램 문헌 고찰, [p.91]은 설문지. 과의존 개입 쪽(디지털상담 p.61–63, 87, 97) 못 찾음</td><td><span class="b no">근거 불일치</span></td></tr>
+        <tr><td><span class="part">⑤</span></td><td>후기: 새로운 행동 약속, 소감 나누기</td><td>사이버상담 p.67과 일치(가해 청소년용 매뉴얼이라 대상은 다름)</td><td><span class="b mid">일부</span></td></tr>
+        <tr><td><span class="part">③⑤</span></td><td>화성시청소년상담복지센터, 청소년 사이버상담센터 1388, 라임(LIME)</td><td>지역기관·마음건강 p.61–62와 일치</td><td><span class="b ok">정확</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="shots">
+      <figure><img src="img/test/case1_gyeot_1.png" alt="곁 답변 1" loading="lazy"><figcaption>곁: 요약·지금 해야 할 일</figcaption></figure>
+      <figure><img src="img/test/case1_gyeot_2.png" alt="곁 답변 2" loading="lazy"><figcaption>곁: 상담 개입 참고·연계</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>[Gemini 노트북 답변]</h2>
+    <p class="meta">문서 전체를 넣고 답하는 방식 · 번호 각주로 근거 표시(쪽 번호는 화면에 직접 보이지 않음)</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th style="width:8%">분해</th><th>답변 내용</th><th style="width:28%">근거 대조(곁 저장소에서 확인)</th><th style="width:10%">판정</th></tr></thead>
+      <tbody>
+        <tr><td><span class="part">②</span></td><td>"디지털 성폭력(협박 및 <b>몸캠피싱</b> 유포 협박)"으로 단정</td><td>몸캠피싱 분류는 디지털상담 p.40, 49–51에 있음. 하지만 질문만으로 단정할 수 없음</td><td><span class="b no">단정</span></td></tr>
+        <tr><td><span class="part">②④</span></td><td>수사기관 즉시 신고, SPO 상담은 신고 아님, 48시간 보고·유선 우선 보고</td><td>가이드북 p.33, 37과 일치. 보고서 이름("사안 보고서(통보서)")은 모호, 양식 번호 없음</td><td><span class="b ok">정확</span></td></tr>
+        <tr><td><span class="part">②</span></td><td>디성센터 <b>02-735-8994</b>, 경기도 원스톱 <b>1544-9112</b>, 모니터링·삭제·채증 지원</td><td>성사안안내 p.14–16, 17과 일치</td><td><span class="b ok">정확</span></td></tr>
+        <tr><td><span class="part">②</span></td><td>비밀 유지, 외부 소통 창구 일원화</td><td>성사안안내 p.24와 일치</td><td><span class="b ok">정확</span></td></tr>
+        <tr><td><span class="part">④</span></td><td>미인정 결석 <b>연속 7일·누적 30일</b> → 위기학생, 숙려제 의무 안내, 위원회 협의, 1~7주 출석인정</td><td>학업숙려제 p.3, 7, 28과 일치</td><td><span class="b ok">정확</span></td></tr>
+        <tr><td><span class="part">④</span></td><td>담임교사가 소재·안전을 <b>매일</b> 확인</td><td>매뉴얼에는 숙려제 참여 학생 "최소 <b>주 1회</b>" 정기 확인</td><td><span class="b no">틀림</span></td></tr>
+        <tr><td><span class="part">③⑤</span></td><td>안전감·라포 우선, 협박 때문에 폰을 못 놓는 <b>강박적 확인 행동</b> 완화, 이혼 고통·외로움 회피 탐색</td><td>강박관념(디지털상담 p.19), 본질적 욕구 탐색은 자료에 없는 일반 상담 지식</td><td><span class="b mid">일부</span></td></tr>
+        <tr><td><span class="part">⑤</span></td><td><b>중간자극</b>으로 점진적 조절, 수면 위생·일상 기능 회복, 보호자 상담 병행</td><td>중간자극은 디지털상담 p.61–63과 일치</td><td><span class="b ok">정확</span></td></tr>
+        <tr><td><span class="part">③</span></td><td>지역 연계</td><td>Wee 클래스·Wee센터만. 화성시 센터·1388 없음</td><td><span class="b mid">부족</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="shots">
+      <figure><img src="img/test/case1_notebook_1.png" alt="노트북 답변 1" loading="lazy"><figcaption>노트북: 즉시 절차</figcaption></figure>
+      <figure><img src="img/test/case1_notebook_2.png" alt="노트북 답변 2" loading="lazy"><figcaption>노트북: 결석 관리·과의존 개입</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>최종 비교 분석</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th style="width:24%">항목(분해)</th><th>곁</th><th>노트북</th><th style="width:12%">우세</th></tr></thead>
+      <tbody>
+        <tr><td>② 사진 성격 판단</td><td>성폭력 단정</td><td>몸캠피싱 단정</td><td>둘 다 부족</td></tr>
+        <tr><td>② 신고·보고 절차</td><td>48시간+유선+양식1-3, 누설 처벌</td><td>48시간+유선, 양식 없음</td><td><b>곁</b></td></tr>
+        <tr><td>② 증거·삭제 지원</td><td>증거 목록, 신청 절차</td><td>디성센터 연락처 2개</td><td>비슷</td></tr>
+        <tr><td>④ 결석 조치</td><td>숙려제 정확, 피해 결석과 섞음</td><td>7일·30일 기준 명확(소재 확인 빈도는 틀림)</td><td><b>노트북</b></td></tr>
+        <tr><td>⑤ 과의존 상담</td><td>엉뚱한 쪽 인용, 핵심 개입 못 찾음</td><td>중간자극, 강박적 확인, 수면·일상 회복</td><td><b>노트북</b></td></tr>
+        <tr><td>③ 가정·연계</td><td>화성시 센터·1388·라임</td><td>보호자 상담은 있음, 지역 기관 없음</td><td><b>곁</b></td></tr>
+        <tr><td>근거 확인</td><td>문장마다 [자료 p.쪽], 원문·쪽 이미지, 사용 전 알림</td><td>번호 각주</td><td><b>곁</b></td></tr>
+      </tbody>
+    </table></div>
+    <h3>차이가 난 이유</h3>
+    <ul>
+      <li>노트북은 문서 전체를, 곁은 검색한 일부만 본다. 요청이 여러 개인 복합 질문에서 차이가 커진다.</li>
+      <li>곁의 검색어 5개에 "과의존"이 없어 디지털상담 p.61–63, 87, 97을 아예 가져오지 못했다.</li>
+      <li>질문 유형을 하나("상담 가이드")로만 정해 가해 청소년용 사이버상담 매뉴얼이 1순위가 됐다.</li>
+      <li>새로 추가한 자료(성사안안내 등)는 질문당 최대 5개 청크만 가져와 연락처 쪽(p.14–16)이 빠졌다.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>보완할 방향</h2>
+    <ol class="fix">
+      <li><b>질문 분해</b>: 질문을 요청 단위(과의존 / 사이버폭력 / 가정 환경 / 절차 / 상담 개입)로 나누고, 조각마다 유형을 붙인다. 화면에 분해 결과를 보여 준다.</li>
+      <li><b>조각별 검색</b>: 조각마다 검색어를 만들고, 조각 유형들의 확인 순서를 합쳐 검색한다(복합 질문 = 유형 여러 개).</li>
+      <li><b>주제가 맞는 추가 자료의 검색 몫 늘리기</b>: 질문 주제와 자료 주제가 겹치면 최대 5개 → 9개 청크.</li>
+      <li><b>단정 금지 규칙</b>: 사진·가해자·상황의 성격이 불분명하면 경우를 나눠 안내하고, 먼저 확인할 것을 쓴다. 성적 사진일 가능성은 신고 의무와 함께 조건부로 쓴다.</li>
+      <li><b>조각별 답변 구성</b>: 답변을 분해한 조각 순서대로 쓰고, 조각마다 근거를 단다(결석 원인 혼동 방지: 피해 결석과 미인정 결석을 구분).</li>
+      <li><b>인용 검증</b>: 문장과 인용 쪽의 내용 겹침이 매우 낮으면 "근거 약함"으로 표시한다(p.30, p.91 같은 경우를 걸러냄).</li>
+    </ol>
+  </section>
+
+  <section class="pending" id="after">
+    <h2>보완 후 재시험</h2>
+    <p class="meta">보완 1~6을 적용한 뒤 같은 질문으로 다시 테스트한 결과(화면·답변)를 받아 이곳에 곁(보완 후) vs 곁(보완 전) vs 노트북을 비교한다.</p>
+  </section>
+</main>
+</body>
+</html>
