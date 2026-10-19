@@ -49,7 +49,7 @@ def measure(pdf_path, index=None, exclude_doc=None):
     import numpy as np
     import pymupdf
     doc = pymupdf.open(pdf_path)
-    pages = [rag.clean_page_text(p.get_text()) for p in doc]
+    pages = rag.page_texts(pdf_path)  # 글자층이 없는 쪽은 OCR 결과로
     n = len(pages)
     lens = [len(t) for t in pages]
     low = [i + 1 for i, L in enumerate(lens) if L < 80]
@@ -91,6 +91,7 @@ def measure(pdf_path, index=None, exclude_doc=None):
                 dup[d] = {"samples": len(vals), "max_cos": round(max(vals), 3), "mean_cos": round(sum(vals) / len(vals), 3)}
     return {
         "file": Path(pdf_path).name, "pages": n, "chars_total": sum(lens),
+        "ocr": ({k: v for k, v in (rag.ocr_cache(pdf_path) or {}).items() if k != "pages"} or None),
         "chars_per_page_median": sorted(lens)[n // 2] if n else 0,
         "low_text_pages_ratio": round(len(low) / n, 3) if n else 1.0, "low_text_pages": low[:30],
         "years_on_cover": years, "pdf_metadata_date": (meta.get("creationDate") or "")[2:10],
@@ -134,6 +135,7 @@ JUDGE_PROMPT = """너는 학교 전문상담교사가 쓰는 AI 도우미의 '�
 [규칙]
 - 기준마다 score(0/1/2)와 evidence(무엇을 보고 판단했는지, 가능하면 쪽 번호 p.N 포함)를 쓴다. 'topic' 기준은 score를 null로 두고 evidence에 분류를 쓴다.
 - 자동 측정값과 표본 쪽에서 확인되는 사실만 근거로 쓴다. 확인할 수 없으면 그렇게 쓰고 점수를 낮게 준다.
+- 자동 측정값의 ocr이 있으면 본문은 PDF 글자층이 아니라 OCR로 읽은 글자다. 'extraction'(텍스트 추출 품질)은 OCR 결과가 읽을 만한지(오탈자·빠진 쪽)로 판단하고, 원본이 글자층 없는 PDF라는 점을 evidence에 적는다. 'cautions'에 'OCR로 읽은 자료이므로 숫자·표는 원본 쪽 이미지로 확인'을 넣는다.
 - 'duplicate'는 자동 측정한 content_overlap_with_existing(기존 자료 표본 최대 코사인 0.93 이상이면 거의 같은 내용)과 제목·연도를 함께 본다. 등록된 자료의 구버전이면 0점.
 - 추가로 아래도 제안한다:
   - short: 답변 인용에 쓸 짧은 이름(2~6자, 기존 이름과 겹치지 않게)

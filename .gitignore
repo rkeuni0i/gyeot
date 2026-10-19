@@ -25,6 +25,10 @@ logs/conversations/*.json
 !logs/.gitkeep
 !logs/conversations/.gitkeep
 
+# OCR cache
+data/ocr/*.json
+!data/ocr/.gitkeep
+
 # SQLite temporary / lock files
 *.db-wal
 *.db-shm

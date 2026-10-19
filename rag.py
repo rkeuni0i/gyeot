@@ -431,11 +431,12 @@ def manual_section(meta, pdf_page):
     return label
 
 
-def generic_sections(doc):
-    """추가 자료: 쪽 앞부분의 'Ⅰ. 제목', '제1장 제목', '1. 제목' 같은 줄을 장 이름으로 이어 쓴다."""
+def generic_sections(doc, texts=None):
+    """추가 자료: 쪽 앞부분의 'Ⅰ. 제목', '제1장 제목', '1. 제목' 같은 줄을 장 이름으로 이어 쓴다.
+    texts: 쪽별 본문(OCR로 채운 것). 없으면 PDF 글자층에서 읽는다."""
     part, sec, out = "", "", []
-    for page in doc:
-        lines = [x.strip() for x in page.get_text().splitlines() if x.strip()][:10]
+    for text in (texts if texts is not None else (pg.get_text() for pg in doc)):
+        lines = [x.strip() for x in text.splitlines() if x.strip()][:10]
         for line in lines:
             if re.match(r"^(Ⅰ|Ⅱ|Ⅲ|Ⅳ|Ⅴ|Ⅵ|Ⅶ|Ⅷ|Ⅸ|Ⅹ)\.\s*\S.{1,28}$", line) or re.match(r"^제\s*\d+\s*장\s*\S.{1,24}$", line):
                 part, sec = line, ""
@@ -450,13 +451,13 @@ def doc_chunks(doc_id, meta):
     import pymupdf
     chunks = []
     doc = pymupdf.open(ROOT / "data" / meta["file"])
+    texts = page_texts(ROOT / "data" / meta["file"])  # 글자층이 없는 쪽은 OCR 결과로
     # 가이드북 장 구간표(section_of)는 2026학년도 판 기준이라, 개정판으로 바꾸면 일반 규칙을 쓴다
     fixed_guide = doc_id == "guide" and meta["file"] == BASE_SEED["guide"]["file"]
     sections = (school_sections(doc) if meta["kind"] == "school"
-                else None if meta.get("toc") or fixed_guide else generic_sections(doc))
-    for i, page in enumerate(doc):
+                else None if meta.get("toc") or fixed_guide else generic_sections(doc, texts))
+    for i, text in enumerate(texts):
         pno = i + 1
-        text = clean_page_text(page.get_text())
         if len(text) < 30:
             continue
         if meta.get("toc"):

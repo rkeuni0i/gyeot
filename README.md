@@ -110,6 +110,7 @@ schtasks /Create /TN "곁 정기 점검" /TR "C:\Users\2003g\Documents\Project_s
 | `store.py` | SQLite 저장소(`index/mindguide.db`): 표 구조와 읽기·쓰기 |
 | `ui_style.py` | 화면 공통 스타일(Figma 시안: 연두 바탕·흰 사이드바·알약 메뉴, 고른 메뉴·지금 단계는 더 진한 연두) |
 | `conversations.py` | 이전 대화 저장·불러오기(`logs/conversations/<대화ID>.json`, 이 컴퓨터에만 저장) |
+| `doc_agent/ocr.py`, `doc_agent/ocr_win.ps1` | 글자층이 없는 PDF(스캔본·윤곽선 글자) OCR. 정확(Gemini, 6쪽씩 동시) / 빠름(Windows 기본 한국어 OCR, 이 PC 안에서만). 결과는 `data/ocr/<PDF 내용 해시>.json`, `rag.page_texts()`가 글자 없는 쪽을 이것으로 채워 평가·중복 확인·검색에 씀. 직접 실행: `python doc_agent/ocr.py <PDF> [gemini|windows]` |
 | `.streamlit/config.toml` | 테마 색·글자 크기(20px) |
 | `build_index.py` | 청크가 없는 자료의 청크를 PDF에서 만들고 임베딩(`--all`이나 doc_id로 다시 만들기). 저장소가 없으면 먼저 만듦 |
 | `run_review.bat` | 정기 점검 실행(작업 스케줄러용) |

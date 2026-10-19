@@ -8,7 +8,7 @@ import streamlit as st
 import rag
 import store
 import ui_style
-from doc_agent import agent, dedupe, ingest, periodic_review
+from doc_agent import agent, dedupe, ingest, ocr, periodic_review
 
 INBOX = Path(__file__).resolve().parent / "doc_agent" / "inbox"
 VERDICT_STYLE = {"추천": st.success, "조건부": st.warning, "비추천": st.error}
@@ -328,6 +328,36 @@ def show_done(done):
         c2.button("등록 자료에서 확인", use_container_width=True, on_click=go_docs_tab)
 
 
+def ocr_step(path):
+    """글자층이 없는 PDF(스캔본·윤곽선 글자)면 OCR을 먼저 하게 한다. 비교·평가로 넘어가도 되면 True."""
+    cache = rag.ocr_cache(path)
+    if cache:
+        st.success(f"🔤 OCR로 읽은 자료입니다 · {ocr.ENGINES[cache['engine']].split('(')[0]} 엔진, {cache['pages_ocr']}쪽"
+                   + (f" · 못 읽은 쪽 {cache['pages_failed']}" if cache.get("pages_failed") else "")
+                   + ". 답변의 근거는 원본 쪽 이미지로 한 번 더 확인하세요.")
+        return True
+    low, n = ocr.text_coverage(path)
+    if not n or low / n < 0.5:
+        return True
+    with st.container(border=True):
+        st.markdown(f"**🔤 글자를 읽을 수 없는 PDF입니다** · {n}쪽 중 {low}쪽에 글자층이 없습니다(스캔본이거나, 한글 문서를 "
+                    "글자 대신 윤곽선으로 인쇄한 PDF). 이대로는 검색·평가를 할 수 없어 **OCR(그림에서 글자 읽기)**을 먼저 합니다.")
+        engine = st.radio("OCR 방식", list(ocr.ENGINES), format_func=ocr.ENGINES.get, key="ocr_engine", horizontal=True)
+        st.caption("정확(Gemini): 표를 행 단위로 읽고 오탈자가 적습니다. 쪽 이미지가 Google Gemini API로 전송되므로 학생 개인정보가 든 "
+                   "문서에는 쓰지 마세요. · 빠름(Windows): 이 PC 안에서만 처리하지만 표·그림 속 글자 오탈자가 많습니다.")
+        est = f"약 {max(1, round(low * 22 / 6 / 60))}분" if engine == "gemini" else f"약 {max(1, round(low * 0.6))}초"
+        if st.button(f"OCR로 글자 읽기 ({low}쪽, {est})", type="primary"):
+            bar = st.progress(0.0, text="OCR 준비 중…")
+            try:
+                ocr.run(path, engine, progress=lambda d, t: bar.progress(d / max(t, 1), text=f"OCR {d} / {t}쪽"))
+            except Exception as e:  # noqa: BLE001
+                st.error(f"OCR 중 오류가 났습니다: {e}")
+                return False
+            st.session_state.pop("dedupe", None)
+            st.rerun()
+    return False
+
+
 def tab_add():
     if st.session_state.get("add_done"):
         show_done(st.session_state.add_done)
@@ -345,17 +375,18 @@ def tab_add():
         INBOX.mkdir(parents=True, exist_ok=True)
         path = INBOX / up.name
         path.write_bytes(up.getbuffer())
-        same = show_dedupe(str(path), up)
-        st.markdown("#### 3. AI 평가")
-        show_criteria()
-        if st.button("AI 평가 실행 (1분 안팎)", type="primary", disabled=bool(same)):
-            with st.spinner("자동 측정 → Gemini 판단 → 최종 판정 중… (1분 안팎)"):
-                try:
-                    st.session_state.eval_report = (str(path), agent.evaluate_pdf(path, rag.Index()))
-                except Exception as e:  # noqa: BLE001
-                    st.error(f"평가 중 오류가 났습니다: {e}")
-            if st.session_state.get("eval_report"):
-                st.rerun()
+        if ocr_step(str(path)):  # 글자층이 없는 PDF는 OCR을 끝내야 비교·평가로 넘어간다
+            same = show_dedupe(str(path), up)
+            st.markdown("#### 3. AI 평가")
+            show_criteria()
+            if st.button("AI 평가 실행 (1분 안팎)", type="primary", disabled=bool(same)):
+                with st.spinner("자동 측정 → Gemini 판단 → 최종 판정 중… (1분 안팎)"):
+                    try:
+                        st.session_state.eval_report = (str(path), agent.evaluate_pdf(path, rag.Index()))
+                    except Exception as e:  # noqa: BLE001
+                        st.error(f"평가 중 오류가 났습니다: {e}")
+                if st.session_state.get("eval_report"):
+                    st.rerun()
     if ev:
         path, r = ev
         st.markdown(f"##### 평가 결과 · {r['file']}")

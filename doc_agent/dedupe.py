@@ -45,10 +45,7 @@ def _norm_title(s):
 
 
 def pdf_text(pdf_path):
-    import pymupdf
-    doc = pymupdf.open(pdf_path)
-    pages = [rag.clean_page_text(p.get_text()) for p in doc]
-    return pages
+    return rag.page_texts(pdf_path)  # 글자층이 없는 쪽은 OCR 결과로
 
 
 # 본문에서 판(발행 연도)을 알려 주는 표현: "2025학년도", "2026년 3월 개정", "2024. 12. 발행"
