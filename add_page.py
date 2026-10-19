@@ -405,9 +405,10 @@ def tab_docs():
     rows = []
     for d, m in docs.items():
         last = store.last_review(con, d)
-        rows.append({"인용 이름": m["short"], "자료": m["title"], "구분": "기본" if m["is_base"] else "추가",
+        rows.append({"주제": list(m["topics"]), "인용 이름": m["short"], "자료": m["title"],
+                     "구분": "기본" if m["is_base"] else "추가",
                      "상태": "사용 중" if m["status"] == "active" else "사용 중지",
-                     "층": LAYER_LABELS[m["layer"]].split("(")[0], "주제": list(m["topics"]),
+                     "층": LAYER_LABELS[m["layer"]].split("(")[0],
                      "청크": counts.get(d, 0), "최근 판정": last["verdict"] if last else "-",
                      "알림": sum(1 for a in alerts if a["doc_id"] == d), "다음 점검": m["next_review_due"] or "-"})
     con.close()

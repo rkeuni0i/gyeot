@@ -110,8 +110,26 @@ def show_route(res):
     """질문 유형과 그에 따른 문서 확인 순서를 답변 위에 보여준다."""
     if not res.get("qtype"):
         return
-    order = " → ".join(f"{i + 1}. {DOCS[d]['short']}" for i, d in enumerate(res["doc_order"]))
-    st.caption(f"🔎 질문 유형: **{QTYPES[res['qtype']]['label']}** · 확인 순서: {order}")
+    order = " → ".join(f"{i + 1}. {DOCS[d]['short']}" for i, d in enumerate(res["doc_order"]) if d in DOCS)
+    types = " + ".join(QTYPES[t]["label"] for t in res.get("qtypes") or [res["qtype"]])
+    st.caption(f"🔎 질문 유형: **{types}** · 확인 순서: {order}")
+    if res.get("parts"):  # 질문 분해: 조각마다 유형과 질문 속 표현
+        marks = "①②③④⑤"
+        st.caption("🧩 질문 분해: " + " · ".join(f"{marks[i]} **{pt['aspect']}**({QTYPES[pt['type']]['label']})"
+                                              for i, pt in enumerate(res["parts"])))
+
+
+def show_weak_cites(res):
+    """답변 문장과 인용한 쪽의 핵심어 겹침이 낮은 줄(근거 약함)을 알려 준다."""
+    weak = res.get("weak_cites") or []
+    if not weak:
+        return
+    with st.expander(f"⚠️ 근거 약함 {len(weak)}곳 · 문장과 인용한 쪽의 내용이 거의 겹치지 않습니다(원문 확인 필요)"):
+        for w in weak:
+            sem = f" · 뜻 유사도 {w['sem']:.2f}" if w.get("sem") is not None else ""
+            st.markdown(f"- {html.escape(w['line'])} → {', '.join(w['cites'])} · 단어 겹침 {w['overlap']:.0%}{sem}")
+        st.caption("단어 겹침(문장 핵심어 중 인용 쪽에 나오는 비율)이 35% 미만이고, 뜻 유사도(문장과 인용 쪽의 임베딩 유사도)도 "
+                   "0.70 미만인 줄입니다. 근거 원문 보기에서 해당 쪽을 확인하세요.")
 
 
 def show_sources(res):
@@ -193,7 +211,7 @@ def img_b64(path):
     return base64.b64encode(Path(path).read_bytes()).decode()
 
 
-def bell_badge_css(count, running):
+def bell_badge_css(count, running, active=False):
     """알림 버튼 오른쪽 위에 빨간 숫자 배지(휴대폰 앱 아이콘처럼). 0건이면 숨긴다. 버튼 모양은 ui_style."""
     label = "99+" if count > 99 else str(count)
     badge = "" if not count else f"""
@@ -209,40 +227,36 @@ def bell_badge_css(count, running):
         content: ""; position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px;
         border-radius: 50%; background: #3b82f6; box-shadow: 0 0 0 2px #fff;
     }"""
-    st.markdown(f"<style>{badge}{spin}</style>", unsafe_allow_html=True)
-
-
-NAV = ["챗봇", "자료 관리"]
+    on = ".st-key-bell_btn button { background: #DDEBC4 !important; }" if active else ""
+    st.markdown(f"<style>{badge}{spin}{on}</style>", unsafe_allow_html=True)
 
 
 def go_alerts():
     st.session_state.view = "alerts"
 
 
-def leave_alerts():
+def go_manage():
+    st.session_state.view = "manage"
+
+
+def leave_view():
+    """자료·알림 화면에서 지금 대화로 돌아간다."""
     st.session_state.view = None
 
 
-def nav_changed():
-    # 이미 고른 메뉴를 다시 누르면 선택이 풀리므로 직전 메뉴로 되돌린다
-    if st.session_state.nav is None:
-        st.session_state.nav = st.session_state.get("nav_last", NAV[0])
-    st.session_state.nav_last = st.session_state.nav
-    st.session_state.view = None
+leave_alerts = leave_view  # 이전 이름(알림 화면의 돌아가기)
 
 
 def new_chat():
     st.session_state.messages = []
     st.session_state.conv_id = None
     st.session_state.view = None
-    st.session_state.nav = st.session_state.nav_last = NAV[0]
 
 
 def open_conv(conv_id):
     st.session_state.messages = conversations.load(conv_id)
     st.session_state.conv_id = conv_id
     st.session_state.view = None
-    st.session_state.nav = st.session_state.nav_last = NAV[0]
 
 
 def delete_conv():
@@ -257,9 +271,8 @@ def pick_example():
     st.session_state.ex_pick = None
 
 
-if st.session_state.get("nav") not in NAV:
-    st.session_state.nav = st.session_state.get("nav_last", NAV[0])
 st.session_state.setdefault("messages", [])
+st.session_state.setdefault("view", None)
 
 with st.sidebar:
     # 학기별 정기 점검: 앱을 열었을 때 점검 시기가 지났으면 백그라운드로 한 번 시작
@@ -275,27 +288,25 @@ with st.sidebar:
     n_warn = sum(a["severity"] == "warn" for a in _alerts)
 
     st.image(str(BRAND / "gyeot_logo.png"), width=380)
-    c_new, c_bell = st.columns([4, 1.25], vertical_alignment="center")
-    c_new.button("새로운 대화 시작", icon=":material/add:", key="new_chat", on_click=new_chat, use_container_width=True)
-    bell_badge_css(len(_alerts), rs["running"])
+    st.markdown(f"**학교** : {SCHOOL_NAME}  \n{SCHOOL_INFO}  \n**연계 기관**  \n"
+                + "  \n".join(f"· {a['name']} ☎ {a['phone']}" for a in LOCAL_AGENCIES))
+
+    view = st.session_state.get("view")
+    c_new, c_files, c_bell = st.columns([3.2, 1, 1], vertical_alignment="center")
+    c_new.button("새 채팅", icon=":material/add:", key="new_chat", on_click=new_chat, use_container_width=True)
+    c_files.button(":material/folder_open:", key="files_btn_on" if view == "manage" else "files_btn",
+                   on_click=go_manage, help="자료 관리: 자료 추가·등록 자료")
+    bell_badge_css(len(_alerts), rs["running"], active=(view == "alerts"))
     c_bell.button(":material/notifications:", key="bell_btn", on_click=go_alerts,
                   help=(f"알림·정기 점검 · 확인하지 않은 알림 {len(_alerts)}건 (긴급 {n_crit}, 주의 {n_warn})"
                         f" · 다음 정기 점검 {rs['next_due']}" + (" · 지금 점검 중" if rs["running"] else "")))
-    st.segmented_control("화면", NAV, key="nav", label_visibility="collapsed", on_change=nav_changed, width="stretch")
-    page = st.session_state.nav or NAV[0]
-    if st.session_state.get("view") == "alerts":
-        page = "알림"
+    page = {"manage": "자료 관리", "alerts": "알림"}.get(view, "챗봇")
+    st.divider()
 
-    st.markdown(f"**학교** : {SCHOOL_NAME}  \n{SCHOOL_INFO}  \n**연계 기관**  \n"
-                + "  \n".join(f"· {a['name']} ☎ {a['phone']}" for a in LOCAL_AGENCIES))
     order = [d for d in ("esan", "guide") if d in DOCS] + [d for d in DOCS if d not in ("esan", "guide")]
     with st.expander(f"근거 자료 {len(order)}개"):
         st.markdown("\n".join(f"{i + 1}. [{DOCS[d]['short']}] {DOCS[d]['name']}" for i, d in enumerate(order)))
         st.caption("자료 관리에서 추가·교체하면 여기에 바로 반영됩니다.")
-    with st.expander("질문 유형별 확인 순서"):
-        for key, spec in QTYPES.items():
-            st.markdown(f"**{spec['label']}**  \n" + " → ".join(DOCS[d]["short"] for d, *_ in plan_for(key, index)))
-        st.caption("질문 유형을 먼저 판단해 맞는 자료부터 확인합니다. 규정과 법령이 다르면 법령이 우선합니다.")
     st.divider()
 
     st.markdown('<div class="gy-side-title">이전 대화</div>', unsafe_allow_html=True)
@@ -316,11 +327,12 @@ with st.sidebar:
             st.button("지금 대화 삭제", icon=":material/delete:", on_click=delete_conv, use_container_width=True)
 
 if page == "알림":
-    st.button("← 돌아가기", on_click=leave_alerts)
+    st.button("채팅으로 돌아가기", icon=":material/arrow_back:", on_click=leave_view)
     add_page.render_alerts()
     st.stop()
 
 if page == "자료 관리":
+    st.button("채팅으로 돌아가기", icon=":material/arrow_back:", on_click=leave_view, key="back_manage")
     add_page.render()
     st.stop()
 
@@ -342,6 +354,7 @@ for i, m in enumerate(st.session_state.messages):
             show_route(m["result"])
             render_answer(m["content"], i)
             show_use_alerts(m["result"])
+            show_weak_cites(m["result"])
             show_sources(m["result"])
         else:
             st.markdown(m["content"])
@@ -368,6 +381,7 @@ if question:
         show_route(res)
         render_answer(res["answer"], len(st.session_state.messages) + 1)
         show_use_alerts(res)
+        show_weak_cites(res)
         show_sources(res)
     log_turn(question, res)
     st.session_state.messages.append({"role": "user", "content": question})

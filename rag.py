@@ -72,6 +72,8 @@ DOCS = {}
 MANUAL_DOCS = []
 SHORT_TO_DOC = {}
 ADDED_BUDGET = (3, 1, 5)  # 추가 자료 검색 몫: (원 질문 상위 k, 검색어별 k, 최대 청크)
+ADDED_TOPIC_BUDGET = (5, 2, 9)  # 질문 주제와 자료 주제가 겹치면 더 많이(연락처·절차 쪽이 빠지지 않게)
+PART_BUDGET = (3, 2, 4)  # 질문 조각별 추가 검색: 조각 하나가 자료 하나에서 가져오는 최대 몫
 
 
 def refresh_docs(create=False):
@@ -221,6 +223,14 @@ SYSTEM_PROMPT = f"""너는 {SCHOOL_NAME} 전용 사안처리·상담 도우미 '
  - 목록 항목마다 핵심 1~2곳만 굵게 한다: 해야 할 행동, 기한·기간·횟수 같은 숫자, 담당자, 기관명·전화번호, 법정 의무·금지("즉시 신고", "누설 금지" 등).
  - 문장 전체나 근거 표시([자료 p.쪽])는 굵게 하지 않는다. 굵은 글씨 바로 뒤에는 조사를 붙이지 않는다(예: "**48시간 이내**에" 대신 "**48시간 이내** 보고").
  - 한 섹션 안에서 "주제", "세부 활동"처럼 묶음 이름이 필요하면 번호 목록 항목으로 쓰지 말고 "### 묶음 이름" 소제목으로 쓴다. 번호 목록은 순서가 있는 단계에만 쓴다.
+13. 판단에 필요한 사실이 질문에 없으면 한쪽으로 단정하지 않는다(예: 사진이 성적인 사진인지, 가해자가 학생인지 성인인지, 결석 원인이 무엇인지).
+ - 첫 줄 요약 바로 다음에 "### 먼저 확인할 것"으로 확인할 사실을 쓰고, 경우별로 나눠 안내한다.
+ - 더 위험한 경우의 법정 의무는 빠뜨리지 않되 조건과 함께 쓴다(예: "성적인 사진이라면 피해학생 의사와 관계없이 즉시 수사기관 신고 의무").
+ - 첫 줄 요약을 "~사안에 해당합니다"처럼 확인되지 않은 결론으로 시작하지 않는다.
+14. [질문 분해]가 주어지면 조각을 하나도 빠뜨리지 않고 다룬다.
+ - [답변 형식]의 섹션 안에서 조각마다 "### ① 조각 이름" 소제목을 쓰고, 그 조각에 맞는 자료를 근거로 단다(상담 개입은 상담 매뉴얼, 절차는 가이드북·학교 규정·운영 매뉴얼).
+ - 원인이 다른 것은 섞지 않는다(예: 학교폭력 피해로 인한 결석의 출석 인정과, 생활 습관으로 인한 미인정 결석의 숙려제 안내는 따로 쓴다).
+ - [자료]에 근거가 없는 조각은 "등록 자료에서 확인되지 않습니다"라고 쓰고 지어내지 않는다.
 """
 
 
@@ -312,9 +322,24 @@ def plan_for(qtype, index=None, topics=None):
         if qtype in m.get("use_in", []) and topic_ok and (indexed is None or d in indexed):
             if qtype == "crisis":  # 기본 자료에 위기 대응 자료가 없으므로, 등록된 위기 대응 자료를 1순위로 크게 본다
                 plan.insert(0, (d, 5, 2, 9))
+            elif topics and set(topics) & set(m.get("topics", [])):
+                plan.append((d, *ADDED_TOPIC_BUDGET))
             else:
                 plan.append((d, *ADDED_BUDGET))
     return plan
+
+
+def merge_plans(plans):
+    """여러 유형의 확인 순서를 합친다: 첫 계획의 순서를 지키고, 뒤 계획에만 있는 자료는 뒤에 붙인다. 몫은 큰 값."""
+    order, budget = [], {}
+    for plan in plans:
+        for d, *b in plan:
+            if d not in budget:
+                order.append(d)
+                budget[d] = b
+            else:
+                budget[d] = [max(x, y) for x, y in zip(budget[d], b)]
+    return [(d, *budget[d]) for d in order]
 
 
 CRISIS_RE = re.compile(r"자살|자해|죽고\s?싶|죽을래|목숨|손목|그었|유서|뛰어내")
@@ -523,6 +548,7 @@ class Index:
                                  else 1.0
                                  for c in self.chunks])
         self.doc_of = np.array([c["doc"] for c in self.chunks])
+        self.id_row = {c["id"]: i for i, c in enumerate(self.chunks)}  # 청크 ID → 임베딩 행(인용 검증용)
         # 가이드북 부록 양식: "[양식2-4]"가 시작되는 쪽부터 다음 양식 전까지를 그 양식의 쪽으로 본다
         starts = {}
         for c in self.chunks:
@@ -543,14 +569,24 @@ class Index:
                             "vec_rank": 0, "bm25_rank": 0, "score": 0.0, **extra})
         return out
 
+    def bm25_scores(self, query):
+        """검색어의 전체 청크 BM25 점수. 같은 검색어를 자료마다 다시 계산하지 않도록 기억해 둔다."""
+        import numpy as np
+        cache = self.__dict__.setdefault("_bm25_cache", {})
+        if query not in cache:
+            if len(cache) > 512:
+                cache.clear()
+            q = tokenize(query)
+            cache[query] = self.bm25.get_scores(q) if q else np.zeros(len(self.chunks))
+        return cache[query]
+
     def search(self, query, k=6, qvec=None, doc=None):
         """하이브리드 검색. doc을 주면 그 문서 안에서만 찾는다(순위도 문서 안 기준).
         각 결과에 cos(벡터 코사인 유사도), bm25, 두 순위, 합산 점수(RRF)를 담는다."""
         import numpy as np
         idxs = np.arange(len(self.chunks)) if doc is None else np.where(self.doc_of == doc)[0]
         n = len(idxs)
-        q = tokenize(query)
-        bm = (self.bm25.get_scores(q) if q else np.zeros(len(self.chunks)))[idxs]
+        bm = self.bm25_scores(query)[idxs]
         bm_rank = np.empty(n, int)
         bm_rank[np.argsort(-bm)] = np.arange(1, n + 1)
         if self.emb is not None:
@@ -587,7 +623,7 @@ def client():
 
 
 def cite_label(doc, page):
-    return f"{DOCS[doc]['short']} p.{page}"
+    return f"{DOCS[doc]['short'] if doc in DOCS else doc} p.{page}"  # 삭제된 자료도 이름 대신 ID로 표시
 
 
 def format_context(hits, doc_order=None):
@@ -618,6 +654,53 @@ def parse_citations(text):
     return sorted(found, key=lambda x: (x[0] != "esan", x[1]))
 
 
+CITE_SPAN_RE = re.compile(r"\[[^\[\]]*?(?:p\.\s?\d[^\[\]]*|지역기관)\]")
+WEAK_CITE = 0.35      # 단어 겹침: 문장 핵심어 중 인용 쪽에 나오는 비율
+WEAK_CITE_SEM = 0.70  # 뜻 겹침: 문장과 인용 쪽 청크의 임베딩 코사인(가장 높은 청크)
+# 둘 다 낮을 때만 '근거 약함'. 사례 1 실측: 엉뚱한 인용은 단어 0.29~0.31·뜻 0.64~0.69,
+# 바꿔 쓴 맞는 인용(띄어쓰기 없는 표 글자 등)은 단어 0.29~0.33이어도 뜻 0.72 이상
+
+
+def check_citations(text, hits, index=None, threshold=WEAK_CITE, sem_threshold=WEAK_CITE_SEM):
+    """답변 줄마다 인용한 쪽과 얼마나 맞는지 본다: ① 단어 겹침(핵심어 중 인용 쪽에 나오는 비율)
+    ② 뜻 겹침(줄 임베딩과 인용 쪽 청크 임베딩의 코사인). 단어 겹침이 낮은 줄만 한 번에 임베딩해, 뜻도 낮으면 '근거 약함'.
+    (한 줄에 근거가 여럿이면 가장 잘 맞는 쪽 기준. 핵심어가 4개 미만인 짧은 줄은 보지 않는다)"""
+    pages, rows = {}, {}
+    id_row = getattr(index, "id_row", {}) if index is not None else {}
+    for h in hits:
+        key = (h["doc"], h["page"])
+        pages.setdefault(key, []).append(h["text"])
+        if h["id"] in id_row:
+            rows.setdefault(key, []).append(id_row[h["id"]])
+    page_tok = {}
+    for k, v in pages.items():
+        if index is not None and rows.get(k):
+            page_tok[k] = {t for r in rows[k] for t in index.chunks[r].get("tokens", [])}
+        else:
+            page_tok[k] = set(tokenize("\n".join(v)))
+    cand = []
+    for line in text.split("\n"):
+        cites = [c for c in parse_citations(line) if c in page_tok]
+        if not cites:
+            continue
+        body = CITE_SPAN_RE.sub(" ", line).strip(" -*#>")
+        toks = {t for t in tokenize(body) if len(t) >= 2}
+        if len(toks) < 4:
+            continue
+        best = max(len(toks & page_tok[c]) / len(toks) for c in cites)
+        if best < threshold:
+            cand.append({"line": body[:160], "cites": cites, "overlap": round(best, 2)})
+    if cand and index is not None and index.emb is not None and rows:
+        vecs = embed_texts([c["line"] for c in cand])  # 후보 줄만 한 번에
+        for c, v in zip(cand, vecs):
+            sims = [float(index.emb[r] @ v) for cc in c["cites"] for r in rows.get(cc, [])]
+            c["sem"] = round(max(sims), 3) if sims else None
+        cand = [c for c in cand if c.get("sem") is None or c["sem"] < sem_threshold]
+    for c in cand:
+        c["cites"] = [cite_label(d, pg) for d, pg in c["cites"]]
+    return cand
+
+
 QUERY_PROMPT = """너는 이산중학교 학생생활규정, 학교폭력 사안처리 가이드북, 상담 매뉴얼의 검색어 생성기이자 질문 유형 분류기다.
 [이전 질문]과 [현재 질문]을 받는다.
 1) standalone: 현재 질문을 혼자 읽어도 뜻이 통하는 한 문장으로 다시 쓴다.
@@ -635,19 +718,30 @@ QUERY_PROMPT = """너는 이산중학교 학생생활규정, 학교폭력 사안
 3) type: 질문 유형을 아래에서 하나 고른다.
 {TYPE_LINES}
 4) topics: 질문과 관련된 주제를 아래에서 0~3개 고른다: {TOPIC_LINE}
-JSON 객체만 출력한다. 예: {"standalone": "학교폭력예방법상 학교폭력의 정의는?", "queries": ["학교폭력 정의", "학교폭력예방법 제2조"], "type": "definition", "topics": ["학교폭력"]}"""
+5) parts: 질문에 상황·요청이 2개 이상 섞여 있으면 조각으로 나눈다(최대 5개). 하나뿐이면 빈 목록 [].
+   조각마다 {"aspect": 짧은 이름, "text": 질문 속 해당 표현, "type": 위 유형 중 하나, "queries": 이 조각만을 위한 검색어 1~3개}.
+   aspect 예: 스마트폰 과의존, 사이버 폭력, 가정 환경, 절차(결석 조치), 상담 개입, 학교 규정, 위기 신호.
+   상황 조각(예: 스마트폰 과의존, 가정 환경)도 자료에서 찾을 수 있게 검색어를 자료 용어로 만든다
+   (예: 과의존 유형 특성, 과의존 회복 개입 중간자극, 보호자 상담, 미인정 결석 학업중단 숙려제, 디지털성범죄 피해 삭제 지원).
+JSON 객체만 출력한다. 예: {"standalone": "학교폭력예방법상 학교폭력의 정의는?", "queries": ["학교폭력 정의", "학교폭력예방법 제2조"], "type": "definition", "topics": ["학교폭력"], "parts": []}"""
 QUERY_PROMPT = (QUERY_PROMPT.replace("{TYPE_LINES}", "\n".join(f"   - {k}: {v['desc']}" for k, v in QTYPES.items()))
                 .replace("{TOPIC_LINE}", ", ".join(store.TOPICS)))
 
 
+REWRITE_REASONING = "low"  # 질문 분석(검색어·유형·조각) 호출의 생각 단계
+
+
 def rewrite_query(question, history=None, model=LLM_MODEL):
-    """→ (standalone 질문, 검색어 목록, 질문 유형, 주제 목록). 실패하면 (원 질문, [], 기본 유형, [])."""
+    """→ (standalone 질문, 검색어 목록, 질문 유형, 주제 목록, 질문 조각 목록). 실패하면 (원 질문, [], 기본 유형, [], [])."""
     prev = [m["content"] for m in (history or []) if m["role"] == "user"][-1:]
     user = f"[이전 질문]\n{prev[0][:1500] if prev else '(없음)'}\n\n[현재 질문]\n{question}"
     try:
-        resp = client().chat.completions.create(
-            model=model, temperature=0,
-            messages=[{"role": "system", "content": QUERY_PROMPT}, {"role": "user", "content": user}])
+        msgs = [{"role": "system", "content": QUERY_PROMPT}, {"role": "user", "content": user}]
+        try:  # 질문 분석은 생각 단계를 낮춰도 같은 결과(사례 1: 14.9초 → 5.6초). 답변 생성은 기본값 유지
+            resp = client().chat.completions.create(model=model, temperature=0, messages=msgs,
+                                                    reasoning_effort=REWRITE_REASONING)
+        except Exception:  # 이 설정을 받지 않는 모델이면 기본값으로
+            resp = client().chat.completions.create(model=model, temperature=0, messages=msgs)
         raw = resp.choices[0].message.content or ""
         m = re.search(r"\{.*\}", raw, re.S)
         obj = json.loads(m.group(0)) if m else {}
@@ -655,9 +749,16 @@ def rewrite_query(question, history=None, model=LLM_MODEL):
         qs = [q for q in obj.get("queries", []) if isinstance(q, str) and q.strip()][:5]
         qtype = obj.get("type") if obj.get("type") in QTYPES else DEFAULT_QTYPE
         topics = [x for x in obj.get("topics", []) if x in store.TOPICS][:3]
-        return standalone.strip() or question, qs, qtype, topics
+        parts = []
+        for x in obj.get("parts", []) or []:
+            if isinstance(x, dict) and isinstance(x.get("aspect"), str) and x.get("type") in QTYPES:
+                parts.append({"aspect": x["aspect"].strip()[:20], "text": str(x.get("text", ""))[:200],
+                              "type": x["type"],
+                              "queries": [q for q in x.get("queries", []) if isinstance(q, str) and q.strip()][:3]})
+        parts = parts[:5] if len(parts) >= 2 else []  # 조각이 하나뿐이면 분해하지 않는다
+        return standalone.strip() or question, qs, qtype, topics, parts
     except Exception:
-        return question, [], DEFAULT_QTYPE, []  # 실패해도 원 질문으로 검색은 진행
+        return question, [], DEFAULT_QTYPE, [], []  # 실패해도 원 질문으로 검색은 진행
 
 
 RETRIEVAL = {  # 기본 검색 설정(v6). eval/run_eval.py로 바꿔 가며 비교한다.
@@ -669,14 +770,16 @@ RETRIEVAL = {  # 기본 검색 설정(v6). eval/run_eval.py로 바꿔 가며 비
 
 
 def retrieve(index, question, queries, k=8, per_query=4, school_k=4, school_per_query=2, max_chunks=18, max_school=6,
-             link_forms=True, max_forms=2, form_pages=2, manual_k=3, manual_per_query=1, max_manual=5, plan=None):
+             link_forms=True, max_forms=2, form_pages=2, manual_k=3, manual_per_query=1, max_manual=5, plan=None,
+             qvecs=None):
     """이산중 규정(1순위): 원 질문 상위 school_k개 + 검색어별 school_per_query개(최대 max_school).
     가이드북(2순위): 원 질문 상위 k개 + 검색어별 per_query개(최대 max_chunks).
     22쪽짜리 학교 규정이 216쪽 가이드북에 밀려 빠지지 않도록 문서별로 따로 뽑아 합친다.
     link_forms: 검색된 본문이 "<양식2-4>"처럼 부록 양식을 가리키면 그 양식의 앞쪽 form_pages쪽을 함께 넣는다
     (사안조사 보고서 작성 요령처럼 본문과 양식에 흩어진 내용을 모으기 위해서)."""
     texts = [question] + queries
-    qvecs = embed_texts(texts) if index.emb is not None else [None] * len(texts)
+    if qvecs is None:  # 미리 묶어 만든 임베딩이 없으면 여기서 만든다
+        qvecs = embed_texts(texts) if index.emb is not None else [None] * len(texts)
     hits = []
     if plan is None:  # 유형이 없으면 학교 맞춤형 순서
         plan = [("esan", school_k, school_per_query, max_school), ("guide", k, per_query, max_chunks)]
@@ -712,8 +815,8 @@ def retrieve(index, question, queries, k=8, per_query=4, school_k=4, school_per_
 def answer(index, question, history=None, model=LLM_MODEL, temperature=0.1, expand=True, retrieval=None,
            qtype_override=None):
     """question → {'answer', 'sources', 'standalone', 'queries', 'qtype', 'doc_order', 'cited', 'flags', 'model'}"""
-    standalone, queries, qtype, topics = (rewrite_query(question, history, model) if expand
-                                          else (question, [], qtype_override or DEFAULT_QTYPE, []))
+    standalone, queries, qtype, topics, parts = (rewrite_query(question, history, model) if expand
+                                                 else (question, [], qtype_override or DEFAULT_QTYPE, [], []))
     flags = []
     if CRISIS_RE.search(question):
         flags.append("crisis")
@@ -723,9 +826,36 @@ def answer(index, question, history=None, model=LLM_MODEL, temperature=0.1, expa
     if qtype_override:
         qtype = qtype_override
     spec = QTYPES[qtype]
-    plan = plan_for(qtype, index, topics)
+    # 복합 질문: 조각 유형들의 확인 순서를 합친다(첫 유형 순서 우선)
+    qtypes = list(dict.fromkeys([qtype] + [pt["type"] for pt in parts]))
+    plan = merge_plans([plan_for(t, index, topics) for t in qtypes])
     doc_order = [d for d, *_ in plan]
-    hits = retrieve(index, standalone, queries, **{**RETRIEVAL, **(retrieval or {}), "plan": plan})
+    # 검색 묶음: 본 질문 + 조각마다(한 조각의 근거가 다른 조각에 밀려 빠지지 않게 조각별로도 찾는다)
+    jobs = [([standalone] + queries, {**RETRIEVAL, **(retrieval or {}), "plan": plan})]
+    for pt in parts:
+        pplan = [(d, min(a, PART_BUDGET[0]), min(b, PART_BUDGET[1]), min(c, PART_BUDGET[2]))
+                 for d, a, b, c in plan_for(pt["type"], index)]  # 조각 검색은 주제로 거르지 않는다(결석 조각 → 학업숙려제 등)
+        jobs.append(([pt["text"] or pt["aspect"]] + pt["queries"], {"link_forms": False, "plan": pplan}))
+    # 임베딩은 모든 검색어를 한 번에 묶어 만들고, BM25 점수도 미리 계산해 둔다(검색어마다 한 번)
+    all_texts = [t for texts, _ in jobs for t in texts]
+    all_vecs = embed_texts(all_texts) if index.emb is not None else [None] * len(all_texts)
+    for t in all_texts:
+        index.bm25_scores(t)
+    from concurrent.futures import ThreadPoolExecutor
+    pos, args = 0, []
+    for texts, kw in jobs:
+        args.append((texts, kw, all_vecs[pos:pos + len(texts)]))
+        pos += len(texts)
+    with ThreadPoolExecutor(max_workers=len(args)) as ex:  # 본 질문·조각 검색을 동시에
+        results = list(ex.map(lambda a: retrieve(index, a[0][0], a[0][1:], qvecs=a[2], **a[1]), args))
+    hits = results[0]
+    have = {h["id"] for h in hits}
+    for pt, part_hits in zip(parts, results[1:]):
+        for h in part_hits:
+            if h["id"] not in have:
+                have.add(h["id"])
+                h["part"] = pt["aspect"]
+                hits.append(h)
 
     messages = [{"role": "system", "content": system_prompt()}]
     for m in (history or [])[-4:]:
@@ -736,8 +866,13 @@ def answer(index, question, history=None, model=LLM_MODEL, temperature=0.1, expa
     if "sexual" in flags:
         note += "\n(참고: 성 관련 사안 가능성 → 규칙 9 적용)"
     order_text = " → ".join(f"{i + 1}순위 [{DOCS[d]['short']}]" for i, d in enumerate(doc_order))
+    marks = "①②③④⑤"
+    parts_text = ("[질문 분해] (규칙 14: 조각마다 소제목을 달고 빠짐없이 답한다)\n"
+                  + "".join(f"{marks[i]} {pt['aspect']} ({QTYPES[pt['type']]['label']}): {pt['text']}\n"
+                            for i, pt in enumerate(parts))) if parts else ""
+    type_text = spec["label"] + (" + " + ", ".join(QTYPES[t]["label"] for t in qtypes[1:]) if len(qtypes) > 1 else "")
     messages.append({"role": "user", "content": f"[자료]\n{format_context(hits, doc_order)}\n\n"
-                                                f"[질문 유형] {spec['label']}\n[확인 순서] {order_text}\n"
+                                                f"[질문 유형] {type_text}\n[확인 순서] {order_text}\n{parts_text}"
                                                 + "".join(f"[추가 자료] [{DOCS[d]['short']}] {DOCS[d]['name']}: {DOCS[d].get('summary', '')}\n"
                                                           for d in doc_order if d in added_docs())
                                                 + f"[답변 형식]\n{spec['format']}\n\n[질문]\n{question}{note}\n\n"
@@ -745,6 +880,7 @@ def answer(index, question, history=None, model=LLM_MODEL, temperature=0.1, expa
 
     resp = client().chat.completions.create(model=model, temperature=temperature, messages=messages)
     text = resp.choices[0].message.content or ""
+    text = re.sub(r"^(#{1,6})\s+#{1,6}\s+", r"\1 ", text, flags=re.M)  # "## ## 제목"처럼 겹친 소제목 정리
     cited = parse_citations(text)
     hit_keys = {(h["doc"], h["page"]) for h in hits}
     for h in hits:
@@ -755,9 +891,12 @@ def answer(index, question, history=None, model=LLM_MODEL, temperature=0.1, expa
         "standalone": standalone,
         "queries": queries,
         "qtype": qtype,
+        "qtypes": qtypes,
+        "parts": parts,
         "topics": topics,
         "doc_order": doc_order,
         "cited": cited,
+        "weak_cites": check_citations(text, hits, index),
         "uncited_ok": [c for c in cited if c not in hit_keys],  # 검색 자료에 없는 쪽을 인용했으면 확인 필요
         "flags": flags,
         "model": model,
@@ -770,6 +909,7 @@ def log_turn(question, result):
     rec = {"time": time.strftime("%Y-%m-%d %H:%M:%S"), "question": question, "answer": result["answer"],
            "model": result["model"], "flags": result["flags"], "qtype": result.get("qtype"), "topics": result.get("topics"),
            "doc_order": result.get("doc_order"), "standalone": result["standalone"],
+           "parts": result.get("parts"), "weak_cites": result.get("weak_cites"),
            "queries": result["queries"], "cited": [cite_label(d, p) for d, p in result["cited"]],
            "sources": [{"id": h["id"], "doc": h["doc"], "page": h["page"], "section": h["section"], "cos": round(h["cos"], 4),
                         "bm25": round(h["bm25"], 2), "rrf": round(h["score"], 5), "cited": h["cited"],

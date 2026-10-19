@@ -6,6 +6,7 @@ PILL_ACTIVE = "#A9CF7A"  # 고른 메뉴·지금 단계(더 진하게)
 PILL_DONE = "#E7F1D3"    # 지난 단계
 INK = "#1C2A18"
 MUTED = "#6B7A63"
+GREEN = "#4E8A2E"     # 진한 연두(아이콘·테두리)
 
 # 주제별 색(등록 자료 표 등). 서로 구분되는 부드러운 색 7개, 글자는 진한 색 그대로
 TOPIC_COLORS = {
@@ -112,11 +113,32 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stSidebar"], butto
 .gy-hello h2 {{ margin: .4rem 0 .2rem; font-size: 1.6rem; }}
 .gy-hello p {{ color: {MUTED}; font-size: .9rem; margin: 0; }}
 
-/* 알림 버튼: 검은 원 + 흰 종 + 빨간 숫자 */
-.st-key-bell_btn button {{ position: relative; overflow: visible; width: 72px; height: 72px; min-height: 72px;
-    padding: 0; border-radius: 50% !important; background: {INK} !important; border: none !important; color: #fff !important; }}
-.st-key-bell_btn button:hover {{ background: #33452c !important; }}
-.st-key-bell_btn button span, .st-key-bell_btn button p {{ color: #fff !important; font-size: 1.5rem; }}
+/* 사이드바 원형 아이콘: 자료(연두 바탕) · 알림(흰 바탕 + 진한 연두 테두리), 아이콘은 진한 연두 */
+[class*="st-key-files_btn"] button, .st-key-bell_btn button {{
+    position: relative; overflow: visible; width: 64px; height: 64px; min-height: 64px; padding: 0;
+    border-radius: 50% !important; box-shadow: none !important; }}
+[class*="st-key-files_btn"] button {{ background: {PILL} !important; border: none !important; }}
+[class*="st-key-files_btn"] button:hover {{ background: #CFE2AE !important; }}
+.st-key-files_btn_on button {{ background: {PILL_ACTIVE} !important; }}
+.st-key-bell_btn button {{ background: #FFFFFF !important; border: 2.5px solid {GREEN} !important; }}
+.st-key-bell_btn button:hover {{ background: {PILL_DONE} !important; }}
+[class*="st-key-files_btn"] button span, [class*="st-key-files_btn"] button p,
+.st-key-bell_btn button span, .st-key-bell_btn button p {{ color: {GREEN} !important; font-size: 1.45rem; }}
+.st-key-new_chat button {{ min-height: 64px !important; }}
+
+/* 사이드바 모서리 25px 통일(원형 아이콘 제외) · 좌우 여백 38px 통일 */
+[data-testid="stSidebar"] {{ --gy-side-pad: 38px; }}
+[data-testid="stSidebarUserContent"] {{ padding-left: var(--gy-side-pad) !important; padding-right: var(--gy-side-pad) !important; }}
+[data-testid="stSidebar"] .st-key-new_chat button,
+[data-testid="stSidebar"] [data-testid="stExpander"] details,
+[data-testid="stSidebar"] [data-testid="stPopover"] button,
+[data-testid="stSidebar"] [class*="st-key-conv_"] button {{ border-radius: 25px !important; }}
+[data-testid="stSidebar"] [class*="st-key-conv_"] button {{ padding: .35rem .8rem !important; }}
+/* 새 채팅·자료·알림 줄: 새 채팅은 남는 폭, 아이콘은 64px 고정 → 오른쪽 끝도 여백에 딱 맞게 */
+[data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.st-key-new_chat) {{ gap: 12px !important; }}
+[data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.st-key-new_chat) > div:first-child {{ flex: 1 1 auto !important; width: auto !important; min-width: 0 !important; }}
+[data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.st-key-new_chat) > div:not(:first-child) {{
+    flex: 0 0 64px !important; width: 64px !important; min-width: 64px !important; }}
 </style>"""
 
 
