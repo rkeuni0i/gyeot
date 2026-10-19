@@ -5,7 +5,7 @@ set PY=C:\Users\2003g\anaconda3\envs\DS\python.exe
 if not exist "%PY%" (
   set PY=python
 )
-if not exist index\mindguide.db (
+if not exist index\gyeot.db (
   echo 자료 저장소를 만드는 중...
   "%PY%" build_index.py
 )

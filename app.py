@@ -48,8 +48,9 @@ st.set_page_config(page_title="곁 · 이산중 상담 도우미", page_icon=str
 
 @st.cache_resource(show_spinner="검색 인덱스 불러오는 중…")
 def load_index():
-    if not DB_PATH.exists() and not (ROOT / "index" / "chunks.json").exists():
-        st.error("자료 저장소(index/mindguide.db)가 없습니다. 먼저 build_index.py를 실행하세요.")
+    if not DB_PATH.exists():
+        st.error(f"자료 저장소(index/{DB_PATH.name})가 없습니다. 파일 이름을 바꿨거나 옮겼다면 되돌리고, "
+                 "처음 설치라면 build_index.py를 실행하세요. (빈 저장소는 자동으로 만들지 않습니다)")
         st.stop()
     return Index()
 

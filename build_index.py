@@ -1,4 +1,4 @@
-"""저장소(index/mindguide.db)의 자료 청크를 PDF에서 만들고 임베딩한다.
+"""저장소(index/gyeot.db)의 자료 청크를 PDF에서 만들고 임베딩한다.
 
 저장소가 없으면 먼저 기존 index/chunks.json·embeddings.npy에서 옮겨 만든다(rag.refresh_docs).
 기본: 청크가 없는 활성 자료만 만든다. PDF를 같은 이름으로 바꿨거나 청크 규칙을 바꿨으면 --all 또는 doc_id를 준다.
@@ -16,7 +16,7 @@ from doc_agent import ingest
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8")
     t = time.time()
-    rag.refresh_docs()
+    rag.refresh_docs(create=True)  # 저장소가 없으면 여기서만 새로 만든다
     con = store.connect()
     counts = store.chunk_counts(con)
     con.close()

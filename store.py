@@ -1,4 +1,4 @@
-"""근거 자료 저장소(SQLite, index/mindguide.db).
+"""근거 자료 저장소(SQLite, index/gyeot.db).
 
 한 파일 안에 문서 정보·주제·질문 유형·청크(본문·형태소·임베딩)·평가 기록·알림을 함께 둔다.
 - 문서를 지우면 외래키 CASCADE로 그 문서의 청크·주제·평가 기록·알림이 한 번에 지워진다(트랜잭션).
@@ -16,7 +16,7 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-DB_PATH = ROOT / "index" / "mindguide.db"
+DB_PATH = ROOT / "index" / "gyeot.db"  # 2026-10-19 mindguide.db에서 이름 변경
 SCHEMA_VERSION = "1"
 TOPICS = ["학교폭력", "가정", "학업·학교부적응", "정서·위기", "디지털·사이버", "상담 기법", "학교 운영"]
 LAYERS = ["common", "topic", "school"]
@@ -76,7 +76,16 @@ def now():
     return time.strftime("%Y-%m-%d %H:%M:%S")
 
 
-def connect(path=DB_PATH):
+class StoreMissing(FileNotFoundError):
+    """저장소 파일이 없다(이름이 바뀌었거나 옮겨졌을 수 있음). 빈 저장소를 몰래 새로 만들지 않는다."""
+
+
+def connect(path=DB_PATH, create=False):
+    """create=False(기본)면 저장소 파일이 없을 때 빈 파일을 만들지 않고 StoreMissing을 낸다.
+    빈 저장소가 생기면 화면은 '자료 0개'로 보이고 검색·평가가 깨지므로, 새로 만드는 것은 build_index.py만 한다."""
+    if not Path(path).exists() and not create:
+        raise StoreMissing(f"자료 저장소 {Path(path).relative_to(ROOT) if Path(path).is_relative_to(ROOT) else path}가 없습니다. "
+                           "파일 이름을 바꿨거나 옮겼다면 되돌리고, 처음 설치라면 build_index.py를 실행하세요.")
     path.parent.mkdir(exist_ok=True)
     con = sqlite3.connect(path)
     con.row_factory = sqlite3.Row

@@ -1,6 +1,6 @@
 """학교폭력 사안처리 가이드북 + 학교 규정 + 상담 매뉴얼 RAG 핵심 모듈.
 
-자료·청크·임베딩은 SQLite 저장소(store.py, index/mindguide.db)에 있다.
+자료·청크·임베딩은 SQLite 저장소(store.py, index/gyeot.db)에 있다.
 PDF 여러 개 → 쪽 단위 청크 → 하이브리드 검색(Gemini 임베딩 벡터 + BM25 형태소) → Gemini 답변(근거 쪽 인용).
 app.py(화면)와 build_index.py(인덱스 생성)가 이 모듈을 같이 쓴다.
 """
@@ -74,10 +74,17 @@ SHORT_TO_DOC = {}
 ADDED_BUDGET = (3, 1, 5)  # 추가 자료 검색 몫: (원 질문 상위 k, 검색어별 k, 최대 청크)
 
 
-def refresh_docs():
-    """저장소의 활성 자료로 DOCS를 다시 채운다. 저장소가 없으면 기존 파일에서 옮겨 만든다."""
+def refresh_docs(create=False):
+    """저장소의 활성 자료로 DOCS를 다시 채운다.
+    저장소가 없을 때: create=True(build_index.py)면 기존 파일에서 옮기거나 기본 자료로 새로 만들고,
+    아니면 DOCS를 비워 두기만 한다(앱은 '저장소 없음'을 보여 준다. 빈 저장소를 몰래 만들지 않는다)."""
     global SHORT_TO_DOC
     if not store.DB_PATH.exists():
+        if not create:
+            DOCS.clear()
+            MANUAL_DOCS.clear()
+            SHORT_TO_DOC = {}
+            return
         migrate_from_files()
     con = store.connect()
     rows = store.documents(con, status="active")
@@ -99,7 +106,7 @@ def added_docs():
 def migrate_from_files():
     """기존 index/chunks.json + embeddings.npy + data/registry.json을 저장소로 옮긴다(임베딩 재계산 없음)."""
     import numpy as np
-    con = store.connect()
+    con = store.connect(create=True)
     store.init_db(con)
     con.execute("INSERT OR IGNORE INTO schools VALUES ('esan', '이산중학교', '경기', ?)", (SCHOOL_INFO,))
     for d, m in BASE_SEED.items():

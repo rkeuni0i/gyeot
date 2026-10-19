@@ -2,7 +2,7 @@
 
 - 작성일: 2026-10-19
 - 대상: 곁 — 이산중학교 사안처리·상담 도우미 (`gyeot`, 이전 폴더 이름 `mindGuide_test`)
-- 구현: `store.py`, 저장 파일 `index/mindguide.db`
+- 구현: `store.py`, 저장 파일 `index/gyeot.db`(이전 이름 `mindguide.db`)
 
 ## 1. 이전 방식과 문제점
 

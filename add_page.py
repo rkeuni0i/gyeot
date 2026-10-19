@@ -341,7 +341,7 @@ def ocr_step(path):
         return True
     with st.container(border=True):
         st.markdown(f"**🔤 글자를 읽을 수 없는 PDF입니다** · {n}쪽 중 {low}쪽에 글자층이 없습니다(스캔본이거나, 한글 문서를 "
-                    "글자 대신 윤곽선으로 인쇄한 PDF). 이대로는 검색·평가를 할 수 없어 **OCR(그림에서 글자 읽기)**을 먼저 합니다.")
+                    "글자 대신 윤곽선으로 인쇄한 PDF). 이대로는 검색·평가를 할 수 없어 먼저 **OCR**(그림에서 글자 읽기)을 합니다.")
         engine = st.radio("OCR 방식", list(ocr.ENGINES), format_func=ocr.ENGINES.get, key="ocr_engine", horizontal=True)
         st.caption("정확(Gemini): 표를 행 단위로 읽고 오탈자가 적습니다. 쪽 이미지가 Google Gemini API로 전송되므로 학생 개인정보가 든 "
                    "문서에는 쓰지 마세요. · 빠름(Windows): 이 PC 안에서만 처리하지만 표·그림 속 글자 오탈자가 많습니다.")

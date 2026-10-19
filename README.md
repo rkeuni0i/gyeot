@@ -2,7 +2,7 @@
 
 # 곁 — 상담실 곁의 사안처리 동료
 
-이산중학교 사안처리·상담 도우미(테스트용 챗봇). 가제 MindGuide에서 이름을 바꿨습니다(2026-10-19). 프로젝트 폴더는 `gyeot`(2026-10-19 `mindGuide_test`에서 이름 변경)이고, 저장소 파일 `index/mindguide.db`와 환경변수 `MINDGUIDE_MODEL`은 그대로 씁니다. 로고(서로 기댄 잎 두 장)는 `docs/brand/`에 있고 `python docs/brand/make_logo.py`로 다시 만듭니다.
+이산중학교 사안처리·상담 도우미(테스트용 챗봇). 가제 MindGuide에서 이름을 바꿨습니다(2026-10-19). 프로젝트 폴더는 `gyeot`(2026-10-19 `mindGuide_test`에서 이름 변경)이고, 저장소 파일은 `index/gyeot.db`(이전 `mindguide.db`), 환경변수 `MINDGUIDE_MODEL`은 그대로 씁니다. 저장소 파일이 없으면 앱은 빈 저장소를 만들지 않고 안내를 띄웁니다(새로 만들기는 `build_index.py`). 로고(서로 기댄 잎 두 장)는 `docs/brand/`에 있고 `python docs/brand/make_logo.py`로 다시 만듭니다.
 
 학교에 혼자 근무하는 상담사가 **절차·기한·법적 의무·학교 규정·양식·기관 연계**를 빠르게 확인하도록 돕는 챗봇입니다.
 **이산중학교(경기) 전용** 챗봇입니다(Wee 클래스 운영, 전문상담교사 1명 배정 — 학교 홈페이지에서 확인). 근거 자료는 두 개이고 **이산중 규정을 먼저** 확인합니다. 답변의 사실 문장마다 `[이산중 p.쪽]` 또는 `[가이드북 p.쪽]` 근거를 답니다.
@@ -55,14 +55,14 @@ C:\Users\2003g\anaconda3\envs\DS\python.exe -m streamlit run app.py
 ```
 
 - 인덱스: 4개 문서 → 쪽 단위 청크 696개(가이드북 313, 이산중 59, 사이버상담 141, 디지털상담 183)
-  - 저장소 `index/mindguide.db`(SQLite): 문서·층·주제·질문 유형·청크(본문·형태소·`gemini-embedding-001` 3072차원 임베딩)·평가 기록·알림. 자세한 구조는 [docs/DB_설계.md](docs/DB_설계.md)
+  - 저장소 `index/gyeot.db`(SQLite): 문서·층·주제·질문 유형·청크(본문·형태소·`gemini-embedding-001` 3072차원 임베딩)·평가 기록·알림. 자세한 구조는 [docs/DB_설계.md](docs/DB_설계.md)
 - 검색(v8): 문서별로 따로 찾아 합칩니다. ① 이산중 규정: 원 질문 6 + 검색어별 3(최대 12청크) ② 가이드북: 원 질문 8 + 검색어별 5(최대 24청크), 검색된 본문이 `<양식2-4>`처럼 부록 양식을 가리키면 그 양식 앞 2쪽을 함께 넣음(최대 3개 양식) ③ 상담 매뉴얼: 문서마다 원 질문 4 + 검색어별 2(최대 7청크). 가이드북 부록3(법령 원문)·매뉴얼 연구방법·참고문헌은 순위를 낮췄습니다. 설정은 `rag.py`의 `RETRIEVAL`.
 - 답변 형식: 정의·요건·기한 같은 사실 질문은 바로 답하고, 상황 질문은 "지금 해야 할 일 / 연계 기관 / 유의사항 / 양식" 구성으로 답합니다.
 - 성폭력 관련 단어가 있으면 "수사기관 즉시 신고 의무"를 먼저, 자해·자살 단어가 있으면 "이 가이드북은 자해·자살 대응을 다루지 않음"을 먼저 안내합니다.
 
 ## 자료 관리(추가·사용 중지·완전 삭제·정기 점검)
 
-사이드바에서 **📚 자료 관리**를 고르면 세 메뉴가 있습니다. 자료는 모두 SQLite 저장소 `index/mindguide.db`에 있고, 설계는 [docs/DB_설계.md](docs/DB_설계.md)에 정리했습니다.
+사이드바에서 **📚 자료 관리**를 고르면 세 메뉴가 있습니다. 자료는 모두 SQLite 저장소 `index/gyeot.db`에 있고, 설계는 [docs/DB_설계.md](docs/DB_설계.md)에 정리했습니다.
 
 **📥 자료 추가**
 1. PDF 업로드(같은 PDF가 이미 있으면 파일 해시로 막음) → **AI 평가 실행**
@@ -107,7 +107,7 @@ schtasks /Create /TN "곁 정기 점검" /TR "C:\Users\2003g\Documents\Project_s
 |---|---|
 | `app.py` | Streamlit 화면 |
 | `rag.py` | 청크 생성, 검색, 프롬프트, Gemini 호출, 로그 |
-| `store.py` | SQLite 저장소(`index/mindguide.db`): 표 구조와 읽기·쓰기 |
+| `store.py` | SQLite 저장소(`index/gyeot.db`): 표 구조와 읽기·쓰기 |
 | `ui_style.py` | 화면 공통 스타일(Figma 시안: 연두 바탕·흰 사이드바·알약 메뉴, 고른 메뉴·지금 단계는 더 진한 연두) |
 | `conversations.py` | 이전 대화 저장·불러오기(`logs/conversations/<대화ID>.json`, 이 컴퓨터에만 저장) |
 | `doc_agent/ocr.py`, `doc_agent/ocr_win.ps1` | 글자층이 없는 PDF(스캔본·윤곽선 글자) OCR. 정확(Gemini, 6쪽씩 동시) / 빠름(Windows 기본 한국어 OCR, 이 PC 안에서만). 결과는 `data/ocr/<PDF 내용 해시>.json`, `rag.page_texts()`가 글자 없는 쪽을 이것으로 채워 평가·중복 확인·검색에 씀. 직접 실행: `python doc_agent/ocr.py <PDF> [gemini|windows]` |
