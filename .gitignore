@@ -44,3 +44,13 @@ Desktop.ini
 venv/
 .venv/
 env/
+
+# Doc agent inbox upload staging
+doc_agent/inbox/*
+!doc_agent/inbox/.gitkeep
+
+# Legacy index backups
+index/legacy_backup/
+
+# Archives
+*.zip
