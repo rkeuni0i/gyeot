@@ -87,6 +87,9 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stSidebar"], butto
     padding: .3rem .4rem !important; border-radius: 10px !important; color: {INK} !important; }}
 [class*="st-key-conv_"] button p {{ font-size: .8rem !important; white-space: nowrap; overflow: hidden;
     text-overflow: ellipsis; }}
+[class*="st-key-conv_"] button > div, [class*="st-key-conv_"] button > div > span {{
+    justify-content: flex-start !important; width: 100%; min-width: 0; }}
+[class*="st-key-conv_"] button [data-testid="stMarkdownContainer"] {{ min-width: 0; text-align: left; }}
 [class*="st-key-conv_"] button:hover {{ background: #F1F7E6 !important; }}
 [class*="st-key-conv_on_"] button {{ background: {PILL_DONE} !important; font-weight: 700; }}
 
@@ -113,32 +116,36 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stSidebar"], butto
 .gy-hello h2 {{ margin: .4rem 0 .2rem; font-size: 1.6rem; }}
 .gy-hello p {{ color: {MUTED}; font-size: .9rem; margin: 0; }}
 
-/* 사이드바 원형 아이콘: 자료(연두 바탕) · 알림(흰 바탕 + 진한 연두 테두리), 아이콘은 진한 연두 */
-[class*="st-key-files_btn"] button, .st-key-bell_btn button {{
-    position: relative; overflow: visible; width: 64px; height: 64px; min-height: 64px; padding: 0;
-    border-radius: 50% !important; box-shadow: none !important; }}
-[class*="st-key-files_btn"] button {{ background: {PILL} !important; border: none !important; }}
+/* 새 채팅·자료보관: 같은 크기 연두 알약 */
+[class*="st-key-files_btn"] button {{ background: {PILL} !important; border: none !important; color: {INK} !important;
+    font-weight: 600; min-height: 64px !important; box-shadow: none !important; }}
 [class*="st-key-files_btn"] button:hover {{ background: #CFE2AE !important; }}
 .st-key-files_btn_on button {{ background: {PILL_ACTIVE} !important; }}
-.st-key-bell_btn button {{ background: #FFFFFF !important; border: 2.5px solid {GREEN} !important; }}
-.st-key-bell_btn button:hover {{ background: {PILL_DONE} !important; }}
-[class*="st-key-files_btn"] button span, [class*="st-key-files_btn"] button p,
-.st-key-bell_btn button span, .st-key-bell_btn button p {{ color: {GREEN} !important; font-size: 1.45rem; }}
+/* 알림 아이콘: 다른 버튼과 같은 연두 원형, 78px(1.5배). 오른쪽 위 ⋮ 메뉴와 가운데 높이를 맞춘다(⋮ 중심 y≈56px) */
+.st-key-bell_btn {{ position: fixed !important; top: 18px; right: 102px; z-index: 999993; width: 78px !important; }}
+.st-key-bell_btn button {{ position: relative; overflow: visible; width: 78px !important; height: 78px !important;
+    min-height: 78px !important; padding: 0; border-radius: 50% !important; box-shadow: none !important;
+    background: {PILL} !important; border: none !important; }}
+.st-key-bell_btn button:hover {{ background: #CFE2AE !important; }}
+.st-key-bell_btn button span, .st-key-bell_btn button p {{ color: {INK} !important; font-size: 1.8rem !important; }}
+/* Streamlit 기본 실행 표시(Running·Stop)와 Deploy는 숨긴다: 알림 자리, 정지는 입력창 아이콘으로 */
+[data-testid="stStatusWidget"], [data-testid="stAppDeployButton"] {{ display: none !important; }}
+/* 답변 생성 중 정지 아이콘: 입력창 보내기 버튼 자리(위치는 app.py STOP_JS가 맞춤) */
+.st-key-stop_gen {{ position: fixed; right: 0; bottom: 0; visibility: hidden; z-index: 1000000; }}
+.st-key-stop_gen button {{ width: 100% !important; height: 100% !important; min-height: 0 !important; padding: 0 !important;
+    border-radius: 999px !important; border: none !important; background: {GREEN} !important; color: #FFFFFF !important; }}
+.st-key-stop_gen button span, .st-key-stop_gen button p {{ color: #FFFFFF !important; font-size: 1.3rem; }}
 .st-key-new_chat button {{ min-height: 64px !important; }}
 
-/* 사이드바 모서리 25px 통일(원형 아이콘 제외) · 좌우 여백 38px 통일 */
-[data-testid="stSidebar"] {{ --gy-side-pad: 38px; }}
-[data-testid="stSidebarUserContent"] {{ padding-left: var(--gy-side-pad) !important; padding-right: var(--gy-side-pad) !important; }}
+/* 사이드바 모서리 25px 통일(원형 아이콘 제외). 좌우 여백은 기본 38px 그대로, 아이콘 줄만 맞춘다 */
 [data-testid="stSidebar"] .st-key-new_chat button,
+[data-testid="stSidebar"] [class*="st-key-files_btn"] button,
 [data-testid="stSidebar"] [data-testid="stExpander"] details,
 [data-testid="stSidebar"] [data-testid="stPopover"] button,
 [data-testid="stSidebar"] [class*="st-key-conv_"] button {{ border-radius: 25px !important; }}
 [data-testid="stSidebar"] [class*="st-key-conv_"] button {{ padding: .35rem .8rem !important; }}
-/* 새 채팅·자료·알림 줄: 새 채팅은 남는 폭, 아이콘은 64px 고정 → 오른쪽 끝도 여백에 딱 맞게 */
+/* 새 채팅·자료보관 줄: 두 칸 같은 폭 */
 [data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.st-key-new_chat) {{ gap: 12px !important; }}
-[data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.st-key-new_chat) > div:first-child {{ flex: 1 1 auto !important; width: auto !important; min-width: 0 !important; }}
-[data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has(.st-key-new_chat) > div:not(:first-child) {{
-    flex: 0 0 64px !important; width: 64px !important; min-width: 64px !important; }}
 </style>"""
 
 

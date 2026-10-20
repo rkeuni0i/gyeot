@@ -74,6 +74,15 @@ SHORT_TO_DOC = {}
 ADDED_BUDGET = (3, 1, 5)  # 추가 자료 검색 몫: (원 질문 상위 k, 검색어별 k, 최대 청크)
 ADDED_TOPIC_BUDGET = (5, 2, 9)  # 질문 주제와 자료 주제가 겹치면 더 많이(연락처·절차 쪽이 빠지지 않게)
 PART_BUDGET = (3, 2, 4)  # 질문 조각별 추가 검색: 조각 하나가 자료 하나에서 가져오는 최대 몫
+MUST_BUDGET = 3  # 필수 항목 검색이 자료 하나에서 더하는 최대 청크
+# 유형별 필수 항목(규칙 10-1, 5-1)의 근거를 찾는 고정 검색어. 그 유형이 질문에 있으면 한 묶음 더 찾는다
+MUST_QUERIES = {
+    "crisis": ["자살 위험성이 높은 학생 보호자 면담 전문기관 연계",
+               "학교위기관리위원회 소집 교육지원청 보고",
+               "보호자가 전문기관 연계를 원치 않는 경우 대체 지원 긴급지원팀 청소년동반자"],
+    "procedure": ["학교폭력 사안처리 흐름도 접수 분리 보고 조사",
+                  "학교폭력 전담조사관 배정 요청 전담기구 자체 사안조사"],
+}
 
 
 def refresh_docs(create=False):
@@ -146,16 +155,21 @@ def migrate_from_files():
 
 
 SCHOOL_NAME = "이산중학교(경기 화성시)"
-SCHOOL_INFO = "Wee 클래스 운영, 전문상담교사 1명 배정(학교 홈페이지에서 확인)"
+SCHOOL_INFO = "Wee 클래스 운영, 전문상담교사 1명 배정"
 # 학교 주변 연계 기관(상담사가 확인한 기관). 출처: 2025 청소년상담복지센터 현황(2025.10) + 사용자 확인(2026-10-19)
 LOCAL_AGENCIES = [
     {"kind": "청소년상담복지센터", "name": "화성시청소년상담복지센터",
      "phone": "031-225-1318", "phone2": "031-267-8771", "fax": "031-267-8774",
      "address": "경기도 화성시 태안로 145 유앤아이센터 2층(병점동)", "homepage": "www.mars1318.or.kr"},
 ]
+# 전국 공통 연계 창구(등록 자료에 적힌 내용 그대로: 학업숙려제 매뉴얼 p.63, 정서행동 매뉴얼 p.38)
+NATIONAL_AGENCIES = [
+    "청소년전화 1388: 365일 24시간 위기 상담(유선 1388, 휴대전화 지역번호+1388)",
+    "청소년동반자: 청소년상담복지센터 상담 전문가가 직접 찾아가는 상담",
+]
 LOCAL_AGENCY_TEXT = "\n".join(
     f"- {a['kind']}: {a['name']} · 전화 {a['phone']}, {a['phone2']} · 팩스 {a['fax']} · {a['address']} · {a['homepage']}"
-    for a in LOCAL_AGENCIES)
+    for a in LOCAL_AGENCIES) + "\n" + "\n".join(f"- 전국 공통: {t}" for t in NATIONAL_AGENCIES)
 DB_PATH = store.DB_PATH
 LOG_PATH = ROOT / "logs" / "chat_log.jsonl"
 
@@ -211,12 +225,18 @@ SYSTEM_PROMPT = f"""너는 {SCHOOL_NAME} 전용 사안처리·상담 도우미 '
 3. 답변 구성은 주어진 [답변 형식]을 따른다. 형식에 없는 섹션을 억지로 만들지 않는다.
 4. 이산중 규정은 [질문 유형]이 "학교 맞춤형"일 때는 답의 첫 부분이 된다. 다른 유형에서는 질문과 직접 관련된 조항이 [자료]에 있을 때만 짧게 덧붙이고, 관련이 없으면 이산중 규정을 언급하지 않는다.
 5. 학교폭력 사안(신고·조사·분리·심의·조치)은 학교폭력예방법에 따른 법정 절차이므로 절차를 안내할 때는 가이드북 절차를 빠짐없이 쓴다. 학교폭력에 해당하지 않는 생활지도 위반은 이산중 학생생활교육규정(학생생활교육위원회)을 따른다. 이산중 규정과 법령 내용이 다르면 둘 다 쓰고 법령이 우선함을 밝힌다.
+5-1. 학교폭력 사안 처리를 안내할 때는 다음 흐름을 순서대로 빠짐없이 쓴다(가이드북 사안처리 흐름도 기준, 각 단계 근거는 [자료] 쪽으로): 접수·학교장 보고 → 분리(24시간 안에 분리 방법 결정, 최대 7일)와 가해학생 제2호 조치 → 교육(지원)청 보고(48시간 이내) → **조사 주체**(교육지원청 학교폭력 전담조사관 배정 요청 또는 전담기구 자체 조사) → 학교장 자체해결 또는 심의위원회. [자료]에 없는 단계는 "등록 자료에서 확인되지 않습니다"라고 쓴다.
 6. 상담 개입 내용은 상담 매뉴얼과 가이드북의 상담 요령에 있는 내용만 쓰고, 일반적인 상담 이론이나 자료에 없는 기법을 덧붙이지 않는다. 매뉴얼은 청소년상담복지센터 개인상담 기준이므로 학교 상황에 맞게 조정이 필요할 수 있다는 점을 한 줄 덧붙인다.
 7. 학교 규정은 "이산중 학생생활교육규정 제18조"처럼 규정명과 조문을, 법 조항은 "학교폭력예방법 제16조"처럼 법령명과 조문을 쓴다.
 8. 전화번호·기한·조치 번호·징계 단계는 자료에 적힌 그대로 쓴다. 바꾸거나 지어내지 않는다. 위 [지역기관] 목록의 기관명·전화번호는 자료로 보고 그대로 쓸 수 있다.
 8-1. [자료]가 청소년상담복지센터나 외부 상담기관(학교 밖 청소년 지원 포함) 연계를 안내하면, 일반 명칭만 쓰지 말고 이 학교의 연계 기관인 화성시청소년상담복지센터(031-225-1318)로 구체적으로 안내하고 끝에 [지역기관]을 단다. 연계 근거(어떤 경우에 연계하는지)는 [자료]의 쪽 번호로 단다. Wee센터·경찰·아동보호전문기관 등 다른 종류의 기관을 이 센터로 바꿔 쓰지 않는다.
+8-2. 상담·위기 연계를 안내할 때는 흩어 쓰지 말고 "### 연계 기관" 묶음 하나로 모은다: 화성시청소년상담복지센터(전화) [지역기관], 청소년전화 1388 [지역기관], 청소년동반자 [지역기관], 그리고 [자료]에 나온 Wee센터·Wee 순회상담·정신건강복지센터 등(근거 쪽 포함). 질문 상황과 관련된 기관만 쓴다.
 9. 성폭력 관련 사안이면 "피해학생 의사와 관계없이 수사기관 즉시 신고 의무"를 맨 앞에 쓴다.
 10. 자해·자살 위험 신호가 질문에 있으면 학교 위기관리 절차와 Wee센터·청소년상담 1388 등 전문기관 연계가 우선임을 먼저 알린다. [자료]에 학교 위기대응 자료(추가 자료 중 위기 대응을 다루는 것)가 있으면 그 자료의 절차만 근거로 안내하고, 없으면 "자해·자살 관련 상담 방법은 등록된 자료에서 확인되지 않습니다"라고 밝힌다. 학교폭력이나 사이버 비행 등 다른 상황의 상담 요령을 자해·자살 상담 방법처럼 옮겨 쓰지 않는다.
+10-1. 자해·자살 위험 신호가 있으면 첫 줄 요약 바로 다음에 "## 지금 바로" 섹션을 두고 아래 5가지를 이 순서로 모두 쓴다.
+ ① **학생을 혼자 두지 않기**(안전 확보) ② **보호자에게 즉시 알리기**: 생명이 위험할 때는 비밀보장의 예외임을 학생에게 설명 ③ **학교위기관리위원회 소집·교육(지원)청 보고** ④ **보호자 동의 후 전문기관 연계** ⑤ **보호자가 연계를 거부할 때의 대체 지원**
+ - [자료]에 근거가 있는 항목은 그 쪽을 단다. [자료]에 근거가 없는 항목은 쪽 번호를 지어내거나 다른 쪽을 빌려 달지 말고 문장 끝에 [일반 원칙]이라고 쓴다. [일반 원칙]은 이 5가지에만 쓸 수 있다.
+ - 일반 면담의 "비밀보장 구조화"를 위기 상황에 그대로 옮겨 쓰지 않는다.
 11. 상담사에게 쓰는 문장은 존댓말로 간결하게 쓴다. 단, [질문 유형]이 "학생 눈높이 설명"이면 상담사가 학생에게 그대로 읽어 줄 수 있는 반말·쉬운 말 예시를 따옴표로 쓴다. 예시 문장도 자료에 있는 정의·유형·사례만 쉬운 말로 바꾼 것이어야 한다. 굵은 글씨 규칙은 12번을 따른다.
 12. 상담사가 답을 훑어만 봐도 무엇을 해야 하는지 보이도록 굵은 글씨를 쓴다.
  - 첫 줄 요약에서는 결론(해야 할 일·가능 여부)을 굵게 한다.
@@ -228,9 +248,11 @@ SYSTEM_PROMPT = f"""너는 {SCHOOL_NAME} 전용 사안처리·상담 도우미 '
  - 더 위험한 경우의 법정 의무는 빠뜨리지 않되 조건과 함께 쓴다(예: "성적인 사진이라면 피해학생 의사와 관계없이 즉시 수사기관 신고 의무").
  - 첫 줄 요약을 "~사안에 해당합니다"처럼 확인되지 않은 결론으로 시작하지 않는다.
 14. [질문 분해]가 주어지면 조각을 하나도 빠뜨리지 않고 다룬다.
+ - 조각이 3개 이상이면 첫 줄 요약 다음(위기면 "## 지금 바로" 다음)에 "## 한눈에 보기"로 조각 순서대로 할 일을 5줄 이내로 쓴다. 이 줄에는 근거 표시를 달지 않고(아래 세부에서 단다), 세부 섹션은 그 아래에 둔다.
  - [답변 형식]의 섹션 안에서 조각마다 "### ① 조각 이름" 소제목을 쓰고, 그 조각에 맞는 자료를 근거로 단다(상담 개입은 상담 매뉴얼, 절차는 가이드북·학교 규정·운영 매뉴얼).
  - 원인이 다른 것은 섞지 않는다(예: 학교폭력 피해로 인한 결석의 출석 인정과, 생활 습관으로 인한 미인정 결석의 숙려제 안내는 따로 쓴다).
  - [자료]에 근거가 없는 조각은 "등록 자료에서 확인되지 않습니다"라고 쓰고 지어내지 않는다.
+15. 근거는 문장마다 그 문장 내용이 실제로 나오는 쪽만 단다. 한 문장에 근거 있는 내용과 근거 없는 내용을 섞지 않는다(근거 없는 부분은 빼거나, 규칙 10-1의 [일반 원칙]으로 따로 쓴다). 한 문장에 다는 쪽은 핵심 3개 이하로 줄인다.
 """
 
 
@@ -304,7 +326,7 @@ QTYPES = {
         "label": "위기(자해·자살)",
         "desc": "자해·자살 위험이나 그 상담 방법을 묻는 질문",
         "plan": [("esan", 4, 2, 6), ("guide", 6, 3, 12), ("cyber", 2, 1, 3), ("digital", 2, 1, 3)],
-        "format": "규칙 10을 따른다. 위기 대응 자료가 [자료]에 있으면 그 절차를 단계별로, 없으면 연계 기관과 학교 절차만 짧게 쓴다.",
+        "format": "규칙 10·10-1을 따른다. \"## 지금 바로\" 5가지 다음에, 위기 대응 자료가 [자료]에 있으면 그 절차를 단계별로, 없으면 연계 기관과 학교 절차만 짧게 쓴다.",
     },
 }
 DEFAULT_QTYPE = "school"
@@ -654,11 +676,16 @@ def parse_citations(text):
     return sorted(found, key=lambda x: (x[0] != "esan", x[1]))
 
 
-CITE_SPAN_RE = re.compile(r"\[[^\[\]]*?(?:p\.\s?\d[^\[\]]*|지역기관)\]")
+CITE_SPAN_RE = re.compile(r"\[[^\[\]]*?(?:p\.\s?\d[^\[\]]*|지역기관|일반 원칙)\]")
 WEAK_CITE = 0.35      # 단어 겹침: 문장 핵심어 중 인용 쪽에 나오는 비율
 WEAK_CITE_SEM = 0.70  # 뜻 겹침: 문장과 인용 쪽 청크의 임베딩 코사인(가장 높은 청크)
 # 둘 다 낮을 때만 '근거 약함'. 사례 1 실측: 엉뚱한 인용은 단어 0.29~0.31·뜻 0.64~0.69,
 # 바꿔 쓴 맞는 인용(띄어쓰기 없는 표 글자 등)은 단어 0.29~0.33이어도 뜻 0.72 이상
+
+
+CLAUSE_SPLIT_RE = re.compile(r",|·(?=\s)|(?<=[고며])\s+|(?<=거나)\s+")
+CLAUSE_STOP = {"학생", "경우", "필요", "진행", "실시", "확인", "지원", "위하", "통하", "대하", "하", "있", "되", "않"}
+CLAUSE_SEM = 0.66  # 구절은 짧아 뜻 겹침이 낮게 나오므로 줄(0.70)보다 낮은 기준. 사례 2 "혼자 두지 않고" 0.63
 
 
 def check_citations(text, hits, index=None, threshold=WEAK_CITE, sem_threshold=WEAK_CITE_SEM):
@@ -690,12 +717,24 @@ def check_citations(text, hits, index=None, threshold=WEAK_CITE, sem_threshold=W
         best = max(len(toks & page_tok[c]) / len(toks) for c in cites)
         if best < threshold:
             cand.append({"line": body[:160], "cites": cites, "overlap": round(best, 2)})
+            continue
+        # 줄 전체는 맞아도, 근거 없는 구절이 섞였는지 본다(예: "혼자 두지 않고" + 원문에 있는 "대화 환경 조성")
+        for clause in CLAUSE_SPLIT_RE.split(body):
+            raw = {t for t in tokenize(clause) if len(t) >= 2}
+            ctoks = raw - CLAUSE_STOP
+            if len(raw) < 2 or not ctoks:
+                continue
+            cbest = max(len(ctoks & page_tok[c]) / len(ctoks) for c in cites)
+            if cbest == 0:
+                cand.append({"line": clause.strip()[:160], "cites": cites, "overlap": 0.0, "clause": True,
+                             "full": body[:160]})
     if cand and index is not None and index.emb is not None and rows:
         vecs = embed_texts([c["line"] for c in cand])  # 후보 줄만 한 번에
         for c, v in zip(cand, vecs):
             sims = [float(index.emb[r] @ v) for cc in c["cites"] for r in rows.get(cc, [])]
             c["sem"] = round(max(sims), 3) if sims else None
-        cand = [c for c in cand if c.get("sem") is None or c["sem"] < sem_threshold]
+        cand = [c for c in cand if c.get("sem") is None
+                or c["sem"] < (CLAUSE_SEM if c.get("clause") else sem_threshold)]
     for c in cand:
         c["cites"] = [cite_label(d, pg) for d, pg in c["cites"]]
     return cand
@@ -812,9 +851,9 @@ def retrieve(index, question, queries, k=8, per_query=4, school_k=4, school_per_
     return hits
 
 
-def answer(index, question, history=None, model=LLM_MODEL, temperature=0.1, expand=True, retrieval=None,
-           qtype_override=None):
-    """question → {'answer', 'sources', 'standalone', 'queries', 'qtype', 'doc_order', 'cited', 'flags', 'model'}"""
+def prepare(index, question, history=None, model=LLM_MODEL, temperature=0.1, expand=True, retrieval=None,
+            qtype_override=None):
+    """답변 1단계: 질문 분석 → 검색 → LLM에 보낼 메시지까지 만든다(답변 생성 전). 화면이 스트리밍할 때 쓴다."""
     standalone, queries, qtype, topics, parts = (rewrite_query(question, history, model) if expand
                                                  else (question, [], qtype_override or DEFAULT_QTYPE, [], []))
     flags = []
@@ -836,6 +875,10 @@ def answer(index, question, history=None, model=LLM_MODEL, temperature=0.1, expa
         pplan = [(d, min(a, PART_BUDGET[0]), min(b, PART_BUDGET[1]), min(c, PART_BUDGET[2]))
                  for d, a, b, c in plan_for(pt["type"], index)]  # 조각 검색은 주제로 거르지 않는다(결석 조각 → 학업숙려제 등)
         jobs.append(([pt["text"] or pt["aspect"]] + pt["queries"], {"link_forms": False, "plan": pplan}))
+    must = [t for t in qtypes + (["crisis"] if "crisis" in flags else []) if t in MUST_QUERIES]
+    for t in dict.fromkeys(must):
+        mplan = [(d, 2, 1, MUST_BUDGET) for d, *_ in plan_for(t, index, topics)[:2]]  # 그 유형의 1·2순위 자료만
+        jobs.append((MUST_QUERIES[t], {"link_forms": False, "plan": mplan}))
     # 임베딩은 모든 검색어를 한 번에 묶어 만들고, BM25 점수도 미리 계산해 둔다(검색어마다 한 번)
     all_texts = [t for texts, _ in jobs for t in texts]
     all_vecs = embed_texts(all_texts) if index.emb is not None else [None] * len(all_texts)
@@ -850,7 +893,8 @@ def answer(index, question, history=None, model=LLM_MODEL, temperature=0.1, expa
         results = list(ex.map(lambda a: retrieve(index, a[0][0], a[0][1:], qvecs=a[2], **a[1]), args))
     hits = results[0]
     have = {h["id"] for h in hits}
-    for pt, part_hits in zip(parts, results[1:]):
+    job_parts = parts + [{"aspect": "필수 항목"}] * (len(results) - 1 - len(parts))
+    for pt, part_hits in zip(job_parts, results[1:]):
         for h in part_hits:
             if h["id"] not in have:
                 have.add(h["id"])
@@ -877,10 +921,24 @@ def answer(index, question, history=None, model=LLM_MODEL, temperature=0.1, expa
                                                           for d in doc_order if d in added_docs())
                                                 + f"[답변 형식]\n{spec['format']}\n\n[질문]\n{question}{note}\n\n"
                                                 "(이번 질문의 근거는 위 [자료]에서만 찾는다. 이전 답변의 쪽 번호를 재사용하지 않는다.)"})
+    return {"messages": messages, "hits": hits, "standalone": standalone, "queries": queries, "qtype": qtype,
+            "qtypes": qtypes, "parts": parts, "topics": topics, "doc_order": doc_order, "flags": flags,
+            "model": model, "temperature": temperature}
 
-    resp = client().chat.completions.create(model=model, temperature=temperature, messages=messages)
-    text = resp.choices[0].message.content or ""
+
+def stream_answer(ctx):
+    """답변 2단계(스트리밍): 생성되는 글 조각을 차례로 돌려준다. 화면이 조각마다 그리므로 중간에 멈출 수 있다."""
+    stream = client().chat.completions.create(model=ctx["model"], temperature=ctx["temperature"],
+                                              messages=ctx["messages"], stream=True)
+    for chunk in stream:
+        if chunk.choices and chunk.choices[0].delta and chunk.choices[0].delta.content:
+            yield chunk.choices[0].delta.content
+
+
+def finish(ctx, text, index=None):
+    """답변 3단계: 다 쓴 답변에서 근거 쪽을 뽑고, 근거 약함을 검사해 결과 묶음을 만든다."""
     text = re.sub(r"^(#{1,6})\s+#{1,6}\s+", r"\1 ", text, flags=re.M)  # "## ## 제목"처럼 겹친 소제목 정리
+    hits = ctx["hits"]
     cited = parse_citations(text)
     hit_keys = {(h["doc"], h["page"]) for h in hits}
     for h in hits:
@@ -888,19 +946,28 @@ def answer(index, question, history=None, model=LLM_MODEL, temperature=0.1, expa
     return {
         "answer": text,
         "sources": hits,
-        "standalone": standalone,
-        "queries": queries,
-        "qtype": qtype,
-        "qtypes": qtypes,
-        "parts": parts,
-        "topics": topics,
-        "doc_order": doc_order,
+        "standalone": ctx["standalone"],
+        "queries": ctx["queries"],
+        "qtype": ctx["qtype"],
+        "qtypes": ctx["qtypes"],
+        "parts": ctx["parts"],
+        "topics": ctx["topics"],
+        "doc_order": ctx["doc_order"],
         "cited": cited,
         "weak_cites": check_citations(text, hits, index),
         "uncited_ok": [c for c in cited if c not in hit_keys],  # 검색 자료에 없는 쪽을 인용했으면 확인 필요
-        "flags": flags,
-        "model": model,
+        "flags": ctx["flags"],
+        "model": ctx["model"],
     }
+
+
+def answer(index, question, history=None, model=LLM_MODEL, temperature=0.1, expand=True, retrieval=None,
+           qtype_override=None):
+    """question → {'answer', 'sources', 'standalone', 'queries', 'qtype', 'doc_order', 'cited', 'flags', 'model'}
+    (한 번에 받는 방식. 평가 스크립트가 쓴다. 화면은 prepare → stream_answer → finish로 나눠 쓴다)"""
+    ctx = prepare(index, question, history, model, temperature, expand, retrieval, qtype_override)
+    resp = client().chat.completions.create(model=model, temperature=temperature, messages=ctx["messages"])
+    return finish(ctx, resp.choices[0].message.content or "", index)
 
 
 def log_turn(question, result):

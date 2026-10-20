@@ -20,8 +20,10 @@ import conversations
 import store
 import ui_style
 from doc_agent import periodic_review
-from rag import (DB_PATH, DOCS, LLM_MODEL, LOCAL_AGENCIES, QTYPES, ROOT, SCHOOL_INFO, SCHOOL_NAME, Index, answer,
-                 cite_label, log_turn, plan_for)
+import streamlit.components.v1 as components
+
+from rag import (DB_PATH, DOCS, LLM_MODEL, LOCAL_AGENCIES, QTYPES, ROOT, SCHOOL_INFO, SCHOOL_NAME, Index,
+                 cite_label, finish, log_turn, plan_for, prepare, stream_answer)
 
 EXAMPLES = [
     "수업 시간에 학생 상담을 해도 되나요? 상담 내용 비밀은 어디까지 지켜야 하나요?",
@@ -71,7 +73,7 @@ def show_use_alerts(res):
         lines = "\n".join(f"- {'🔴' if a['severity'] == 'critical' else '🟠'} [{a['short']}] {a['title']}: "
                           f"{(a['message'] or '')[:160]}" for a in alerts[:5])
         st.warning(f"**사용 전 확인** · 이 답변이 인용한 자료에 확인하지 않은 알림이 {len(alerts)}건 있습니다.\n{lines}\n\n"
-                   "사이드바 위쪽 🔔 아이콘(알림·정기 점검)에서 확인할 수 있습니다.")
+                   "화면 오른쪽 위 🔔 아이콘(알림·정기 점검)에서 확인할 수 있습니다.")
 
 
 @st.cache_data(show_spinner=False)
@@ -190,7 +192,7 @@ ANSWER_CSS = """<style>
 [class*="st-key-ans_"] [data-testid="stMarkdownContainer"] strong { font-weight: 700; }
 [class*="st-key-ans_"] .mg-cite { font-size: .72em; color: #8a8f98; white-space: nowrap; font-weight: 400; }
 </style>"""
-CITE_RE = re.compile(r"\[[^\[\]]*?(?:p\.\s?\d[^\[\]]*|지역기관)\]")
+CITE_RE = re.compile(r"\[[^\[\]]*?(?:p\.\s?\d[^\[\]]*|지역기관|일반 원칙)\]")
 
 
 def render_answer(text, key):
@@ -216,7 +218,7 @@ def bell_badge_css(count, running, active=False):
     label = "99+" if count > 99 else str(count)
     badge = "" if not count else f"""
     .st-key-bell_btn button::after {{
-        content: "{label}"; position: absolute; top: -8px; right: -8px;
+        content: "{label}"; position: absolute; top: -6px; right: -6px;
         min-width: 32px; height: 32px; padding: 0 8px; box-sizing: border-box;
         border-radius: 16px; background: #e5484d; color: #fff;
         font-size: 17px; font-weight: 700; line-height: 32px; text-align: center;
@@ -227,7 +229,7 @@ def bell_badge_css(count, running, active=False):
         content: ""; position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px;
         border-radius: 50%; background: #3b82f6; box-shadow: 0 0 0 2px #fff;
     }"""
-    on = ".st-key-bell_btn button { background: #DDEBC4 !important; }" if active else ""
+    on = ".st-key-bell_btn button { background: #A9CF7A !important; }" if active else ""
     st.markdown(f"<style>{badge}{spin}{on}</style>", unsafe_allow_html=True)
 
 
@@ -292,14 +294,10 @@ with st.sidebar:
                 + "  \n".join(f"· {a['name']} ☎ {a['phone']}" for a in LOCAL_AGENCIES))
 
     view = st.session_state.get("view")
-    c_new, c_files, c_bell = st.columns([3.2, 1, 1], vertical_alignment="center")
+    c_new, c_files = st.columns(2, vertical_alignment="center")
     c_new.button("새 채팅", icon=":material/add:", key="new_chat", on_click=new_chat, use_container_width=True)
-    c_files.button(":material/folder_open:", key="files_btn_on" if view == "manage" else "files_btn",
-                   on_click=go_manage, help="자료 관리: 자료 추가·등록 자료")
-    bell_badge_css(len(_alerts), rs["running"], active=(view == "alerts"))
-    c_bell.button(":material/notifications:", key="bell_btn", on_click=go_alerts,
-                  help=(f"알림·정기 점검 · 확인하지 않은 알림 {len(_alerts)}건 (긴급 {n_crit}, 주의 {n_warn})"
-                        f" · 다음 정기 점검 {rs['next_due']}" + (" · 지금 점검 중" if rs["running"] else "")))
+    c_files.button("자료보관", icon=":material/folder_open:", key="files_btn_on" if view == "manage" else "files_btn",
+                   on_click=go_manage, help="자료 관리: 자료 추가·등록 자료", use_container_width=True)
     page = {"manage": "자료 관리", "alerts": "알림"}.get(view, "챗봇")
     st.divider()
 
@@ -326,6 +324,12 @@ with st.sidebar:
         if st.session_state.get("conv_id"):
             st.button("지금 대화 삭제", icon=":material/delete:", on_click=delete_conv, use_container_width=True)
 
+# 알림 아이콘: 화면 오른쪽 위(Streamlit 실행 표시 자리)에 고정. 위치·모양은 ui_style
+bell_badge_css(len(_alerts), rs["running"], active=(page == "알림"))
+st.button(":material/notifications:", key="bell_btn", on_click=go_alerts,
+          help=(f"알림·정기 점검 · 확인하지 않은 알림 {len(_alerts)}건 (긴급 {n_crit}, 주의 {n_warn})"
+                f" · 다음 정기 점검 {rs['next_due']}" + (" · 지금 점검 중" if rs["running"] else "")))
+
 if page == "알림":
     st.button("채팅으로 돌아가기", icon=":material/arrow_back:", on_click=leave_view)
     add_page.render_alerts()
@@ -347,6 +351,49 @@ if not st.session_state.messages and not st.session_state.get("pending"):
     st.caption("⚠️ 실제 학생 이름, 학교명, 연락처는 입력하지 마세요. 질문 내용이 Google Gemini API로 전송됩니다. "
                "답변이 맞는지 근거 원문으로 꼭 확인하세요.")
 
+def request_stop():
+    st.session_state.stop_requested = True
+
+
+def save_conversation():
+    if not st.session_state.get("conv_id"):
+        st.session_state.conv_id = conversations.new_id()
+    conversations.save(st.session_state.conv_id, st.session_state.messages)
+
+
+# 답변 생성 중에 멈췄으면(정지 버튼 또는 다른 버튼을 눌러 다시 그려짐) 그때까지 쓴 답을 대화에 남긴다
+_partial = st.session_state.pop("partial", None)
+if _partial:
+    done = _partial["text"].strip()
+    st.session_state.messages.append({"role": "user", "content": _partial["question"]})
+    st.session_state.messages.append({"role": "assistant", "stopped": True,
+                                      "content": (done + "\n\n" if done else "") + "_⏹ 답변 생성을 멈췄습니다._"})
+    st.session_state.pop("stop_requested", None)
+    save_conversation()
+
+STOP_JS = """<script>
+// 정지 버튼을 입력창의 보내기 버튼 자리에 겹쳐 놓는다(답변 생성 중에만 그려짐)
+const doc = window.parent.document;
+function place() {
+  const sub = doc.querySelector('[data-testid="stChatInputSubmitButton"]');
+  const wrap = doc.querySelector('.st-key-stop_gen');
+  if (!sub || !wrap) return;
+  const r = sub.getBoundingClientRect();
+  Object.assign(wrap.style, {position: 'fixed', left: r.left + 'px', top: r.top + 'px',
+                             width: r.width + 'px', height: r.height + 'px', zIndex: 1000000, visibility: 'visible'});
+}
+place(); setInterval(place, 150);
+</script>"""
+
+
+def show_stop_button():
+    """답변 생성 중: 보내기 아이콘을 숨기고 그 자리에 정지 아이콘을 띄운다. 누르면 생성을 멈춘다."""
+    st.markdown("<style>[data-testid='stChatInputSubmitButton']{visibility:hidden !important}</style>",
+                unsafe_allow_html=True)
+    st.button(":material/stop:", key="stop_gen", on_click=request_stop, help="답변 생성 멈추기")
+    components.html(STOP_JS, height=0)
+
+
 for i, m in enumerate(st.session_state.messages):
     with st.chat_message(m["role"], avatar=USER_AVATAR if m["role"] == "user" else AI_AVATAR):
         if m.get("result"):
@@ -367,27 +414,47 @@ if question:
     with st.chat_message("user", avatar=USER_AVATAR):
         st.markdown(question)
     history = [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages]
+    # 멈추면 다음 실행에서 이 기록으로 대화에 남긴다(끝까지 쓰면 지운다)
+    st.session_state.partial = {"question": question, "text": ""}
+    show_stop_button()
     with st.chat_message("assistant", avatar=AI_AVATAR):
         st.markdown('<div class="gy-ai-label">곁</div>', unsafe_allow_html=True)
-        with st.spinner("질문 유형을 판단하고 맞는 자료부터 찾는 중…"):
-            try:
-                res = answer(index, question, history=history)
-            except Exception as e:
-                st.error(f"답변 생성 중 오류가 났습니다: {e}")
-                st.stop()
-        if "crisis" in res["flags"]:
+        status = st.empty()
+        status.caption("🔎 질문 유형을 판단하고 맞는 자료부터 찾는 중…")
+        try:
+            ctx = prepare(index, question, history=history)
+        except Exception as e:
+            st.session_state.pop("partial", None)
+            status.empty()
+            st.error(f"답변 생성 중 오류가 났습니다: {e}")
+            st.stop()
+        status.empty()
+        if "crisis" in ctx["flags"]:
             st.error("자해·자살 위험 신호가 감지되었습니다. "
                      "학교 위기관리 절차를 우선 따르세요.")
-        show_route(res)
+        show_route(ctx)
+        box = st.empty()
+        box.caption("✍️ 답변을 쓰는 중… (정지 버튼으로 멈출 수 있습니다)")
+        text = ""
+        try:
+            for piece in stream_answer(ctx):
+                text += piece
+                st.session_state.partial["text"] = text
+                box.markdown(text + " ▌")  # 조각마다 화면에 그림: 정지를 누르면 여기서 멈춘다
+        except Exception as e:
+            st.session_state.pop("partial", None)
+            st.error(f"답변 생성 중 오류가 났습니다: {e}")
+            st.stop()
+        res = finish(ctx, text, index)
+        box.empty()
         render_answer(res["answer"], len(st.session_state.messages) + 1)
         show_use_alerts(res)
         show_weak_cites(res)
         show_sources(res)
+    st.session_state.pop("partial", None)
     log_turn(question, res)
     st.session_state.messages.append({"role": "user", "content": question})
     st.session_state.messages.append({"role": "assistant", "content": res["answer"], "result": res})
     # 이전 대화로 저장(첫 질문이면 새 대화 ID) → 사이드바 목록에 바로 보이도록 다시 그린다
-    if not st.session_state.get("conv_id"):
-        st.session_state.conv_id = conversations.new_id()
-    conversations.save(st.session_state.conv_id, st.session_state.messages)
+    save_conversation()
     st.rerun()
