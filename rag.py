@@ -685,14 +685,156 @@ class Index:
 
 
 # ---------- LLM ----------
+class GeminiADCClient:
+    """Google Cloud ADC (Application Default Credentials) 기반 Gemini 클라이언트 어댑터.
+    기존 OpenAI SDK 인터페이스(chat.completions.create, embeddings.create)를 호환 제공합니다."""
+
+    def __init__(self, project=None, location=None):
+        from types import SimpleNamespace
+        import google.auth
+        from google import genai
+
+        if not project:
+            try:
+                _, detected_proj = google.auth.default()
+            except Exception:
+                detected_proj = None
+            project = (
+                detected_proj
+                or os.environ.get("GOOGLE_CLOUD_PROJECT")
+                or os.environ.get("GCP_PROJECT")
+                or os.environ.get("GEMINI_PROJECT")
+            )
+        if not project:
+            raise RuntimeError(
+                "Google Cloud Project ID를 확인할 수 없습니다. "
+                "'gcloud config set project [PROJECT_ID]'를 실행하거나 "
+                "GOOGLE_CLOUD_PROJECT 환경변수를 설정하세요."
+            )
+
+        self.project = project
+        self.location = (
+            location
+            or os.environ.get("GOOGLE_CLOUD_LOCATION")
+            or os.environ.get("VERTEX_LOCATION", "global")  # gemini-3.8-flash는 global에만 있다(asia-northeast3는 404)
+        )
+        self.genai_client = genai.Client(vertexai=True, project=self.project, location=self.location)
+        self.chat = SimpleNamespace(completions=self._Completions(self))
+        self.embeddings = self._Embeddings(self)
+
+    class _Embeddings:
+        def __init__(self, outer):
+            self.outer = outer
+
+        def create(self, model, input):
+            from types import SimpleNamespace
+            model_name = model.split("/", 1)[1] if model.startswith("google/") else model
+            contents = [input] if isinstance(input, str) else list(input)
+            all_vecs = []
+            for i in range(0, len(contents), 90):
+                sub = contents[i:i + 90]
+                res = self.outer.genai_client.models.embed_content(model=model_name, contents=sub)
+                for e in res.embeddings:
+                    all_vecs.append(SimpleNamespace(embedding=list(e.values)))
+            return SimpleNamespace(data=all_vecs)
+
+    class _Completions:
+        def __init__(self, outer):
+            self.outer = outer
+
+        def _convert_messages(self, messages):
+            import base64
+            from google.genai import types
+
+            system_parts = []
+            contents = []
+            for msg in messages:
+                role = msg.get("role", "user")
+                content = msg.get("content", "")
+                if role == "system":
+                    if isinstance(content, str):
+                        system_parts.append(content)
+                    continue
+                genai_role = "model" if role == "assistant" else "user"
+                parts = []
+                if isinstance(content, str):
+                    parts.append(types.Part.from_text(text=content))
+                elif isinstance(content, list):
+                    for item in content:
+                        if isinstance(item, dict):
+                            if item.get("type") == "text":
+                                parts.append(types.Part.from_text(text=item.get("text", "")))
+                            elif item.get("type") == "image_url":
+                                url = item.get("image_url", {}).get("url", "")
+                                if url.startswith("data:") and ";base64," in url:
+                                    header, b64data = url.split(";base64,", 1)
+                                    mime = header.replace("data:", "")
+                                    raw_bytes = base64.b64decode(b64data)
+                                    parts.append(types.Part.from_bytes(data=raw_bytes, mime_type=mime))
+                contents.append(types.Content(role=genai_role, parts=parts))
+            system_instruction = "\n\n".join(system_parts) if system_parts else None
+            return system_instruction, contents
+
+        # OpenAI 호환 주소의 reasoning_effort와 같은 뜻: Gemini 3은 생각 단계, 2.5는 생각 토큰 예산으로 바꾼다
+        EFFORT_LEVEL = {"minimal": "MINIMAL", "low": "LOW", "medium": "MEDIUM", "high": "HIGH"}
+        EFFORT_BUDGET = {"none": 0, "minimal": 0, "low": 1024, "medium": 8192, "high": 24576}
+
+        def _thinking(self, model_name, effort):
+            from google.genai import types
+            if not effort:
+                return None
+            if model_name.startswith("gemini-2"):
+                return types.ThinkingConfig(thinking_budget=self.EFFORT_BUDGET[effort])
+            return types.ThinkingConfig(thinking_level=types.ThinkingLevel[self.EFFORT_LEVEL[effort]])
+
+        def create(self, model, messages, temperature=0.0, stream=False, reasoning_effort=None, **kwargs):
+            from types import SimpleNamespace
+            from google.genai import types
+
+            model_name = model.split("/", 1)[1] if model.startswith("google/") else model
+
+            system_instruction, contents = self._convert_messages(messages)
+            config = types.GenerateContentConfig(
+                temperature=temperature,
+                system_instruction=system_instruction,
+                thinking_config=self._thinking(model_name, reasoning_effort),
+                automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True)
+            )
+
+            if stream:
+                gen = self.outer.genai_client.models.generate_content_stream(
+                    model=model_name, contents=contents, config=config
+                )
+                def _stream_wrapper():
+                    for chunk in gen:
+                        text = chunk.text or ""
+                        yield SimpleNamespace(choices=[SimpleNamespace(delta=SimpleNamespace(content=text))])
+                return _stream_wrapper()
+            else:
+                resp = self.outer.genai_client.models.generate_content(
+                    model=model_name, contents=contents, config=config
+                )
+                text = resp.text or ""
+                return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=text))])
+
+
 def client():
     global _client
     if _client is None:
-        from openai import OpenAI
-        key = os.environ.get("GEMINI_API_KEY")
-        if not key:
-            raise RuntimeError("환경변수 GEMINI_API_KEY가 없습니다.")
-        _client = OpenAI(api_key=key, base_url=GEMINI_BASE_URL)
+        try:
+            _client = GeminiADCClient()
+        except Exception as adc_err:
+            # ADC 인증 실패 시 환경변수 GEMINI_API_KEY가 있으면 기존 방식으로 폴백
+            key = os.environ.get("GEMINI_API_KEY")
+            if key:
+                from openai import OpenAI
+                _client = OpenAI(api_key=key, base_url=GEMINI_BASE_URL)
+            else:
+                raise RuntimeError(
+                    f"Google Cloud ADC(Application Default Credentials) 인증을 초기화하지 못했습니다: {adc_err}\n"
+                    "터미널에서 'gcloud auth application-default login' 및 "
+                    "'gcloud config set project [PROJECT_ID]'를 실행했는지 확인하세요."
+                ) from adc_err
     return _client
 
 

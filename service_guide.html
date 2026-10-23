@@ -100,7 +100,7 @@ footer { color: var(--muted); font-size: 12.5px; margin-top: 44px; }
   <div class="grid g4" style="margin-top:22px">
     <div class="card stat"><div class="l">근거 자료</div><div class="v">10개 · 청크 1,689개</div><div class="d">이산중 규정, 학교폭력 가이드북, 상담 매뉴얼 2종, 학업숙려제·정서행동·마음건강·아동학대·성사안·위기대응(PFA-S)</div></div>
     <div class="card stat"><div class="l">질문 유형</div><div class="v">6가지</div><div class="d">유형마다 먼저 볼 자료와 답변 형식이 다름</div></div>
-    <div class="card stat"><div class="l">답변 품질(v13, 16문항)</div><div class="v">핵심 89.1%</div><div class="d">학교 규정 3문항 제외 시 91.2%. 평가 세트는 31문항으로 확대(v14 측정은 API 한도 해제 후)</div></div>
+    <div class="card stat"><div class="l">답변 품질(v13, 16문항)</div><div class="v">핵심 89.1%</div><div class="d">학교 규정 3문항 제외 시 91.2%. 평가 세트는 31문항으로 확대(v14 측정 대기, Vertex AI 전환으로 API 사용 가능)</div></div>
     <div class="card stat"><div class="l">자료 점검</div><div class="v">학기마다</div><div class="d">182일마다 자동 재평가, 사용 전 알림</div></div>
   </div>
 
@@ -218,7 +218,7 @@ footer { color: var(--muted); font-size: 12.5px; margin-top: 44px; }
   <!-- 실행 -->
   <h2>7. 실행과 파일</h2>
   <div class="grid g3">
-    <div class="card"><h3>실행</h3><p style="margin:0;font-size:14px"><code>run.bat</code> 더블클릭 → <code>http://localhost:8501</code>. 저장소가 없으면 먼저 만듭니다. API 키는 환경변수나 <code>.env</code>의 <code>GEMINI_API_KEY</code>, 모델 <code>gemini-3.8-flash</code>. 키(또는 사용 한도)가 없으면 질문 답변·자료 평가·등록은 할 수 없고, 화면·이전 대화·자료 보기·사용 중지·지역 수정은 됩니다.</p></div>
+    <div class="card"><h3>실행</h3><p style="margin:0;font-size:14px"><code>run.bat</code> 더블클릭 → <code>http://localhost:8501</code>. 저장소가 없으면 먼저 만듭니다. 인증은 Google Cloud ADC(<code>gcloud auth application-default login</code>)로 Vertex AI를 쓰고, 없으면 환경변수나 <code>.env</code>의 <code>GEMINI_API_KEY</code>로 대체합니다. 모델 <code>gemini-3.8-flash</code>(Vertex 위치 <code>global</code>). 인증(또는 사용 한도)이 없으면 질문 답변·자료 평가·등록은 할 수 없고, 화면·이전 대화·자료 보기·사용 중지·지역 수정은 됩니다.</p></div>
     <div class="card"><h3>주요 파일</h3><p style="margin:0;font-size:14px"><code>app.py</code> 화면 · <code>add_page.py</code> 자료 관리 · <code>rag.py</code> 검색·답변 · <code>answer_cache.py</code> 답변 캐시 · <code>store.py</code> 저장소 · <code>doc_agent/</code> OCR·중복 확인·평가·등록·정기 점검 · <code>eval/</code> 성능 평가(31문항)</p></div>
     <div class="card"><h3>더 보기</h3><p style="margin:0;font-size:14px"><a href="README.md">README.md</a> 사용법 · <a href="docs/DB_설계.md">docs/DB_설계.md</a> 저장소 설계 · <a href="workinglog.html">workinglog.html</a> 작업 과정(22단계)</p></div>
   </div>

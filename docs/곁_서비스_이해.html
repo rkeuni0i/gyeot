@@ -78,7 +78,7 @@ details { background:var(--surface-2); border-radius:12px; padding:10px 14px; ma
 <main>
   <h1>곁 서비스 해설: 코드와 설계 이유</h1>
   <p class="lead">곁이 어떻게 동작하는지, 각 기능이 어느 파일·함수에 있는지, 왜 그렇게 만들고 보완했는지를 처음부터 끝까지 정리한 문서입니다. 발표 질의응답 준비용으로도 씁니다.</p>
-  <p class="meta">2026-10-23 기준 · 코드 약 3,900줄(Python) · 근거 자료 10개 · 조각 1,689개 · 평가 v13(31문항 세트 v14는 API 한도 해제 후)</p>
+  <p class="meta">2026-10-23 기준 · 코드 약 3,900줄(Python) · 근거 자료 10개 · 조각 1,689개 · 평가 v13(31문항 세트 v14는 측정 대기) · Gemini는 Vertex AI(ADC 인증)</p>
 
   <!-- 0 -->
   <section id="overview">
@@ -126,8 +126,8 @@ details { background:var(--surface-2); border-radius:12px; padding:10px 14px; ma
     <div class="tw"><table>
       <tr><th>영역</th><th>선택</th><th>왜 이것을 골랐나</th><th>검토한 다른 선택</th></tr>
       <tr><td>화면</td><td><b>Streamlit</b></td><td>파이썬만으로 채팅·표·파일 업로드·탭을 바로 만들 수 있어 1인 개발 MVP에 빠름. RAG 로직(파이썬)과 같은 언어라 화면과 엔진을 한 프로세스에서 돌림</td><td>React + FastAPI: 디자인 자유도는 높지만 개발량이 2배 이상. 2단계(여러 사용자)에서 다시 검토</td></tr>
-      <tr><td>답변 모델</td><td><b>Gemini 3.8 Flash</b> (OpenAI 호환 API)</td><td>한국어 품질이 좋고 빠르며 비용이 낮음. 긴 컨텍스트(조각 100개 이상)를 한 번에 넣을 수 있음. OpenAI 호환 주소로 불러 <code>openai</code> 라이브러리 하나로 모델을 바꿀 수 있게 함(환경변수 <code>MINDGUIDE_MODEL</code>)</td><td>다른 상용 모델도 같은 코드로 교체 가능하도록 API 형태만 맞춤</td></tr>
-      <tr><td>임베딩</td><td><b>gemini-embedding-001</b></td><td>한국어 문장 의미 검색 품질, 같은 API 키로 사용. 벡터는 L2 정규화해 내적 = 코사인</td><td>로컬 한국어 임베딩 모델: 설치·GPU 부담</td></tr>
+      <tr><td>답변 모델</td><td><b>Gemini 3.8 Flash</b> (Vertex AI, ADC 인증)</td><td>한국어 품질이 좋고 빠르며 비용이 낮음. 긴 컨텍스트(조각 100개 이상)를 한 번에 넣을 수 있음. <code>google-genai</code>로 Vertex AI(위치 <code>global</code>)를 부르되, OpenAI 형식 어댑터(<code>GeminiADCClient</code>)를 둬 나머지 코드는 그대로 둠. 질문 분석의 생각 단계 low는 <code>thinking_level=LOW</code>(2.5 계열은 생각 토큰 예산 1024)로 바꿔 넘김. 모델은 환경변수 <code>MINDGUIDE_MODEL</code></td><td>AI Studio API 키(OpenAI 호환 주소, <code>openai</code> 라이브러리): 월 지출 한도(429)로 막혀 ADC를 기본으로 바꾸고, 키는 ADC가 없을 때의 대체 경로로 남김</td></tr>
+      <tr><td>임베딩</td><td><b>gemini-embedding-001</b></td><td>한국어 문장 의미 검색 품질, 같은 Vertex AI 프로젝트로 사용(3072차원). 벡터는 L2 정규화해 내적 = 코사인</td><td>로컬 한국어 임베딩 모델: 설치·GPU 부담</td></tr>
       <tr><td>키워드 검색</td><td><b>BM25 (rank_bm25)</b> + <b>kiwipiepy</b> 형태소 분석</td><td>법령·절차 질문은 “48시간”, “제17조”, “숙려제”처럼 정확한 단어가 중요. 한국어는 조사가 붙어서(“숙려제를”) 형태소로 잘라야 BM25가 제대로 맞음</td><td>벡터 검색만: 숫자·조문 번호를 자주 놓침(초기 79.4%의 원인 중 하나)</td></tr>
       <tr><td>순위 합치기</td><td><b>RRF</b>(Reciprocal Rank Fusion, k=60)</td><td>BM25 점수와 코사인은 단위가 달라 더할 수 없음. 순위만 써서 1/(60+순위)를 더하면 단위 문제가 없고 튜닝할 값이 거의 없음</td><td>가중 합: 자료마다 가중치를 맞춰야 함</td></tr>
       <tr><td>저장소</td><td><b>SQLite</b> 한 파일 (<code>index/gyeot.db</code>)</td><td>설치가 필요 없고 학교 PC 한 대에서 돌아감. 자료·조각·임베딩·평가·알림을 한 파일에 담아 백업도 파일 복사 한 번</td><td>PostgreSQL + pgvector: 여러 학교·사용자(2단계)에서 같은 표 구조로 옮길 계획</td></tr>
@@ -283,7 +283,7 @@ if _partial: messages.append(... done + "⏹ 답변 생성을 멈췄습니다.")
       <li><b>사용 전 확인</b> <code>show_use_alerts()</code>: 인용한 자료에 미확인 긴급·주의 알림이 있으면 답변 아래 경고, 참고 알림(입고 평가의 주의할 점)은 접힌 목록. 다른 시·도 자료 경고, OCR 자료 안내, 질문 주제 밖 자료 표시는 저장된 값이 아니라 지금 자료 정보로 다시 계산(이전 대화를 다시 열어도 맞게).</li>
       <li><b>답변 캐시</b> <code>answer_cache.py</code>: 대화의 첫 질문만, 열쇠 = 정리한 질문 + 자료 구성 지문(<code>Index.fingerprint</code>) + 규칙·모델 지문. 자료나 규칙이 바뀌면 예전 답은 쓰지 않음. “새로 답변 받기”로 다시 생성, 설정에서 모두 지우기.</li>
       <li><b>근거 표</b>: “적용 지역·연도” 칸(OCR 자료는 “· OCR”).</li>
-      <li><b>API 오류</b> <code>api_error()</code>: 429(사용 한도)면 원인과 확인할 곳(AI Studio 결제)을 안내. 근거 약함 검사의 임베딩이 실패해도 단어 겹침만으로 검사하고 답은 보여 줌.</li>
+      <li><b>API 오류</b> <code>api_error()</code>: 429(사용 한도)면 원인과 확인할 곳(Google Cloud 콘솔의 Vertex AI 할당량·결제)을, ADC 인증이 없으면 <code>gcloud auth application-default login</code>을 안내. 근거 약함 검사의 임베딩이 실패해도 단어 겹침만으로 검사하고 답은 보여 줌.</li>
       <li><b>이전 대화</b>: 답변이 끝날 때마다 <code>conversations.save()</code>로 JSON 저장. 실제 학생 정보 입력 금지 안내를 화면에 상시 표시.</li>
     </ul>
     <div class="warn"><b>보완한 점들</b>: 탭형 버튼(segmented control)의 CSS 선택자가 맞지 않아 색이 안 바뀜 → <code>[data-testid=stButtonGroup] button[aria-checked]</code>로 수정. 등록 완료 후에도 “이미 등록된 자료” 카드가 보여 실패처럼 보임 → 완료 화면을 따로 두고 업로더를 새 key(<code>upload_gen</code>)로 초기화.</div>
@@ -422,7 +422,7 @@ if _partial: messages.append(... done + "⏹ 답변 생성을 멈췄습니다.")
     <details><summary>개인정보는 어떻게 보호하나요?</summary><p>실제 학생 이름·학교·연락처 입력을 화면에서 막도록 안내하고, 자료 평가에서 개인정보 기준을 필수로 둬 실제 개인정보가 많은 자료는 비추천합니다. 대화는 이 컴퓨터에만 저장합니다. 2단계에서 자동 가림을 넣을 계획입니다.</p></details>
     <details><summary>다른 학교에서도 쓸 수 있나요?</summary><p>학교 이름·정보·연계 기관은 설정값(<code>SCHOOL_NAME</code>, <code>LOCAL_AGENCIES</code>)이고, 학교 규정은 자료보관에서 그 학교 규정 PDF로 바꾸면 됩니다. 여러 학교가 함께 쓰려면 2단계의 PostgreSQL 전환과 로그인이 필요합니다.</p></details>
     <details><summary>답변 시간이 긴데 줄일 수 있나요?</summary><p>답변 전 준비는 3초로 줄였고, 남은 시간은 대부분 답변 생성입니다. 스트리밍으로 첫 글자가 바로 보이게 했고, 자주 묻는 질문 캐시(같은 첫 질문은 1초 안)와 자료 수에 맞춘 검색 몫 조정(본 질문 합계 60청크)을 넣었습니다. 평균 20초 이하인지는 API 한도가 풀린 뒤 31문항 평가로 확인합니다.</p></details>
-    <details><summary>Gemini API 키가 없으면 무엇을 할 수 없나요?</summary><p>질문 답변(질문 분석·임베딩·답변 생성), 근거 약함의 뜻 비교, 자료 추가의 AI 평가와 임베딩, 개정판 교체·다시 평가·정기 점검, Gemini OCR, 품질 평가는 키가 필요합니다. 화면·이전 대화·자료 보기, 사용 중지·완전 삭제, 지역·연도 고치기, 알림 확인, 중복·판 확인, Windows OCR은 키 없이 됩니다.</p></details>
+    <details><summary>Gemini 인증(ADC 또는 API 키)이 없으면 무엇을 할 수 없나요?</summary><p>질문 답변(질문 분석·임베딩·답변 생성), 근거 약함의 뜻 비교, 자료 추가의 AI 평가와 임베딩, 개정판 교체·다시 평가·정기 점검, Gemini OCR, 품질 평가는 키가 필요합니다. 화면·이전 대화·자료 보기, 사용 중지·완전 삭제, 지역·연도 고치기, 알림 확인, 중복·판 확인, Windows OCR은 키 없이 됩니다.</p></details>
   </section>
 </main>
 </div>

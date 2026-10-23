@@ -56,11 +56,14 @@ C:\Users\2003g\anaconda3\envs\DS\python.exe -m streamlit run app.py
 ```
 
 - 의존성 설치: `pip install -r requirements.txt` (Python 3.10+ 권장)
-- API 키: Windows 환경변수 `GEMINI_API_KEY` 또는 프로젝트 루트의 `.env` 파일에서 읽습니다. (`.env.example` 참고)
-  - 키(또는 사용 한도)가 있어야 하는 것: 질문 답변(질문 분석·임베딩·답변 생성), 근거 약함의 뜻 비교·더 맞는 쪽 추천, 자료 추가의 AI 평가와 임베딩, 개정판 교체, 다시 평가·정기 점검, Gemini OCR, `eval/run_eval.py`, `build_index.py`
-  - 키 없이 되는 것: 화면, 이전 대화 다시 보기, 저장된 답변 캐시, 등록 자료 보기·사용 중지·완전 삭제, 적용 지역·연도 고치기, 알림 확인, 중복·판 확인, Windows OCR
-  - 사용 한도를 넘으면(429) 화면에 원인과 확인할 곳(Google AI Studio 결제)을 안내합니다.
-- 모델: `gemini-3.8-flash` (환경변수 또는 `.env`의 `MINDGUIDE_MODEL`로 바꿀 수 있음)
+- 인증: Google Cloud ADC(Application Default Credentials)를 기본으로 사용합니다.
+  - 사전 준비: 터미널에서 `gcloud auth login` 및 `gcloud auth application-default login`을 실행합니다.
+  - (선택 폴백) 환경변수 `GEMINI_API_KEY` 또는 `.env` 파일의 API Key 인증도 함께 지원합니다.
+  - 인증(또는 사용 한도)이 있어야 하는 것: 질문 답변(질문 분석·임베딩·답변 생성), 근거 약함의 뜻 비교·더 맞는 쪽 추천, 자료 추가의 AI 평가와 임베딩, 개정판 교체, 다시 평가·정기 점검, Gemini OCR, `eval/run_eval.py`, `build_index.py`
+  - 인증 없이 되는 것: 화면, 이전 대화 다시 보기, 저장된 답변 캐시, 등록 자료 보기·사용 중지·완전 삭제, 적용 지역·연도 고치기, 알림 확인, 중복·판 확인, Windows OCR
+  - 사용 한도를 넘으면(429) 화면에 원인과 확인할 곳(Google Cloud 콘솔 / Vertex AI 할당량 및 결제)을 안내합니다.
+  - Vertex AI 위치는 `GOOGLE_CLOUD_LOCATION`(기본 `global`). `gemini-3.8-flash`는 `global`에만 있고 `asia-northeast3`에서는 404입니다.
+- 모델: `gemini-3.8-flash` (환경변수 또는 `.env`의 `MINDGUIDE_MODEL`로 바꿀 수 있음). 질문 분석은 생각 단계 low로 부릅니다(Gemini 3은 `thinking_level=LOW`, 2.5 계열은 생각 토큰 예산 1024).
 
 ## 동작 방식
 
@@ -153,7 +156,7 @@ schtasks /Create /TN "곁 정기 점검" /TR "C:\Users\2003g\Documents\Project_s
 | `service_guide.html` | 서비스 소개(구조·기능·사용 흐름 시뮬레이션·등록 자료) |
 | `docs/곁_서비스_이해.html` | 코드와 설계 이유 해설(발표 질의응답 준비용) |
 | `docs/테스트_사례1_비교.html` | 사례 1·2 곁 vs Gemini 노트북 비교와 보완·후속 조치 |
-| `workinglog.html` | 단계별 작업 기록(23단계) |
+| `workinglog.html` | 단계별 작업 기록(24단계) |
 | `곁 서비스 기획서.pdf` | Notion 기획서 출력본 |
 
 ## 주의

@@ -1,0 +1,228 @@
+{
+ "summary": {
+  "n": 16,
+  "retrieval_recall": 0.885,
+  "citation_recall": 0.854,
+  "key_coverage": 0.937,
+  "avg_seconds": 46.406,
+  "weak_cites_total": 6,
+  "type_accuracy": 1.0
+ },
+ "note": "v14 31문항 중 Q1~Q16(v13 동일 16문항) 실측 결과 (Q17에서 429 중단)",
+ "items": [
+  {
+   "id": "Q1",
+   "qtype": "procedure",
+   "type_ok": true,
+   "retrieval_recall": 1.0,
+   "citation_recall": 1.0,
+   "key_coverage": 1.0,
+   "weak_cites": 0,
+   "missed_keys": [],
+   "missed_gold": [],
+   "seconds": 46.8
+  },
+  {
+   "id": "Q2",
+   "qtype": "procedure",
+   "type_ok": true,
+   "retrieval_recall": 1.0,
+   "citation_recall": 1.0,
+   "key_coverage": 1.0,
+   "weak_cites": 0,
+   "missed_keys": [],
+   "missed_gold": [],
+   "seconds": 52.6
+  },
+  {
+   "id": "Q3",
+   "qtype": "procedure",
+   "type_ok": true,
+   "retrieval_recall": 1.0,
+   "citation_recall": 1.0,
+   "key_coverage": 1.0,
+   "weak_cites": 0,
+   "missed_keys": [],
+   "missed_gold": [],
+   "seconds": 12.2
+  },
+  {
+   "id": "Q4",
+   "qtype": "procedure",
+   "type_ok": true,
+   "retrieval_recall": 1.0,
+   "citation_recall": 1.0,
+   "key_coverage": 0.833,
+   "weak_cites": 0,
+   "missed_keys": [
+    "14일"
+   ],
+   "missed_gold": [],
+   "seconds": 33.6
+  },
+  {
+   "id": "Q5",
+   "qtype": "procedure",
+   "type_ok": true,
+   "retrieval_recall": 1.0,
+   "citation_recall": 1.0,
+   "key_coverage": 1.0,
+   "weak_cites": 0,
+   "missed_keys": [],
+   "missed_gold": [],
+   "seconds": 26.1
+  },
+  {
+   "id": "Q6",
+   "qtype": "procedure",
+   "type_ok": true,
+   "retrieval_recall": 1.0,
+   "citation_recall": 1.0,
+   "key_coverage": 0.833,
+   "weak_cites": 0,
+   "missed_keys": [
+    "응답"
+   ],
+   "missed_gold": [],
+   "seconds": 36.4
+  },
+  {
+   "id": "Q7",
+   "qtype": "procedure",
+   "type_ok": true,
+   "retrieval_recall": 1.0,
+   "citation_recall": 1.0,
+   "key_coverage": 1.0,
+   "weak_cites": 1,
+   "missed_keys": [],
+   "missed_gold": [],
+   "seconds": 60.3
+  },
+  {
+   "id": "Q8",
+   "qtype": "school",
+   "type_ok": true,
+   "retrieval_recall": 1.0,
+   "citation_recall": 1.0,
+   "key_coverage": 1.0,
+   "weak_cites": 0,
+   "missed_keys": [],
+   "missed_gold": [],
+   "seconds": 69.3
+  },
+  {
+   "id": "Q9",
+   "qtype": "school",
+   "type_ok": true,
+   "retrieval_recall": 1.0,
+   "citation_recall": 0.5,
+   "key_coverage": 0.8,
+   "weak_cites": 0,
+   "missed_keys": [
+    "과반수"
+   ],
+   "missed_gold": [
+    "이산중 p.15"
+   ],
+   "seconds": 39.0
+  },
+  {
+   "id": "Q10",
+   "qtype": "school",
+   "type_ok": true,
+   "retrieval_recall": 1.0,
+   "citation_recall": 1.0,
+   "key_coverage": 1.0,
+   "weak_cites": 0,
+   "missed_keys": [],
+   "missed_gold": [],
+   "seconds": 59.4
+  },
+  {
+   "id": "Q11",
+   "qtype": "crisis",
+   "type_ok": true,
+   "retrieval_recall": 0.333,
+   "citation_recall": 0.333,
+   "key_coverage": 1.0,
+   "weak_cites": 1,
+   "missed_keys": [],
+   "missed_gold": [
+    "마음건강 p.35",
+    "마음건강 p.36"
+   ],
+   "seconds": 40.2
+  },
+  {
+   "id": "Q12",
+   "qtype": "counseling",
+   "type_ok": true,
+   "retrieval_recall": 0.5,
+   "citation_recall": 0.5,
+   "key_coverage": 0.857,
+   "weak_cites": 1,
+   "missed_keys": [
+    "보호자"
+   ],
+   "missed_gold": [
+    "사이버상담 p.74",
+    "사이버상담 p.75"
+   ],
+   "seconds": 47.1
+  },
+  {
+   "id": "Q13",
+   "qtype": "counseling",
+   "type_ok": true,
+   "retrieval_recall": 1.0,
+   "citation_recall": 1.0,
+   "key_coverage": 1.0,
+   "weak_cites": 1,
+   "missed_keys": [],
+   "missed_gold": [],
+   "seconds": 44.1
+  },
+  {
+   "id": "Q14",
+   "qtype": "counseling",
+   "type_ok": true,
+   "retrieval_recall": 0.333,
+   "citation_recall": 0.333,
+   "key_coverage": 0.667,
+   "weak_cites": 0,
+   "missed_keys": [
+    "장난",
+    "피해자"
+   ],
+   "missed_gold": [
+    "가이드북 p.30",
+    "사이버상담 p.65"
+   ],
+   "seconds": 40.6
+  },
+  {
+   "id": "Q15",
+   "qtype": "student_explain",
+   "type_ok": true,
+   "retrieval_recall": 1.0,
+   "citation_recall": 1.0,
+   "key_coverage": 1.0,
+   "weak_cites": 2,
+   "missed_keys": [],
+   "missed_gold": [],
+   "seconds": 31.7
+  },
+  {
+   "id": "Q16",
+   "qtype": "definition",
+   "type_ok": true,
+   "retrieval_recall": 1.0,
+   "citation_recall": 1.0,
+   "key_coverage": 1.0,
+   "weak_cites": 0,
+   "missed_keys": [],
+   "missed_gold": [],
+   "seconds": 103.1
+  }
+ ]
+}

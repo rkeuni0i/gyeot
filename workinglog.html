@@ -339,6 +339,7 @@
         <li><a href="#s21">글자를 읽을 수 없는 PDF의 OCR</a></li>
         <li><a href="#s22">기획서 대조와 1단계 남은 과제(A~F) 구현</a></li>
         <li><a href="#s23">키 없이 점검과 추가 보완, 자료 3개 받기</a></li>
+        <li><a href="#s24">Vertex AI(ADC) 전환</a></li>
         <li><a href="#files">현재 파일 구성</a></li>
         <li><a href="#next">다음 계획</a></li>
       </ol>
@@ -1307,6 +1308,20 @@
       <div class="issue"><b>남은 점</b> 세 자료의 AI 평가·임베딩, 31문항 평가(v14)와 처리 시간 측정은 Gemini API 한도가 풀린 뒤. 가짜 응답 점검은 코드가 끝까지 도는지만 보여 주고 답변 품질·속도는 알 수 없음</div>
     </section>
 
+    <section class="step" id="s24">
+      <div class="step-head"><span class="num">24</span>
+        <h2>Vertex AI(ADC) 전환</h2><span class="date">2026-10-23</span>
+      </div>
+      <div class="req"><b>요청</b>AI Studio API 키가 한도 초과(429)로 막혀 Google Cloud ADC + Vertex AI로 바꾸되 모델은 gemini-3.8-flash 유지, 질문 분석의 생각 단계 low를 ADC 경로에도 넣기(3.8이 안 되면 2.5-flash로)</div>
+      <ul>
+        <li><b>인증</b>: <code>GeminiADCClient</code>(google-genai, Vertex AI)가 OpenAI 형식(<code>chat.completions.create</code>·<code>embeddings.create</code>)을 흉내 내 나머지 코드는 그대로. ADC가 없으면 <code>GEMINI_API_KEY</code>로 OpenAI 호환 주소 대체</li>
+        <li><b>모델 그대로</b>: 3.8을 2.5로 몰래 바꾸던 줄을 지움(설정·평가 기록에 3.8로 남는데 실제로는 2.5가 답하던 문제). 3.8은 Vertex 위치 <code>global</code>에서 동작, <code>asia-northeast3</code>는 404 → 기본 위치 <code>global</code></li>
+        <li><b>생각 단계 low</b>: <code>reasoning_effort</code>를 Gemini 3은 <code>thinking_level=LOW</code>, 2.5 계열은 생각 토큰 예산 1024로 바꿈(2.5는 thinking_level을 400으로 거부). 질문 분석 생각 토큰 133 → 0, 1회 2~6초</li>
+        <li><b>실제 흐름 1건</b>: 임베딩 95개 묶음 정상(3072차원), "학교폭력 신고 후 교육지원청 보고 기한" → 학교폭력 절차·법, 48시간 이내 [가이드북 p.24] 등, 근거 약함 0건, 약 20초. 스트리밍 정상</li>
+      </ul>
+      <div class="issue"><b>남은 점</b> 31문항 평가(v14)로 품질·평균 시간 확인, 등록 대기 3개 AI 평가 → 승인</div>
+    </section>
+
     <!-- files -->
     <section class="step" id="files">
       <div class="step-head"><span class="num">≡</span>
@@ -1352,7 +1367,7 @@
         <li><s>특정 학교 학칙 넣고 그 학교에 맞게 답하기</s> → 이산중 규정, 기본 자리 복구(22단계)</li>
         <li><s>상담 기법 자료 추가</s> · <s>자료 평가 에이전트</s> · <s>DB 층 분리·정기 점검</s> · <s>OCR</s> · <s>개정판 교체</s></li>
         <li><s>가정·정서·위기 주제 자료</s> → 아동학대·정서행동·마음건강·PFA-S 등록, 주제 7개 모두 1개 이상</li>
-        <li><s>1단계 남은 과제 A~F 구현</s>(22·23단계) → <b>측정이 남음</b>: Gemini API 한도가 풀리면 31문항 평가(v14)로 평균 20초 이하·품질 하락 없음·사례 C1·C2 근거 약함 0건 확인</li>
+        <li><s>1단계 남은 과제 A~F 구현</s>(22·23단계) → <b>측정이 남음</b>: Vertex AI 전환(24단계)으로 바로 31문항 평가(v14)를 돌려 평균 20초 이하·품질 하락 없음·사례 C1·C2 근거 약함 0건 확인</li>
         <li><b>다음 차례</b>: 등록 대기 3개(Wee 운영 가이드, Wee 우수사례집, 서울 위기관리 가이드라인) AI 평가 → 승인, 자료 20개까지 상담교사가 실제 보는 PDF 받기</li>
         <li>2단계: 상담교사 커뮤니티(지식 공유), 로그인·인증, PostgreSQL + pgvector, 개인정보 자동 가림</li>
       </ol>

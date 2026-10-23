@@ -410,8 +410,11 @@ def api_error(e):
     """Gemini 오류를 상담사가 알아볼 수 있게 바꾼다."""
     msg = str(e)
     if "429" in msg or "RESOURCE_EXHAUSTED" in msg:
-        return ("Gemini API 사용 한도를 넘었습니다(429). 월 지출 한도라면 Google AI Studio의 결제(Billing)에서 한도를 "
+        return ("Gemini API 사용 한도를 넘었습니다(429). Google Cloud 콘솔의 Vertex AI 할당량 및 결제를 "
                 "확인하고, 잠시 뒤 다시 시도하세요.")
+    if "ADC" in msg or "DefaultCredentials" in msg or "credentials" in msg.lower():
+        return ("Google Cloud ADC(인증) 정보가 없습니다. 터미널에서 'gcloud auth application-default login'을 "
+                "실행하여 인증을 완료하세요.")
     return f"답변 생성 중 오류가 났습니다: {e}"
 
 
