@@ -56,7 +56,7 @@ meta (스키마 버전, 점검 주기, 마지막 정기 점검 시각)
 
 | 표 | 주요 열 |
 |---|---|
-| `documents` | `doc_id`, `short`(인용 이름, 고유), `title`, `file_name`, `file_sha256`(중복 방지), `layer`, `kind`(guide/school/manual/reference), `school_id`, `publisher`, `published_year`, `is_base`, `status`(active/inactive), `toc_json`·`page_offset`(매뉴얼 목차), `summary`, `added_at`·`added_by`, `last_reviewed_at`, `next_review_due` |
+| `documents` | `doc_id`, `short`(인용 이름, 고유), `title`, `file_name`, `file_sha256`(중복 방지), `layer`, `kind`(guide/school/manual/reference), `school_id`, `publisher`, `published_year`(기준 연도), `region`(적용 지역: 전국/경기/화성·오산/학교/다른 시·도, v2), `ocr_engine`(OCR로 읽은 자료면 gemini/windows, v2), `is_base`, `status`(active/inactive), `toc_json`·`page_offset`(매뉴얼 목차), `summary`, `added_at`·`added_by`, `last_reviewed_at`, `next_review_due` |
 | `doc_topics` | `doc_id`, `topic` |
 | `doc_qtypes` | `doc_id`, `qtype` |
 | `chunks` | `chunk_id`, `doc_id`, `page`, `section`, `text`, `tokens_json`, `embedding`(float32 BLOB), `embed_model` |
@@ -95,8 +95,17 @@ meta (스키마 버전, 점검 주기, 마지막 정기 점검 시각)
 
 - 사용 전 알림이 보이는 곳
   - 챗봇 사이드바: "🔔 자료 유의사항 N건(긴급·주의) · 다음 정기 점검일"
-  - 답변 바로 아래: 답변이 인용한 자료에 확인하지 않은 주의·긴급 알림이 있으면 "사용 전 확인" 상자
+  - 답변 바로 아래: 답변이 인용한 자료에 확인하지 않은 주의·긴급 알림이 있으면 "사용 전 확인" 상자, 참고 알림(입고 평가의 주의할 점·OCR로 읽은 자료)은 접힌 목록
   - 자료 관리 → 알림·정기 점검: 알림 목록과 "확인함" 처리, 지금 점검 실행
+
+## 6-1. 저장소 v2(2026-10-23)
+
+- `documents`에 `region`·`ocr_engine` 칸을 더했다. `store.connect()`가 이전 저장소를 열면 `ensure_schema()`가 칸만 더하고 데이터는 그대로 둔다(`meta.schema_version` = 2).
+- 답변의 근거 블록 머리와 근거 표에 "적용 지역 · 기준 연도"가 붙고, 적용 지역이 전국·경기·화성·오산·이 학교가 아닌 자료를 인용하면 경고한다.
+- 이산중 규정을 추가 자료(`add_이산중생활규정`)에서 기본 자리(`esan`)로 옮겼다. 청크 ID·평가 기록·알림의 자료 ID를 함께 바꿨다(재임베딩 없음).
+- `region`은 확인 순서에도 쓴다: 위기 자료가 여러 개면 이 학교에 그대로 쓸 수 있는 지역(전국·경기·화성·오산·학교) 자료를 앞에, 다른 시·도 자료를 뒤에 둔다.
+- 자료를 등록할 때 `region`을 고르지 않으면 `ingest.guess_region()`이 정한다: 학교 층 → 학교, 평가 에이전트의 제안, 교육부 없이 ○○교육청만 발행 → 그 시·도, 그 밖 → 전국. `ocr_engine`은 OCR 캐시(`data/ocr/`)가 있으면 그 엔진.
+- `published_year`는 `dedupe.year_info()`로 읽는다. 부칙 개정 이력은 가장 늦은 해, 보고서 번호("2024 TR-34")는 제외, 표지에 "연구보고 25-…"만 있으면 2025.
 
 ## 7. 앞으로 확장할 때
 

@@ -26,7 +26,8 @@ SAME_MIN = 0.85      # 양쪽 겹침이 이 이상이고 연도가 같으면 같
 EDITION_MIN = 0.30   # 어느 한쪽 겹침이 이 이상이면 같은 자료의 다른 판 후보
 TITLE_EDITION = 0.60  # 제목이 이만큼 비슷하면 겹침이 EDITION_MIN의 절반만 넘어도 다른 판 후보
 OVERLAP_MIN = 0.10   # 일부 겹침으로 알려 줄 최소값
-YEAR_RE = re.compile(r"(20[0-3]\d)\s*(?:년|학년도|\.|년도|\s|$|_|판|개정)")
+# 연구보고서 번호("2024 TR-34", "2025-TR-55")는 발행 연도가 아니므로 뺀다
+YEAR_RE = re.compile(r"(20[0-3]\d)(?!\s*-?\s*TR)\s*(?:년|학년도|\.|년도|\s|$|_|판|개정)")
 
 
 def _words(text):
@@ -55,14 +56,18 @@ BODY_YEAR_RE = re.compile(
     r"|(20[0-3]\d)\s*\.\s*\d{1,2}\s*\.?\s*(?:\d{1,2}\s*\.?\s*)?(?:개정|발행|발간)")
 
 
+REPORT_NO_RE = re.compile(r"(?:연구\s*보고|연구보고서|기본\s*연구|수시\s*연구)\s*(\d{2})\s*-")
+
+
 def _snippet(text, start, end, pad=18):
     return " ".join(text[max(0, start - pad):end + pad].split())
 
 
-def _pick(found):
-    """found: [(연도, 쪽, 문맥)] → 가장 많이 나온 연도(같으면 늦은 해)와 그 첫 쪽·문맥."""
+def _pick(found, latest=False):
+    """found: [(연도, 쪽, 문맥)] → 가장 많이 나온 연도(같으면 늦은 해)와 그 첫 쪽·문맥.
+    latest=True면 가장 늦은 해(부칙의 개정 이력처럼 여러 해가 나열된 발행 정보는 마지막 개정이 그 판이다)."""
     years = [y for y, _, _ in found]
-    best = max(set(years), key=lambda y: (years.count(y), y))
+    best = max(years) if latest else max(set(years), key=lambda y: (years.count(y), y))
     first = next(f for f in found if f[0] == best)
     return best, first[1], first[2], years.count(best)
 
@@ -76,6 +81,11 @@ def year_info(pages, file_name="", title="", stored=None):
     if found:
         y, pg, ctx, n = _pick(found)
         return {"year": y, "source": f"표지 p.{pg}", "detail": ctx, "weak": False}
+    # 표지에 네 자리 연도가 없고 "연구보고 25-위센터02"처럼 두 자리 연도가 든 보고서 번호만 있으면 그 해(2025)
+    m = REPORT_NO_RE.search(pages[0] if pages else "")
+    if m:
+        return {"year": 2000 + int(m.group(1)), "source": "표지 p.1 보고서 번호",
+                "detail": _snippet(pages[0], m.start(), m.end()), "weak": False}
 
     def body_hits(idx):
         out = []
@@ -90,7 +100,7 @@ def year_info(pages, file_name="", title="", stored=None):
     for label, idx in (("발행 정보", tail), ("본문", [i for i in range(1, n_pages) if i not in tail])):
         found = body_hits(idx)
         if found:
-            y, pg, ctx, n = _pick(found)
+            y, pg, ctx, n = _pick(found, latest=label == "발행 정보")
             return {"year": y, "source": f"{label} p.{pg}", "detail": ctx + (f" (같은 연도 {n - 1}곳 더)" if n > 1 else ""),
                     "weak": False}
     if stored:

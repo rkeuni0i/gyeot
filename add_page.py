@@ -15,6 +15,9 @@ VERDICT_STYLE = {"추천": st.success, "조건부": st.warning, "비추천": st.
 TYPE_LABELS = {k: v["label"] for k, v in rag.QTYPES.items()}
 LAYER_LABELS = {"common": "공통(모든 질문)", "topic": "주제(주제가 겹칠 때)", "school": "학교(이 학교 자료)"}
 SEVERITY = {"critical": ("🔴", st.error), "warn": ("🟠", st.warning), "info": ("🔵", st.info)}
+REGION_OPTIONS = list(store.REGIONS)
+REGION_LABELS = {"전국": "전국 공통(교육부 등)", "경기": "경기도(경기도교육청)", "화성·오산": "화성·오산(교육지원청 관할)",
+                 "학교": "이 학교(이산중)"}
 
 
 def flash(msg):
@@ -172,6 +175,11 @@ def add_form(r, path):
     use_in = st.multiselect("이 자료를 확인할 질문 유형", options=list(TYPE_LABELS),
                             default=[u for u in default_use if u in TYPE_LABELS],
                             format_func=lambda k: TYPE_LABELS[k], key=f"add_use_in_{mode}")
+    default_region = (old_meta.get("region") if mode == "replace" else None) or ingest.guess_region(r, layer)
+    region_opts = REGION_OPTIONS + ([default_region] if default_region not in REGION_OPTIONS else [])
+    region = st.selectbox("적용 지역", region_opts, index=region_opts.index(default_region), key=f"add_region_{mode}",
+                          format_func=lambda x: REGION_LABELS.get(x, f"{x} (다른 시·도: 답변에서 경고)"),
+                          help="답변 근거 표에 함께 보이고, 경기·전국·이 학교가 아닌 지역 자료를 인용하면 경고합니다.")
     verdict = r["verdict"]
     note, ok = "", edition_ok
     if verdict == "조건부":
@@ -190,19 +198,25 @@ def add_form(r, path):
         if same:
             finish_add({"title": "이미 등록되어 있습니다", "short": rag.DOCS.get(same, {}).get("short", same),
                         "lines": ["같은 PDF가 저장소에 들어 있어 다시 등록하지 않았습니다. 챗봇에서 바로 검색됩니다."]})
-        with st.spinner("저장소에 등록하고 청크를 임베딩하는 중… (1분 안팎) 버튼을 다시 누르지 마세요."):
+        bar = st.progress(0.0, text="저장소에 등록하고 청크를 임베딩하는 중… 버튼을 다시 누르지 마세요.")
+
+        def tick(done, total):
+            bar.progress(done / max(total, 1), text=f"청크 임베딩 {done} / {total}")
+        with st.spinner("저장소에 등록하는 중…"):
             try:
                 if mode == "replace":
                     r["dedupe_year"] = old.get("new_year")
                     n, removed = ingest.replace_edition(old["doc_id"], path, r, title=title, use_in=use_in,
-                                                        topics=topics, layer=layer, note=note)
+                                                        topics=topics, layer=layer, note=note, region=region,
+                                                        progress=tick)
                     done = {"title": "새 판으로 교체 완료", "short": short, "n": n, "lines": [
                         f"이전 판({old['old_year'] or '?'}) → 새 판({old.get('new_year') or '?'})으로 바꿨습니다.",
                         "삭제한 이전 판 파일: " + (", ".join(removed) or "없음"),
                         "🔔 알림에 '개정판으로 교체됨'이 남았습니다. 바뀐 기한·절차를 한 번 확인하세요."]}
                 else:
                     doc_id, n = ingest.add_document(path, r, short=short, title=title, use_in=use_in, topics=topics,
-                                                    layer=layer, note=note, base_slot=slot)
+                                                    layer=layer, note=note, base_slot=slot, region=region,
+                                                    progress=tick)
                     done = {"title": "등록 완료", "short": short, "n": n, "lines": [f"정식 이름: {title}"]}
                     if slot:
                         done["lines"].append(f"기본 자료 자리 [{short}]에 들어가 질문 유형별 확인 순서에서 원래 자리를 차지합니다.")
@@ -409,6 +423,8 @@ def tab_docs():
                      "구분": "기본" if m["is_base"] else "추가",
                      "상태": "사용 중" if m["status"] == "active" else "사용 중지",
                      "층": LAYER_LABELS[m["layer"]].split("(")[0],
+                     "적용 지역": "이 학교" if m.get("region") == "학교" else (m.get("region") or "-"),
+                     "연도": m["published_year"] or "-", "OCR": "🔤" if m.get("ocr_engine") else "",
                      "청크": counts.get(d, 0), "최근 판정": last["verdict"] if last else "-",
                      "알림": sum(1 for a in alerts if a["doc_id"] == d), "다음 점검": m["next_review_due"] or "-"})
     con.close()
@@ -418,7 +434,21 @@ def tab_docs():
     target = st.selectbox("자료 선택", list(docs), format_func=lambda d: f"[{docs[d]['short']}] {docs[d]['title']}")
     m = docs[target]
     st.caption(f"파일: data/{m['file_name']} · 등록 {m['added_at']} ({m['added_by']}) · 질문 유형: "
-               + ", ".join(TYPE_LABELS.get(q, q) for q in m["qtypes"]))
+               + ", ".join(TYPE_LABELS.get(q, q) for q in m["qtypes"])
+               + (f" · OCR({m['ocr_engine']})로 읽은 자료" if m.get("ocr_engine") else ""))
+    with st.expander("적용 지역·기준 연도 고치기"):
+        opts = REGION_OPTIONS + ([m["region"]] if m.get("region") and m["region"] not in REGION_OPTIONS else [])
+        e1, e2, e3 = st.columns([2, 1, 1], vertical_alignment="bottom")
+        new_region = e1.selectbox("적용 지역", opts, index=opts.index(m["region"]) if m.get("region") in opts else 0,
+                                  format_func=lambda x: REGION_LABELS.get(x, x), key=f"reg_{target}")
+        new_year = e2.number_input("기준 연도", 2000, 2100, int(m["published_year"] or 2026), key=f"year_{target}")
+        if e3.button("저장", key=f"save_scope_{target}", use_container_width=True):
+            con = store.connect()
+            store.upsert_document(con, target, region=new_region, published_year=int(new_year))
+            con.commit()
+            con.close()
+            rag.refresh_docs()
+            flash(f"[{m['short']}] 적용 지역 {new_region} · 기준 연도 {new_year}로 저장했습니다.")
     c1, c2 = st.columns(2)
     if m["status"] == "active":
         if c1.button("사용 중지", use_container_width=True, help="검색에서만 빼고 자료와 청크는 남깁니다. 다시 켤 수 있습니다."):

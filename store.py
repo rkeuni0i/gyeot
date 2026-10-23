@@ -17,9 +17,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 DB_PATH = ROOT / "index" / "gyeot.db"  # 2026-10-19 mindguide.db에서 이름 변경
-SCHEMA_VERSION = "1"
+SCHEMA_VERSION = "2"  # 2: documents.region(적용 지역)·ocr_engine(OCR로 읽은 자료) 추가
 TOPICS = ["학교폭력", "가정", "학업·학교부적응", "정서·위기", "디지털·사이버", "상담 기법", "학교 운영"]
 LAYERS = ["common", "topic", "school"]
+# 적용 지역: 전국 공통 → 시·도 → 시·군(교육지원청 관할) → 이 학교. 학교 지역과 다르면 답변에서 경고한다
+REGIONS = ["전국", "경기", "화성·오산", "학교"]
 REVIEW_INTERVAL_DAYS = 182  # 한 학기
 
 SCHEMA = """
@@ -36,6 +38,8 @@ CREATE TABLE IF NOT EXISTS documents (
   kind TEXT NOT NULL,                          -- guide / school / manual / reference
   school_id TEXT REFERENCES schools(school_id),
   publisher TEXT, published_year INTEGER,
+  region TEXT,                                 -- 적용 지역(REGIONS 중 하나 또는 다른 시·도 이름)
+  ocr_engine TEXT,                             -- 글자층이 없어 OCR로 읽었으면 그 엔진(gemini/windows)
   is_base INTEGER NOT NULL DEFAULT 0,          -- 처음부터 있던 기본 자료(완전 삭제는 인용 이름 입력 확인 필요, 빈 자리로 다시 등록 가능)
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','inactive')),
   toc_json TEXT, page_offset INTEGER,          -- 매뉴얼 목차(인쇄 쪽, 장 이름)와 쪽 차이
@@ -90,11 +94,26 @@ def connect(path=DB_PATH, create=False):
     con = sqlite3.connect(path)
     con.row_factory = sqlite3.Row
     con.execute("PRAGMA foreign_keys = ON")
+    ensure_schema(con)
     return con
+
+
+def ensure_schema(con):
+    """이전 판 저장소에 없는 칸을 더한다(데이터는 그대로). 표가 아직 없으면(새 저장소) init_db가 만든다."""
+    cols = {r[1] for r in con.execute("PRAGMA table_info(documents)")}
+    if not cols:
+        return
+    for col in ("region", "ocr_engine"):
+        if col not in cols:
+            con.execute(f"ALTER TABLE documents ADD COLUMN {col} TEXT")
+    if get_meta(con, "schema_version") != SCHEMA_VERSION:
+        set_meta(con, "schema_version", SCHEMA_VERSION)
+    con.commit()
 
 
 def init_db(con):
     con.executescript(SCHEMA)
+    ensure_schema(con)
     con.execute("INSERT OR IGNORE INTO meta VALUES ('schema_version', ?)", (SCHEMA_VERSION,))
     con.execute("INSERT OR IGNORE INTO meta VALUES ('review_interval_days', ?)", (str(REVIEW_INTERVAL_DAYS),))
     con.commit()
@@ -112,6 +131,7 @@ def set_meta(con, key, value):
 # ---------- 문서 ----------
 def upsert_document(con, doc_id, **f):
     cols = ["short", "title", "file_name", "file_sha256", "layer", "kind", "school_id", "publisher", "published_year",
+            "region", "ocr_engine",
             "is_base", "status", "toc_json", "page_offset", "summary", "note", "added_at", "added_by",
             "last_reviewed_at", "next_review_due"]
     vals = {c: f.get(c) for c in cols if c in f}

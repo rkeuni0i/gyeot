@@ -22,6 +22,7 @@ __pycache__/
 *.log
 logs/*.jsonl
 logs/conversations/*.json
+logs/answer_cache.json
 !logs/.gitkeep
 !logs/conversations/.gitkeep
 

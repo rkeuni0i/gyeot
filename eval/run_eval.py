@@ -10,6 +10,7 @@
 - 인용 재현율: 정답 쪽 중 답변이 실제로 인용한 쪽 비율
 - 핵심 내용 포함률: 정답 핵심어 묶음 중 답변에 하나라도 들어간 묶음 비율
 - 유형 정확도: 질문 유형 분류가 expected_type과 같은 비율
+- 근거 약함(쪽 빌림): 답변 줄 중 인용한 쪽과 단어·뜻이 모두 맞지 않는 줄 수(rag.check_citations). 사례 C1·C2는 0이 목표
 """
 import json
 import sys
@@ -36,6 +37,7 @@ def score(item, res):
         "missed_keys": [g[0] for g, hit in zip(item["keys"], keys_hit) if not hit],
         "missed_gold": sorted(rag.cite_label(*g) for g in gold - cited),
         "qtype": res.get("qtype"),
+        "weak_cites": len(res.get("weak_cites") or []),
         "type_ok": (res.get("qtype") == item["expected_type"]) if item.get("expected_type") and res.get("qtype") else None,
     }
 
@@ -56,7 +58,7 @@ def main():
         s.update({"id": it["id"], "type": it["type"], "seconds": round(time.time() - t, 1),
                   "cited": [rag.cite_label(*c) for c in res["cited"]], "answer": res["answer"]})
         out.append(s)
-        print(f"{it['id']:4} 유형 {s['qtype']}({'O' if s['type_ok'] else 'X'})  검색 {s['retrieval_recall']}  인용 {s['citation_recall']}  핵심 {s['key_coverage']}"
+        print(f"{it['id']:4} 유형 {s['qtype']}({'O' if s['type_ok'] else 'X'})  검색 {s['retrieval_recall']}  인용 {s['citation_recall']}  핵심 {s['key_coverage']}  근거 약함 {s['weak_cites']}"
               f"  놓친 핵심 {s['missed_keys']}  놓친 쪽 {s['missed_gold']}  ({s['seconds']}s)", flush=True)
 
     def avg(key):
@@ -66,6 +68,8 @@ def main():
     summary = {"name": name, "mode": "full" if full else "rag", "model": rag.LLM_MODEL,
                "retrieval_recall": avg("retrieval_recall"), "citation_recall": avg("citation_recall"),
                "key_coverage": avg("key_coverage"), "avg_seconds": avg("seconds"),
+               "n": len(out), "weak_cites_total": sum(o["weak_cites"] for o in out),
+               "weak_cites_cases": sum(o["weak_cites"] for o in out if o["id"].startswith("C")),
                "type_accuracy": round(sum(o["type_ok"] for o in out if o["type_ok"] is not None)
                                       / max(1, len([o for o in out if o["type_ok"] is not None])), 3)}
     print("평균", summary)

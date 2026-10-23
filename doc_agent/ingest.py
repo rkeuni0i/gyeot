@@ -55,6 +55,11 @@ def caution_alerts(con, doc_id, report, review_id):
     """평가의 주의할 점·낮은 점수를 '사용 전 알림'으로 남긴다."""
     for c in report["proposal"].get("cautions", []):
         store.add_alert(con, doc_id, "info", "사용 시 유의사항", c, review_id)
+    ocr = (report.get("measured") or {}).get("ocr")
+    if ocr:
+        store.add_alert(con, doc_id, "info", "OCR로 읽은 자료",
+                        f"글자층이 없는 PDF라 {ocr.get('engine')} OCR로 {ocr.get('pages_ocr', '?')}쪽을 읽었습니다. "
+                        "숫자·표·연락처는 원본 쪽 이미지로 확인하세요.", review_id)
     for cid, s in report["scores"].items():
         if s.get("score") == 0 and s.get("weight"):
             store.add_alert(con, doc_id, "warn", f"{s['name']} 0점", s.get("evidence", ""), review_id)
@@ -71,6 +76,27 @@ def doc_year(pdf_path, agent_years, title):
     return dedupe.year_info([], Path(pdf_path).name, title)["year"]
 
 
+def guess_region(report, layer=None):
+    """적용 지역 추정: 학교 층이면 '학교', 평가가 제안한 지역, 표지의 시·도 교육청 이름, 그 밖에는 '전국'."""
+    if layer == "school" or report["proposal"].get("role") == "school":
+        return "학교"
+    r = report["proposal"].get("region")
+    if r in store.REGIONS or (r and r not in ("", "기타")):
+        return r
+    pubs = " ".join(report["measured"].get("publisher_candidates", []))
+    if "교육부" not in pubs:  # 교육부가 함께 낸 자료는 전국 공통으로 본다
+        m = re.search(r"(서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충청북|충북|충청남|충남|전라북|전북|"
+                      r"전라남|전남|경상북|경북|경상남|경남|제주)[가-힣]*교육청", pubs)
+        if m:
+            return m.group(1)
+    return "전국"
+
+
+def ocr_engine_of(pdf_path):
+    c = rag.ocr_cache(pdf_path)
+    return c["engine"] if c else None
+
+
 def empty_base_slots():
     """완전 삭제돼 비어 있는 기본 자료 자리(doc_id 목록)."""
     con = store.connect()
@@ -80,7 +106,7 @@ def empty_base_slots():
 
 
 def add_document(pdf_path, report, short=None, title=None, use_in=None, topics=None, layer=None,
-                 approved_by="상담사", note="", base_slot=None):
+                 approved_by="상담사", note="", base_slot=None, region=None, progress=None):
     """report: doc_agent.agent.evaluate_pdf 결과. 나머지는 화면에서 고친 값(없으면 에이전트 제안).
     base_slot: 비어 있는 기본 자료 자리(예: 'guide')에 등록하면 그 ID·인용 이름으로 들어가 기본 자료로 취급된다
     (질문 유형별 확인 순서, 가이드북 양식 연결, 원래 판 파일이면 장 구간표·목차까지 그대로)."""
@@ -124,6 +150,7 @@ def add_document(pdf_path, report, short=None, title=None, use_in=None, topics=N
             school_id="esan" if role == "school" else None,
             publisher=", ".join(report["measured"].get("publisher_candidates", [])[:3]) or None,
             published_year=year, is_base=0, status="active",
+            region=region or guess_region(report, layer), ocr_engine=ocr_engine_of(pdf_path),
             summary=prop.get("summary"), note=note, added_at=store.now(), added_by=approved_by,
             last_reviewed_at=report["evaluated_at"])
         if extra:
@@ -139,7 +166,7 @@ def add_document(pdf_path, report, short=None, title=None, use_in=None, topics=N
         chunks = rag.build_chunks(only=[doc_id])
         for c in chunks:
             c["tokens"] = rag.tokenize(c["text"])
-        vecs = rag.embed_texts([rag.chunk_embed_text(c) for c in chunks])
+        vecs = rag.embed_texts([rag.chunk_embed_text(c) for c in chunks], progress=progress)
         store.replace_chunks(con, doc_id, chunks, vecs, rag.EMBED_MODEL)
         con.commit()
     except Exception:
@@ -156,7 +183,7 @@ def add_document(pdf_path, report, short=None, title=None, use_in=None, topics=N
 
 
 def replace_edition(old_id, pdf_path, report, title=None, use_in=None, topics=None, layer=None,
-                    approved_by="상담사", note=""):
+                    approved_by="상담사", note="", region=None, progress=None):
     """등록된 자료(old_id)를 개정판 PDF로 교체한다. 상담사가 화면에서 확인한 뒤에만 부른다.
 
     유지: 자료 ID·인용 이름·층·주제·질문 유형(화면에서 고친 값이 있으면 그 값), 이전 평가 기록(이력)
@@ -187,7 +214,7 @@ def replace_edition(old_id, pdf_path, report, title=None, use_in=None, topics=No
     chunks = rag.doc_chunks(old_id, meta)
     for c in chunks:
         c["tokens"] = rag.tokenize(c["text"])
-    vecs = rag.embed_texts([rag.chunk_embed_text(c) for c in chunks])
+    vecs = rag.embed_texts([rag.chunk_embed_text(c) for c in chunks], progress=progress)
 
     # 2) 한 트랜잭션으로 교체
     old_file, old_year = old["file_name"], old["published_year"]
@@ -195,6 +222,8 @@ def replace_edition(old_id, pdf_path, report, title=None, use_in=None, topics=No
         store.upsert_document(
             con, old_id, title=title or prop["title"], file_name=dest.name, file_sha256=digest,
             layer=layer or old["layer"], published_year=new_year,
+            region=region or old.get("region") or guess_region(report, layer or old["layer"]),
+            ocr_engine=ocr_engine_of(pdf_path),
             publisher=", ".join(report["measured"].get("publisher_candidates", [])[:3]) or old["publisher"],
             toc_json=None, page_offset=None, status="active", summary=prop.get("summary"),
             note=(note + " " if note else "") + f"개정판 교체: {old_file}({old_year}) → {dest.name}({new_year})",

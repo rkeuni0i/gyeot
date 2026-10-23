@@ -95,12 +95,12 @@ footer { color: var(--muted); font-size: 12.5px; margin-top: 44px; }
 <body>
 <main>
   <h1><img src="docs/brand/gyeot_mark.svg" alt="" style="height:1.05em;vertical-align:-.15em;margin-right:.15em">곁 <span style="font-weight:500;font-size:.6em;color:var(--text-2)">상담실 곁의 사안처리 동료</span></h1>
-  <p class="sub">이산중학교 사안처리·상담 도우미 · 학교에 혼자 근무하는 전문상담교사가 학교 규정·학교폭력 절차·상담 개입 방법을 근거와 함께 바로 확인하는 웹 서비스 · 2026-10-19 기준</p>
+  <p class="sub">이산중학교 사안처리·상담 도우미 · 학교에 혼자 근무하는 전문상담교사가 학교 규정·학교폭력 절차·상담 개입 방법을 근거와 함께 바로 확인하는 웹 서비스 · 2026-10-23 기준</p>
 
   <div class="grid g4" style="margin-top:22px">
-    <div class="card stat"><div class="l">근거 자료</div><div class="v">4개 · 청크 696개</div><div class="d">이산중 규정, 학교폭력 가이드북, 상담 매뉴얼 2종</div></div>
+    <div class="card stat"><div class="l">근거 자료</div><div class="v">10개 · 청크 1,689개</div><div class="d">이산중 규정, 학교폭력 가이드북, 상담 매뉴얼 2종, 학업숙려제·정서행동·마음건강·아동학대·성사안·위기대응(PFA-S)</div></div>
     <div class="card stat"><div class="l">질문 유형</div><div class="v">6가지</div><div class="d">유형마다 먼저 볼 자료와 답변 형식이 다름</div></div>
-    <div class="card stat"><div class="l">답변 품질(평가 16문항)</div><div class="v">핵심 91%</div><div class="d">노트북형 기준선(90%)과 같거나 높음, 근거 쪽 표시</div></div>
+    <div class="card stat"><div class="l">답변 품질(v13, 16문항)</div><div class="v">핵심 89.1%</div><div class="d">학교 규정 3문항 제외 시 91.2%. 평가 세트는 31문항으로 확대(v14 측정은 API 한도 해제 후)</div></div>
     <div class="card stat"><div class="l">자료 점검</div><div class="v">학기마다</div><div class="d">182일마다 자동 재평가, 사용 전 알림</div></div>
   </div>
 
@@ -109,13 +109,13 @@ footer { color: var(--muted); font-size: 12.5px; margin-top: 44px; }
   <div class="flow">
     <div class="box"><b>① 질문</b><small>상담사가 상황이나 궁금한 점을 입력(예시 질문 버튼도 있음)</small></div>
     <div class="arrow">→</div>
-    <div class="box"><b>② 질문 이해</b><small>Gemini가 질문을 정리하고 검색어·<b>질문 유형</b>·<b>주제</b>를 판단</small></div>
+    <div class="box"><b>② 질문 이해</b><small>Gemini가 질문을 정리하고 검색어·<b>질문 유형</b>·<b>주제</b>·<b>질문 조각</b>을 판단, 위기·성·학생 특성(다문화·장애) 신호 감지</small></div>
     <div class="arrow">→</div>
-    <div class="box"><b>③ 자료 검색</b><small>유형별 순서대로 문서마다 찾음(벡터 + 형태소 하이브리드), 본문이 가리키는 양식 쪽도 함께</small></div>
+    <div class="box"><b>③ 자료 검색</b><small>유형별 순서대로 문서마다 찾음(벡터 + 형태소 하이브리드), 조각별·필수 항목 검색을 동시에, 본 질문은 합계 60청크 안에서</small></div>
     <div class="arrow">→</div>
-    <div class="box"><b>④ 답변</b><small>자료 안에서만 답하고 문장마다 [자료 p.쪽] 근거, 알림이 있으면 "사용 전 확인"</small></div>
+    <div class="box"><b>④ 답변</b><small>자료 안에서만 답하고 문장마다 [자료 p.쪽] 근거(스트리밍·정지), 근거 약함 검사·더 맞는 쪽 추천, "사용 전 확인"</small></div>
   </div>
-  <div class="store">🗄️ <b>자료 저장소</b> <code>index/mindguide.db</code>(SQLite): 문서·층(공통/주제/학교)·주제·질문 유형·청크·임베딩·평가 기록·알림을 한 파일에 보관.
+  <div class="store">🗄️ <b>자료 저장소</b> <code>index/gyeot.db</code>(SQLite, 구조 v2): 문서·층(공통/주제/학교)·주제·질문 유형·<b>적용 지역·기준 연도·OCR 여부</b>·청크·임베딩·평가 기록·알림을 한 파일에 보관.
     <b>자료 관리</b> 화면에서 추가(AI 평가 → 승인)·사용 중지·완전 삭제, <b>학기별 정기 점검</b>이 같은 저장소를 씁니다.</div>
 
   <!-- 화면 -->
@@ -123,24 +123,26 @@ footer { color: var(--muted); font-size: 12.5px; margin-top: 44px; }
   <div class="grid g3">
     <div class="card"><h3>💬 챗봇</h3>
       <ul style="margin:0;padding-left:18px;font-size:14px">
-        <li>질문 입력, 예시 질문 11개, 대화 초기화</li>
-        <li>답변 위: 🔎 질문 유형·확인 순서</li>
-        <li>답변: 유형별 형식, 문장마다 근거 쪽</li>
-        <li>답변 아래: 사용 전 확인(알림), 근거 표(코사인 순), 인용된 근거 원문·원본 쪽 이미지</li>
-        <li>사이드바: 근거 자료 목록, 🔔 유의사항 N건, 질문 유형별 확인 순서</li>
-        <li>모든 질문·답변·근거가 <code>logs/chat_log.jsonl</code>에 저장</li>
+        <li>질문 입력, 예시 질문, 새 채팅, 이전 대화 다시 열기</li>
+        <li>답변 위: 🔎 질문 유형·확인 순서, 🧩 질문 분해</li>
+        <li>답변: 유형별 형식, 문장마다 근거 쪽, 스트리밍·정지 버튼</li>
+        <li>답변 아래: 사용 전 확인(주의·긴급 경고, 참고 알림 접힌 목록, OCR·다른 지역·주제 밖 자료 표시), 근거 약함(더 맞는 쪽 추천), 근거 표(적용 지역·연도), 근거 원문·원본 쪽 이미지</li>
+        <li>같은 첫 질문은 저장된 답을 바로 보여 줌(새로 답변 받기)</li>
+        <li>사이드바: 학교 정보·연계 기관, 새 채팅·자료보관, 근거 자료, 이전 대화, 설정 · 오른쪽 위 🔔 알림 배지</li>
+        <li>질문·답변·근거가 <code>logs/chat_log.jsonl</code>, 대화가 <code>logs/conversations/</code>에 저장</li>
       </ul></div>
     <div class="card"><h3>📚 자료 관리</h3>
       <ul style="margin:0;padding-left:18px;font-size:14px">
-        <li><b>자료 추가</b>: PDF 업로드 → 같은 PDF 차단 → AI 평가(12개 기준) → 추천/조건부/비추천 → 상담사 승인 → 바로 검색</li>
-        <li><b>등록 자료</b>: 상태·층·주제·청크·최근 판정·알림·다음 점검일, 사용 중지·다시 평가·완전 삭제</li>
-        <li><b>알림·정기 점검</b>: 마지막/다음 점검일, 지금 점검, 알림 "확인함"</li>
+        <li><b>자료 추가</b>: PDF 올리기 → (글자층 없으면 OCR) → 본문 기반 중복·판 확인 → AI 평가(12개 기준) → 적용 지역 등 확인·승인(개정판이면 교체 동의) → 진행 막대 → 바로 검색</li>
+        <li><b>등록 자료</b>: 주제 꼬리표·상태·층·적용 지역·연도·OCR·청크·최근 판정·알림·다음 점검일, 지역·연도 고치기, 사용 중지·다시 평가·완전 삭제</li>
+        <li><b>알림·정기 점검</b>(오른쪽 위 🔔): 마지막/다음 점검일, 지금 점검, 알림 "확인함"</li>
       </ul></div>
     <div class="card"><h3>⚙️ 자동으로 일어나는 일</h3>
       <ul style="margin:0;padding-left:18px;font-size:14px">
         <li>앱을 열 때 점검 시기(182일)가 지났으면 백그라운드 정기 점검</li>
-        <li>자료 추가 때 평가의 주의할 점 → 알림</li>
-        <li>답변이 인용한 자료에 주의·긴급 알림이 있으면 답변 아래 표시</li>
+        <li>자료 추가 때 평가의 주의할 점·OCR 여부 → 참고 알림, 0점 기준 → 주의 알림</li>
+        <li>답변이 인용한 자료에 주의·긴급 알림이 있으면 답변 아래 경고, 참고 알림은 접힌 목록</li>
+        <li>다른 시·도 자료를 인용하면 경고</li>
         <li>(선택) <code>run_review.bat</code>을 작업 스케줄러에 등록하면 앱을 열지 않아도 점검</li>
       </ul></div>
   </div>
@@ -164,27 +166,33 @@ footer { color: var(--muted); font-size: 12.5px; margin-top: 44px; }
   <div class="table-wrap"><table>
     <thead><tr><th>질문 유형</th><th>예시 질문</th><th>확인 순서</th><th>답변 형식</th></tr></thead>
     <tbody>
-      <tr><td><b>학교 맞춤형</b></td><td>수업 시간에 상담해도 되나요? / 수업 방해 학생 처리</td><td>이산중 → 가이드북 → 매뉴얼</td><td>이산중 규정 → 지금 해야 할 일</td></tr>
+      <tr><td><b>학교 맞춤형</b></td><td>수업 시간에 상담해도 되나요? / 수업 방해 학생 처리</td><td>이산중 → 가이드북 → 매뉴얼 → 주제가 맞는 추가 자료</td><td>이산중 규정 → 지금 해야 할 일</td></tr>
       <tr><td><b>학교폭력 절차·법</b></td><td>교육지원청 보고 기한 / 자체해결 요건 / 분리 기간</td><td>가이드북 → 이산중 → 매뉴얼</td><td>사실은 바로, 상황은 법정 절차 순서(기한·담당)</td></tr>
       <tr><td><b>용어·개념 정의</b></td><td>사이버 비행이 뭐야? 사이버폭력과 차이는?</td><td>가이드북 → 사이버상담 → 디지털상담 → 이산중</td><td>법적 정의 → 매뉴얼 정의·유형 → 비슷한 용어 차이</td></tr>
       <tr><td><b>상담 가이드</b></td><td>사이버폭력 가해 학생 회기 구성 / 피해 학생 개입</td><td>사이버상담 → 디지털상담 → 가이드북 → 이산중</td><td>상담 개입 참고(단계·활동) + 절차도 물으면 지금 해야 할 일</td></tr>
       <tr><td><b>학생 눈높이 설명</b></td><td>사이버 비행을 학생에게 쉽게 설명하려면?</td><td>사이버상담 → 디지털상담 → 가이드북 → 이산중</td><td>한 줄 설명·비유·예시·꼭 알려줄 점(학생 말투, 줄마다 근거)</td></tr>
-      <tr><td><b>위기(자해·자살)</b></td><td>자해한 학생의 보호자 상담은?</td><td>(위기 대응 자료가 등록되면 1순위) → 이산중 → 가이드북</td><td>위기관리 절차·Wee센터·1388 연계, 자료에 없으면 없다고 안내</td></tr>
+      <tr><td><b>위기(자해·자살)</b></td><td>자해한 학생의 보호자 상담은?</td><td>위기대응(PFA-S) → 마음건강 → 정서행동 → 이산중 → 가이드북 (다른 시·도 위기 자료는 뒤로)</td><td>"지금 바로" 5가지 → 위기 자료 절차 → 연계 기관 묶음</td></tr>
     </tbody>
   </table></div>
 
   <!-- 자료 -->
   <h2>5. 지금 등록된 근거 자료</h2>
   <div class="table-wrap"><table>
-    <thead><tr><th>인용 이름</th><th>자료</th><th>층</th><th>주제</th><th>청크</th></tr></thead>
+    <thead><tr><th>인용 이름</th><th>자료</th><th>층</th><th>적용 지역·연도</th><th>주제</th><th>청크</th></tr></thead>
     <tbody>
-      <tr><td><b>이산중</b></td><td>이산중학교 학생생활규정(2026.8.27 개정)</td><td>학교</td><td><span class="pill">학교 운영</span><span class="pill">학교폭력</span></td><td>59</td></tr>
-      <tr><td><b>가이드북</b></td><td>2026학년도 학교폭력 사안처리 가이드북</td><td>주제</td><td><span class="pill">학교폭력</span></td><td>313</td></tr>
-      <tr><td><b>사이버상담</b></td><td>사이버 비행 청소년 상담개입 매뉴얼(한국청소년상담복지개발원, 2023)</td><td>주제</td><td><span class="pill">디지털·사이버</span><span class="pill">상담 기법</span><span class="pill">학교폭력</span></td><td>141</td></tr>
-      <tr><td><b>디지털상담</b></td><td>디지털 미디어 위기 청소년 유형 및 개입 매뉴얼(한국청소년상담복지개발원, 2024)</td><td>주제</td><td><span class="pill">디지털·사이버</span><span class="pill">상담 기법</span></td><td>183</td></tr>
+      <tr><td><b>이산중</b> (기본)</td><td>이산중학교 학생생활규정(2026.8.27 개정)</td><td>학교</td><td>이 학교 · 2026</td><td><span class="pill">학교 운영</span><span class="pill">학교폭력</span><span class="pill">학업·학교부적응</span></td><td>59</td></tr>
+      <tr><td><b>가이드북</b> (기본)</td><td>2026 학교폭력 사안처리 가이드북(교육부)</td><td>주제</td><td>전국 · 2026</td><td><span class="pill">학교폭력</span></td><td>313</td></tr>
+      <tr><td><b>사이버상담</b> (기본)</td><td>사이버 비행 청소년 상담개입 매뉴얼(한국청소년상담복지개발원)</td><td>주제</td><td>전국 · 2023</td><td><span class="pill">디지털·사이버</span><span class="pill">상담 기법</span><span class="pill">학교폭력</span></td><td>141</td></tr>
+      <tr><td><b>디지털상담</b> (기본)</td><td>디지털 미디어 위기 청소년 유형 및 개입 매뉴얼(한국청소년상담복지개발원)</td><td>주제</td><td>전국 · 2024</td><td><span class="pill">디지털·사이버</span><span class="pill">상담 기법</span></td><td>183</td></tr>
+      <tr><td><b>학업숙려제</b></td><td>2026 학업중단 숙려제 운영 매뉴얼(경기도교육청)</td><td>주제</td><td>경기 · 2026</td><td><span class="pill">학교 운영</span><span class="pill">학업·학교부적응</span></td><td>91</td></tr>
+      <tr><td><b>정서행동</b></td><td>2026년 학생정서·행동특성검사 및 관리 매뉴얼</td><td>주제</td><td>전국 · 2026</td><td><span class="pill">정서·위기</span><span class="pill">학교 운영</span></td><td>246</td></tr>
+      <tr><td><b>마음건강</b></td><td>학생 마음건강 지원 가이드북(교육부, OCR)</td><td>주제</td><td>전국 · 2025</td><td><span class="pill">정서·위기</span><span class="pill">상담 기법</span><span class="pill">학교 운영</span></td><td>134</td></tr>
+      <tr><td><b>아동학대</b></td><td>아동학대 예방 및 대처요령 교육부문 가이드북(교육부, OCR)</td><td>주제</td><td>전국 · 2024</td><td><span class="pill">가정</span></td><td>231</td></tr>
+      <tr><td><b>성사안안내서</b></td><td>학교 내 성희롱·성폭력 사안처리 업무 안내서(경기도교육청)</td><td>주제</td><td>경기 · 2026</td><td><span class="pill">학교폭력</span><span class="pill">정서·위기</span><span class="pill">학교 운영</span></td><td>228</td></tr>
+      <tr><td><b>위기대응(PFA-S)</b></td><td>학교 위기대응 안내서 PFA-S(학생정신건강지원센터)</td><td>주제</td><td>전국 · 2024</td><td><span class="pill">정서·위기</span><span class="pill">학교 운영</span></td><td>63</td></tr>
     </tbody>
   </table></div>
-  <div class="note">첫 정기 점검(2026-10-19) 알림 11건: <span class="sev w"></span>주의 2건(가이드북·이산중이 학교폭력예방법 시행일 2026-06-02과 같은 해 자료 → 개정 조문 확인), <span class="sev i"></span>참고 9건(무단전재 금지 문구, 법적 절차는 가이드북 우선 등). 다음 정기 점검 2027-04-19.</div>
+  <div class="note">정기 점검(마지막 2026-10-20) 뒤 확인하지 않은 알림은 <span class="sev i"></span>참고 24건(입고 평가의 주의할 점). 다음 정기 점검 2027-04-20. 등록 대기(<code>doc_agent/inbox/</code>, AI 평가 전): 2025 위(Wee) 클래스 및 센터 운영 가이드, 제14회 위(Wee) 희망대상 우수사례집(2025), 단위학교 위기관리 가이드라인(서울시교육청, 2021).</div>
 
   <!-- 평가 기준 -->
   <h2>6. 자료 추가 때 AI가 보는 12개 기준</h2>
@@ -210,9 +218,9 @@ footer { color: var(--muted); font-size: 12.5px; margin-top: 44px; }
   <!-- 실행 -->
   <h2>7. 실행과 파일</h2>
   <div class="grid g3">
-    <div class="card"><h3>실행</h3><p style="margin:0;font-size:14px"><code>run.bat</code> 더블클릭 → <code>http://localhost:8501</code>. 저장소가 없으면 먼저 만듭니다. API 키는 환경변수 <code>GEMINI_API_KEY</code>, 모델 <code>gemini-3.8-flash</code>.</p></div>
-    <div class="card"><h3>주요 파일</h3><p style="margin:0;font-size:14px"><code>app.py</code> 화면 · <code>add_page.py</code> 자료 관리 · <code>rag.py</code> 검색·답변 · <code>store.py</code> 저장소 · <code>doc_agent/</code> 평가·등록·정기 점검 · <code>eval/</code> 성능 평가</p></div>
-    <div class="card"><h3>더 보기</h3><p style="margin:0;font-size:14px"><a href="README.md">README.md</a> 사용법 · <a href="docs/DB_설계.md">docs/DB_설계.md</a> 저장소 설계 · <a href="workinglog.html">workinglog.html</a> 작업 과정(18단계)</p></div>
+    <div class="card"><h3>실행</h3><p style="margin:0;font-size:14px"><code>run.bat</code> 더블클릭 → <code>http://localhost:8501</code>. 저장소가 없으면 먼저 만듭니다. API 키는 환경변수나 <code>.env</code>의 <code>GEMINI_API_KEY</code>, 모델 <code>gemini-3.8-flash</code>. 키(또는 사용 한도)가 없으면 질문 답변·자료 평가·등록은 할 수 없고, 화면·이전 대화·자료 보기·사용 중지·지역 수정은 됩니다.</p></div>
+    <div class="card"><h3>주요 파일</h3><p style="margin:0;font-size:14px"><code>app.py</code> 화면 · <code>add_page.py</code> 자료 관리 · <code>rag.py</code> 검색·답변 · <code>answer_cache.py</code> 답변 캐시 · <code>store.py</code> 저장소 · <code>doc_agent/</code> OCR·중복 확인·평가·등록·정기 점검 · <code>eval/</code> 성능 평가(31문항)</p></div>
+    <div class="card"><h3>더 보기</h3><p style="margin:0;font-size:14px"><a href="README.md">README.md</a> 사용법 · <a href="docs/DB_설계.md">docs/DB_설계.md</a> 저장소 설계 · <a href="workinglog.html">workinglog.html</a> 작업 과정(22단계)</p></div>
   </div>
 
   <footer>사진은 작업 중 실제 화면 캡처입니다(<code>docs/img/</code>). 실제 학생 이름·학교명·연락처는 입력하지 마세요. 질문과 검색된 원문 일부가 Google Gemini API로 전송됩니다.</footer>
@@ -256,8 +264,8 @@ const SCENARIOS = [
     desc: "학교 위기대응 안내서(PFA-S)를 추가하는 경우. AI가 판정하고 상담사가 승인해야 들어간다.",
     steps: [
       { name: "업로드", img: "docs/img/22_manage_add_duplicate.jpg",
-        user: ["사이드바에서 📚 자료 관리 → 📥 자료 추가", "PDF를 올린다"],
-        sys: ["파일 해시로 같은 PDF가 이미 있는지 확인 → 있으면 평가 버튼을 막고 안내"], out: [] },
+        user: ["사이드바에서 자료보관 → 자료 추가", "PDF를 올린다"],
+        sys: ["글자층이 없는 PDF면 OCR(정확 Gemini / 빠름 Windows)을 먼저", "본문 4단어 묶음·발행 연도로 중복·개정판 확인 → 같은 자료면 평가 버튼을 막고 안내"], out: [] },
       { name: "AI 평가", img: "docs/img/19_agent_report.jpg",
         user: ["AI 평가 실행을 누른다(1분 안팎)"],
         sys: ["① 자동 측정: 쪽당 글자 수, 연도·발행처, 개인정보 패턴, 지역, 기존 자료와 본문 유사도",
@@ -265,18 +273,18 @@ const SCENARIOS = [
               "③ 코드로 최종 판정: 추천 / 조건부 / 비추천"],
         out: ["PFA-S → 추천(100%): 교육부·학생정신건강지원센터, 2024 개정, 전문가 자문, 공개 자료"] },
       { name: "승인", img: "docs/img/19_agent_report.jpg",
-        user: ["인용 이름·정식 이름·층·주제·질문 유형을 확인하고 고친다",
+        user: ["인용 이름·정식 이름·층·주제·질문 유형·적용 지역을 확인하고 고친다", "개정판이면 이전 판 처리(교체·사용 중지·둘 다 유지)를 고른다",
                "추천 → 추천대로 추가 / 조건부 → 주의 확인 체크 후 추가 / 비추천 → 사유 입력 후에만 추가"],
         sys: [], out: [] },
       { name: "등록", img: "docs/img/20_registered_docs.jpg",
         user: [],
-        sys: ["PDF를 data/로 복사, 저장소에 문서·주제·질문 유형·입고 평가 기록",
+        sys: ["PDF를 data/로 복사, 저장소에 문서·주제·질문 유형·적용 지역·연도·OCR 여부·입고 평가 기록", "청크 임베딩 진행 막대",
               "그 자료 청크만 임베딩해 저장(전체 재생성 없음). 실패하면 등록 전체를 되돌림",
               "평가의 주의할 점은 🔵 참고 알림으로 남김"],
         out: ["[위기대응] 등록 완료: 청크 63개, 사이드바 근거 자료에 바로 추가"] },
       { name: "바로 사용", img: "",
         user: ["챗봇에 \"학생이 자해했다는 사실을 알게 됐어요. 학교에서 어떻게 대응해야 하나요?\""],
-        sys: ["위기 유형 → 등록된 위기 대응 자료를 1순위로 확인"],
+        sys: ["위기 유형 → 등록된 위기 대응 자료(PFA-S → 마음건강 → 정서행동)를 먼저 확인, \"지금 바로\" 5가지 필수 항목 검색"],
         out: ["[위기대응 p.6, p.8] 근거로 위기관리위원회 소집·선별검사·특별상담실 절차 안내"] },
     ]
   },
@@ -285,8 +293,8 @@ const SCENARIOS = [
     desc: "더 이상 쓰지 않거나 잘못 넣은 자료를 관리하는 경우.",
     steps: [
       { name: "목록 보기", img: "docs/img/23_manage_docs_delete.jpg",
-        user: ["📚 자료 관리 → 🗂️ 등록 자료"],
-        sys: ["자료별 상태·층·주제·청크 수·최근 판정·알림 수·다음 점검일 표시"], out: [] },
+        user: ["자료보관 → 등록 자료"],
+        sys: ["자료별 주제 꼬리표·상태·층·적용 지역·연도·OCR·청크 수·최근 판정·알림 수·다음 점검일 표시", "적용 지역·기준 연도 고치기"], out: [] },
       { name: "사용 중지", img: "docs/img/23_manage_docs_delete.jpg",
         user: ["자료를 골라 사용 중지(다시 사용으로 되돌릴 수 있음)"],
         sys: ["저장소에서 상태만 inactive로 바꿈. 청크는 남기고 검색에서만 뺌", "기본 4개 자료도 가능"],
@@ -296,7 +304,7 @@ const SCENARIOS = [
         sys: ["그 자료만 오늘 기준으로 재평가, 직전 평가와 비교해 알림 생성"], out: ["알림·정기 점검 탭에 결과"] },
       { name: "완전 삭제", img: "docs/img/23_manage_docs_delete.jpg",
         user: ["\"PDF 파일까지 완전히 지웁니다\" 체크 → 완전 삭제"],
-        sys: ["문서 행을 지우면 청크·평가 기록·알림이 함께 지워짐(CASCADE)", "data/와 doc_agent/inbox/의 PDF도 삭제", "기본 4개 자료는 완전 삭제 불가(사용 중지만)"],
+        sys: ["문서 행을 지우면 청크·평가 기록·알림이 함께 지워짐(CASCADE)", "data/와 doc_agent/inbox/의 PDF도 삭제", "기본 4개 자료는 인용 이름을 입력해 확인해야 완전 삭제, 지운 자리는 자료 추가에서 다시 채울 수 있음"],
         out: ["테스트: [위기대응] 삭제 후 저장소 4개 자료·청크 696개·알림 11건으로 복원, PDF 두 사본 삭제"] },
     ]
   },
@@ -320,10 +328,10 @@ const SCENARIOS = [
               "🔵 참고: 이번 평가의 주의할 점(같은 알림은 다시 만들지 않음)"],
         out: ["주의 2건 + 참고 9건, 다음 점검일 2027-04-19"] },
       { name: "사용 전 알림", img: "docs/img/21_use_alert.jpg",
-        user: ["질문하면 인용된 자료의 알림을 답변 아래에서 본다", "사이드바 🔔 유의사항 N건을 펼쳐 본다"],
+        user: ["질문하면 인용된 자료의 알림을 답변 아래에서 본다(주의·긴급은 경고 상자, 참고는 접힌 목록)", "오른쪽 위 🔔 배지를 눌러 전체 알림을 본다"],
         sys: [], out: ["답변을 쓰기 전에 바뀐 법령·주의할 점을 확인"] },
       { name: "확인 처리", img: "",
-        user: ["📚 자료 관리 → 🔔 알림·정기 점검에서 내용을 확인하고 '확인함'"],
+        user: ["오른쪽 위 🔔 → 알림·정기 점검에서 내용을 확인하고 '확인함'"],
         sys: ["알림에 확인 시각·확인자 기록, 이후 답변 아래에 다시 뜨지 않음"],
         out: ["필요하면 그 자료를 사용 중지하거나 새 판본을 추가"] },
     ]

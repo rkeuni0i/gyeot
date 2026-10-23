@@ -337,6 +337,8 @@
         <li><a href="#s19">알림 아이콘, 학업중단 숙려제 매뉴얼, 지역 연계 기관</a></li>
         <li><a href="#s20">본문 기반 중복 확인과 개정판 교체</a></li>
         <li><a href="#s21">글자를 읽을 수 없는 PDF의 OCR</a></li>
+        <li><a href="#s22">기획서 대조와 1단계 남은 과제(A~F) 구현</a></li>
+        <li><a href="#s23">키 없이 점검과 추가 보완, 자료 3개 받기</a></li>
         <li><a href="#files">현재 파일 구성</a></li>
         <li><a href="#next">다음 계획</a></li>
       </ol>
@@ -1238,6 +1240,73 @@
       <div class="issue"><b>남은 점</b> 이 자료는 자해·자살 위기 대응을 다루므로 등록하면 '위기' 질문에서 1순위로 쓰임(앞서 위험성 때문에 시험 주제에서 뺀 영역). OCR 글자는 오탈자 가능성이 있어 답변 근거를 원본 쪽 이미지로 확인해야 함. 인터넷이 막힌 곳에서는 Windows 방식만 쓸 수 있음</div>
     </section>
 
+    <section class="step" id="s22">
+      <div class="step-head"><span class="num">22</span>
+        <h2>기획서 대조와 1단계 남은 과제(A~F) 구현</h2><span class="date">2026-10-23</span>
+      </div>
+      <div class="req"><b>요청</b>Notion 기획서에 작동 시퀀스 다이어그램을 넣고, 기획서 내용이 실제 구현과 맞는지 확인 → 실제 값 반영, 1단계 남은 과제 마무리</div>
+      <h3>기획서와 달랐던 점</h3>
+      <ul>
+        <li>이산중 규정 기본 자리(<code>esan</code>)가 비어 있고 추가 자료(발행 연도 2019로 잘못 저장)로만 등록 → 학교 맞춤형 확인 순서 7순위, 평가 Q8~Q10 검색 재현율 0</li>
+        <li>위기 질문이 성희롱·성폭력 안내서를 2순위로 보고, 필수 항목 검색도 그 자료로 감</li>
+        <li>입고 평가의 '주의할 점'은 참고 등급이라 답변 아래 '사용 전 확인'에 한 번도 나오지 않음, OCR 자료 표시 없음</li>
+      </ul>
+      <h3>구현</h3>
+      <ul>
+        <li><b>A</b> 이산중 규정을 기본 자리로 옮김(청크·임베딩·평가·알림 그대로, 재임베딩 없음), 연도 2026. 연도 읽기: 부칙 개정 이력은 가장 늦은 해, 보고서 번호("2024 TR-34")는 연도로 보지 않음 → 마음건강 2025</li>
+        <li><b>B</b> [일반 원칙]과 쪽을 함께 단 줄은 더 엄격하게(뜻 유사도 0.75) 검사, 근거 약함 줄마다 이번에 검색된 쪽 중 '더 맞는 쪽' 추천, 다른 사안 자료를 빌릴 때 대상 사안을 밝히는 규칙(15-1)과 '질문 주제 밖 자료' 표시</li>
+        <li><b>C</b> 자주 묻는 질문 캐시(<code>answer_cache.py</code>, 첫 질문·같은 자료·같은 규칙일 때만, '새로 답변 받기'), 자료 수에 맞춘 검색 몫(본 질문 합계 60청크, 1·2순위 자료 몫 유지), 자료 등록 임베딩 진행 막대</li>
+        <li><b>D</b> 저장소 v2: <code>documents.region</code>(전국/경기/화성·오산/학교/다른 시·도), <code>ocr_engine</code>. 근거 블록 머리·근거 표에 "적용 지역 · 기준 연도", 다른 시·도 자료 인용 시 경고, 자료 추가·등록 자료에서 지역·연도 지정·수정</li>
+        <li><b>E</b> 평가 세트 16 → 31문항: Q11 기대 답 갱신, 학업숙려제·정서행동·아동학대·성희롱·사후 위기·치료비·다문화·장애·근거 없음 2·추론 필요 2·과의존, 사례 C1·C2. 지표에 근거 약함(쪽 빌림) 수 추가</li>
+        <li><b>F</b> 다문화·이주배경·북한배경·장애 학생 감지 → 규칙 16(통역·이주배경 전문가·특수교육 전문가 참여) + 가이드북 필수 항목 검색(p.34·45·48·49·61·97·109)</li>
+      </ul>
+      <div class="issue"><b>남은 점</b> Gemini API가 월 지출 한도 초과(429)로 막혀 31문항 평가·처리 시간 측정을 아직 못 돌림. 자료 20개 이상(A)은 상담교사가 실제 보는 PDF가 더 필요함(지금 10개, 주제 7개는 모두 1개 이상)</div>
+    </section>
+
+    <section class="step" id="s23">
+      <div class="step-head"><span class="num">23</span>
+        <h2>키 없이 점검과 추가 보완, 자료 3개 받기</h2><span class="date">2026-10-23</span>
+      </div>
+      <div class="req"><b>요청</b>Gemini API 한도 초과로 실제 답변을 못 받는 동안 키 없이 할 수 있는 점검을 하고, 8501 앱을 새 코드로 다시 띄우고, Wee 운영 가이드·Wee 우수사례집·서울 위기관리 가이드라인을 공식 출처에서 받아 넣기</div>
+      <h3>키 없이 점검(가짜 Gemini)</h3>
+      <ul>
+        <li>OpenAI 호환 가짜 클라이언트: 질문 분석·자료 심사는 미리 정한 JSON, 답변은 미리 정한 글(스트리밍 포함), 임베딩은 BM25로 가장 맞는 실제 청크의 저장된 임베딩(+잡음) → 근거 약함의 뜻 비교·추천이 그럴듯한 값으로 돔</li>
+        <li>저장소 사본·임시 로그·임시 대화 폴더에서 실행(실제 저장소·기록은 그대로인 것 확인)</li>
+      </ul>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>점검</th><th>결과</th><th>내용</th></tr></thead>
+          <tbody>
+            <tr><td>답변 엔진</td><td>26/26</td><td>학교 맞춤형 1순위 이산중·정답 쪽 검색, 위기 순서, 다문화 통역 근거 쪽 검색, 질문 분해, 스트리밍, 근거 약함·추천, 주제 밖 자료, 다른 지역, 캐시, 평가 채점, 429</td></tr>
+            <tr><td>자료 등록</td><td>17/17</td><td>12기준 평가 → 판정, 적용 지역·연도 저장, 진행 막대, 참고·OCR 알림, 지역 추정, 저장소 v1 → v2</td></tr>
+            <tr><td>화면(Streamlit AppTest)</td><td>29/29</td><td>질문 → 답변 → 근거 표(적용 지역·연도) → 캐시 → 같은 질문 캐시 답 → 새로 답변 받기, 근거 약함·추천·OCR·주제 밖 표시, 429 안내, 등록 자료 표·지역·연도 고치기</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>점검에서 찾아 고친 것</h3>
+      <ul>
+        <li><b>엉뚱한 쪽을 빌린 줄을 놓침</b>: 통역 문장에 가이드북 p.24를 단 줄이 단어 겹침 0.23이었지만 같은 자료의 비슷한 장이라 뜻 유사도 0.73(기준 0.70 이상)으로 빠짐 → 다른 검색 쪽이 0.08 이상 더 가까우면 근거 약함으로 남기고 그 쪽(p.45, 0.87) 추천(<code>BETTER_PAGE_MARGIN</code>)</li>
+        <li><b>다른 지역 자료가 위기 1순위</b>: 서울 2021 가이드라인을 넣자 "최근 등록 먼저" 규칙으로 1순위 → 이 학교에 그대로 쓸 수 있는 지역 자료 먼저, 그다음 정서·위기 주제, 최근 순</li>
+        <li><b>연도 읽기</b>: 표지에 "연구보고 25-위센터02"처럼 두 자리 보고서 번호만 있으면 2025로 읽음(우수사례집이 본문 사례의 "2023학년도"로 잘못 읽히던 것)</li>
+      </ul>
+      <h3>8501 다시 실행</h3>
+      <ul>
+        <li>10월 20일 이전 작업 세션이 띄운 Streamlit(PID 26172)을 끄고, 새 코드로 8501에서 다시 실행(화면 오류 없음 확인)</li>
+      </ul>
+      <h3>자료 3개 받기(등록 대기)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>파일(<code>doc_agent/inbox/</code>)</th><th>출처</th><th>크기·쪽</th><th>미리 확인</th></tr></thead>
+          <tbody>
+            <tr><td>2025_위(Wee) 클래스 및 센터 운영 가이드.pdf</td><td>wee.go.kr(교육부·한국청소년정책연구원)</td><td>3.6MB · 150쪽</td><td>연도 2025(보고서 번호), 기존 자료와 중복 없음</td></tr>
+            <tr><td>2025_제14회 위(Wee) 희망대상 우수사례집.pdf</td><td>wee.go.kr</td><td>11.5MB · 224쪽</td><td>연도 2025, 중복 없음(이전 평가 조건부: 대상 독자·이용 조건 0점)</td></tr>
+            <tr><td>2021_단위학교 위기관리 가이드라인(서울특별시교육청).pdf</td><td>학생건강정보센터(schoolhealth.kr)</td><td>1.1MB · 52쪽</td><td>2021년 판(2025 개정판은 민간 사이트에만 있어 받지 않음), 등록하면 다른 지역 경고</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="issue"><b>남은 점</b> 세 자료의 AI 평가·임베딩, 31문항 평가(v14)와 처리 시간 측정은 Gemini API 한도가 풀린 뒤. 가짜 응답 점검은 코드가 끝까지 도는지만 보여 주고 답변 품질·속도는 알 수 없음</div>
+    </section>
+
     <!-- files -->
     <section class="step" id="files">
       <div class="step-head"><span class="num">≡</span>
@@ -1252,42 +1321,22 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td><code>run.bat</code></td>
-              <td>더블클릭 실행. 인덱스가 없으면 만들고 http://localhost:8501 실행</td>
-            </tr>
-            <tr>
-              <td><code>app.py</code></td>
-              <td>Streamlit 화면(답변, 근거 표, 인용된 근거 원문, 원본 쪽 이미지)</td>
-            </tr>
-            <tr>
-              <td><code>rag.py</code></td>
-              <td>청크 생성, 하이브리드 검색, 질문 정리·검색어 생성, 프롬프트, Gemini 호출, 로그</td>
-            </tr>
-            <tr>
-              <td><code>build_index.py</code></td>
-              <td>PDF → <code>index/chunks.json</code> + <code>index/embeddings.npy</code></td>
-            </tr>
-            <tr>
-              <td><code>data/</code></td>
-              <td>2026학년도 학교폭력 사안처리 가이드북.pdf, 이산중학교 학생생활규정(2026.8.27 개정).pdf</td>
-            </tr>
-            <tr>
-              <td><code>logs/chat_log.jsonl</code></td>
-              <td>질문·답변·근거(점수·원문) 기록</td>
-            </tr>
-            <tr>
-              <td><code>docs/가이드북_검토_요약.md</code></td>
-              <td>가이드북 요약과 적합성 검토</td>
-            </tr>
-            <tr>
-              <td><code>wee_case_analysis.html</code></td>
-              <td>우수사례집 42건 주제 분석</td>
-            </tr>
-            <tr>
-              <td><code>README.md</code></td>
-              <td>실행 방법과 동작 방식</td>
-            </tr>
+            <tr><td><code>run.bat</code></td><td>더블클릭 실행. 저장소가 없으면 만들고 http://localhost:8501 실행</td></tr>
+            <tr><td><code>app.py</code></td><td>Streamlit 화면: 사이드바, 채팅, 스트리밍·정지, 답변 캐시, 사용 전 확인, 근거 약함, 근거 표·원문·원본 쪽 이미지, 알림 아이콘</td></tr>
+            <tr><td><code>add_page.py</code></td><td>자료보관 화면: 자료 추가 4단계(OCR·중복·판 확인·AI 평가·승인, 적용 지역, 진행 막대), 등록 자료(지역·연도 고치기), 알림·정기 점검</td></tr>
+            <tr><td><code>rag.py</code></td><td>조각 만들기, 하이브리드 검색, 질문 분석·유형 라우팅·검색 몫, 프롬프트(규칙 1~17), Gemini 호출, 인용 검증, 기록</td></tr>
+            <tr><td><code>answer_cache.py</code></td><td>자주 묻는 질문 답변 캐시(<code>logs/answer_cache.json</code>)</td></tr>
+            <tr><td><code>store.py</code></td><td>SQLite 저장소 <code>index/gyeot.db</code>(구조 v2: 적용 지역·OCR 엔진)</td></tr>
+            <tr><td><code>conversations.py</code> · <code>ui_style.py</code></td><td>이전 대화 저장 · 화면 디자인</td></tr>
+            <tr><td><code>doc_agent/</code></td><td>OCR(<code>ocr.py</code>), 중복·판·연도(<code>dedupe.py</code>), 12기준 평가(<code>agent.py</code>, <code>criteria.json</code>), 등록·교체·삭제(<code>ingest.py</code>), 학기별 점검(<code>periodic_review.py</code>), 등록 대기 PDF(<code>inbox/</code>)</td></tr>
+            <tr><td><code>build_index.py</code></td><td>저장소가 없을 때 처음 만들기(빈 저장소 생성은 여기서만)</td></tr>
+            <tr><td><code>data/</code></td><td>등록 자료 PDF 10개, OCR 결과(<code>data/ocr/</code>)</td></tr>
+            <tr><td><code>eval/</code></td><td>평가 세트 31문항(<code>eval_set.json</code>), 실행(<code>run_eval.py</code>), 버전별 결과(<code>results/</code>)</td></tr>
+            <tr><td><code>logs/</code></td><td>질문·답변·근거 기록(<code>chat_log.jsonl</code>), 이전 대화(<code>conversations/</code>), 답변 캐시</td></tr>
+            <tr><td><code>docs/</code></td><td>저장소 설계(<code>DB_설계.md</code>), 서비스 해설(<code>곁_서비스_이해.html</code>), 사례 비교(<code>테스트_사례1_비교.html</code>), 가이드북 검토 요약, 로고</td></tr>
+            <tr><td><code>service_guide.html</code> · <code>wee_case_analysis.html</code></td><td>서비스 소개(사용 흐름 시뮬레이션) · 우수사례집 42건 주제 분석</td></tr>
+            <tr><td><code>곁 서비스 기획서.pdf</code></td><td>Notion 기획서 출력본</td></tr>
+            <tr><td><code>README.md</code></td><td>실행 방법과 동작 방식</td></tr>
           </tbody>
         </table>
       </div>
@@ -1296,20 +1345,18 @@
     <!-- next -->
     <section class="step next" id="next">
       <div class="step-head"><span class="num">→</span>
-        <h2>다음 계획</h2><span class="date">사용자 메모 기준</span>
+        <h2>다음 계획</h2><span class="date">2026-10-23 기준</span>
       </div>
       <ol>
-        <li><s>Gemini 노트북과 답변 성능 비교</s> → 노트북형 기준선 이상 달성(14단계). 실제 노트북으로 질문 2~14 확인은 남음</li>
-        <li><s>특정 학교 학칙 넣고 그 학교에 맞게 답하기</s> → 이산중학교 학생생활규정 반영 완료(12단계)</li>
-        <li><s>상담 기법 자료 추가</s> → 사이버상담·디지털상담 매뉴얼 추가(15단계)</li>
-        <li><s>PDF 추가 시 자료 평가 에이전트로 채택 여부 판단</s> → 12개 기준으로 추천·조건부·비추천을 판정하고 상담사가 승인해 등록(17단계)</li>
-        <li><s>DB를 공통 / 주제별 / 학교별로 분리</s> → SQLite 저장소에 공통·주제·학교 층과 주제 꼬리표로 구현, 자료 삭제와 학기별 정기 점검 추가(18단계)</li>
-        <li><b>다음 차례</b>: 문제 상황을 원인별(학폭·가정·학업 등)로 나눠 각각 맞는 솔루션을 찾는지 비교 분석.
-          학업·학교부적응은 숙려제 매뉴얼로 채움(19단계). <b>가정 · 정서·위기 주제 자료는 아직 0건</b>이라 이 주제의 자료부터 넣어야 함
-          (후보: 2026 아동학대 예방 및 사안처리 절차 가이드북(전북교육청), 2026 학생정서행동특성검사 및 관리 매뉴얼)</li>
+        <li><s>Gemini 노트북과 답변 성능 비교</s> → 노트북형 기준선 이상(14단계), 사례 1·2 비교(20단계 전후)</li>
+        <li><s>특정 학교 학칙 넣고 그 학교에 맞게 답하기</s> → 이산중 규정, 기본 자리 복구(22단계)</li>
+        <li><s>상담 기법 자료 추가</s> · <s>자료 평가 에이전트</s> · <s>DB 층 분리·정기 점검</s> · <s>OCR</s> · <s>개정판 교체</s></li>
+        <li><s>가정·정서·위기 주제 자료</s> → 아동학대·정서행동·마음건강·PFA-S 등록, 주제 7개 모두 1개 이상</li>
+        <li><s>1단계 남은 과제 A~F 구현</s>(22·23단계) → <b>측정이 남음</b>: Gemini API 한도가 풀리면 31문항 평가(v14)로 평균 20초 이하·품질 하락 없음·사례 C1·C2 근거 약함 0건 확인</li>
+        <li><b>다음 차례</b>: 등록 대기 3개(Wee 운영 가이드, Wee 우수사례집, 서울 위기관리 가이드라인) AI 평가 → 승인, 자료 20개까지 상담교사가 실제 보는 PDF 받기</li>
+        <li>2단계: 상담교사 커뮤니티(지식 공유), 로그인·인증, PostgreSQL + pgvector, 개인정보 자동 가림</li>
       </ol>
-      <p style="margin:8px 0 0;color:var(--text-2);font-size:14px">개선 후보: 흩어진 내용 검색 재현율 높이기(질문 1), 위기 질문 연계 기관 안내 수정(질문 4),
-        양식이 아닌 질문에서 부록1 순위 낮추기, 질문당 Gemini 3회 호출(20~30초) 줄이기.</p>
+      <p style="margin:8px 0 0;color:var(--text-2);font-size:14px">개선 후보: 근거 약함 오탐(띄어쓰기 없는 PDF 글자), OCR·임베딩의 진짜 백그라운드 처리, 자동 점검 스크립트를 프로젝트 <code>tests/</code>로 옮기기.</p>
     </section>
 
     <footer>사진은 작업 중 브라우저 화면과 사용자 제공 스크린샷입니다(<code>docs/img/</code>). 사진을 누르면 원본 크기로 열립니다.</footer>

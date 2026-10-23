@@ -16,6 +16,7 @@ import pymupdf
 import streamlit as st
 
 import add_page
+import answer_cache
 import conversations
 import store
 import ui_style
@@ -23,7 +24,7 @@ from doc_agent import periodic_review
 import streamlit.components.v1 as components
 
 from rag import (DB_PATH, DOCS, LLM_MODEL, LOCAL_AGENCIES, QTYPES, ROOT, SCHOOL_INFO, SCHOOL_NAME, Index,
-                 cite_label, finish, log_turn, plan_for, prepare, stream_answer)
+                 cite_label, finish, log_turn, other_region_docs, plan_for, prepare, scope_label, stream_answer)
 
 EXAMPLES = [
     "수업 시간에 학생 상담을 해도 되나요? 상담 내용 비밀은 어디까지 지켜야 하나요?",
@@ -65,19 +66,44 @@ def doc_alerts(doc_ids, severities=("critical", "warn")):
     return out
 
 
+def short_of(doc):
+    """자료 인용 이름(삭제·사용 중지된 자료면 ID 그대로)."""
+    return DOCS[doc]["short"] if doc in DOCS else doc
+
+
 def show_use_alerts(res):
-    """답변이 인용한 자료에 주의·경고 알림이 있으면 답변 바로 아래에 보여준다."""
+    """사용 전 확인: 답변이 인용한 자료의 주의·긴급 알림(경고 상자), 참고 알림(접어 둔 목록),
+    OCR로 읽은 자료·다른 지역 자료·질문 주제 밖에서 빌린 자료 표시."""
     cited_docs = list(dict.fromkeys(d for d, _ in res["cited"]))
-    alerts = doc_alerts(cited_docs)
-    if alerts:
+    alerts = doc_alerts(cited_docs, severities=("critical", "warn", "info"))
+    strong = [a for a in alerts if a["severity"] != "info"]
+    notes = [a for a in alerts if a["severity"] == "info"]
+    if strong:
         lines = "\n".join(f"- {'🔴' if a['severity'] == 'critical' else '🟠'} [{a['short']}] {a['title']}: "
-                          f"{(a['message'] or '')[:160]}" for a in alerts[:5])
-        st.warning(f"**사용 전 확인** · 이 답변이 인용한 자료에 확인하지 않은 알림이 {len(alerts)}건 있습니다.\n{lines}\n\n"
+                          f"{(a['message'] or '')[:160]}" for a in strong[:5])
+        st.warning(f"**사용 전 확인** · 이 답변이 인용한 자료에 확인하지 않은 알림이 {len(strong)}건 있습니다.\n{lines}\n\n"
                    "화면 오른쪽 위 🔔 아이콘(알림·정기 점검)에서 확인할 수 있습니다.")
+    # 지역·OCR은 저장된 값이 아니라 지금 자료 정보로 본다(이전 대화를 다시 열 때도, 지역을 고친 뒤에도 맞게)
+    other = other_region_docs(cited_docs)
+    ocr_docs = [d for d in cited_docs if DOCS.get(d, {}).get("ocr_engine")]
+    if other:
+        st.warning("**다른 지역 자료 인용** · " + ", ".join(f"[{short_of(d)}] {scope_label(d)}" for d in other)
+                   + " — 이 학교(경기 화성시)에 그대로 적용되지 않을 수 있습니다. 경기도교육청·전국 기준을 확인하세요.")
+    if ocr_docs:
+        st.caption("🔤 OCR로 읽은 자료를 인용했습니다: " + ", ".join(f"[{short_of(d)}]" for d in ocr_docs)
+                   + " · 숫자·표·연락처는 근거 원문 보기의 원본 쪽 이미지로 확인하세요.")
+    if res.get("borrowed"):
+        st.caption("↪️ 질문 주제 밖 자료에서 빌린 근거: " + ", ".join(f"[{short_of(d)}]" for d in res["borrowed"])
+                   + " · 그 자료가 원래 다루는 사안 기준인지 확인하세요.")
+    if notes:
+        with st.expander(f"ℹ️ 인용 자료 유의사항 {len(notes)}건(참고)"):
+            st.markdown("\n".join(f"- [{a['short']}] {(a['message'] or a['title'])[:200]}" for a in notes[:12]))
 
 
 @st.cache_data(show_spinner=False)
 def page_png(doc, page, dpi=110):
+    if doc not in DOCS or not (ROOT / "data" / DOCS[doc]["file"]).exists():
+        return None  # 삭제·사용 중지된 자료(이전 대화)
     return pymupdf.open(ROOT / "data" / DOCS[doc]["file"])[page - 1].get_pixmap(dpi=dpi).tobytes("png")
 
 
@@ -129,9 +155,12 @@ def show_weak_cites(res):
     with st.expander(f"⚠️ 근거 약함 {len(weak)}곳 · 문장과 인용한 쪽의 내용이 거의 겹치지 않습니다(원문 확인 필요)"):
         for w in weak:
             sem = f" · 뜻 유사도 {w['sem']:.2f}" if w.get("sem") is not None else ""
-            st.markdown(f"- {html.escape(w['line'])} → {', '.join(w['cites'])} · 단어 겹침 {w['overlap']:.0%}{sem}")
-        st.caption("단어 겹침(문장 핵심어 중 인용 쪽에 나오는 비율)이 35% 미만이고, 뜻 유사도(문장과 인용 쪽의 임베딩 유사도)도 "
-                   "0.70 미만인 줄입니다. 근거 원문 보기에서 해당 쪽을 확인하세요.")
+            kind = " · [일반 원칙]과 쪽을 함께 닮" if w.get("general_mix") else " · 구절" if w.get("clause") else ""
+            tip = (f"  \n  ↳ 더 맞는 쪽: **{w['suggest']}** (뜻 유사도 {w['suggest_sem']:.2f})" if w.get("suggest") else "")
+            st.markdown(f"- {html.escape(w['line'])} → {', '.join(w['cites'])} · 단어 겹침 {w['overlap']:.0%}{sem}{kind}{tip}")
+        st.caption("단어 겹침(문장 핵심어 중 인용 쪽에 나오는 비율)이 35% 미만이고 뜻 유사도(문장과 인용 쪽의 임베딩 유사도)도 "
+                   "0.70 미만인 줄, 또는 [일반 원칙]과 쪽 번호를 함께 단 줄 중 뜻 유사도 0.75 미만인 줄입니다. "
+                   "'더 맞는 쪽'은 이번에 검색된 쪽 중 그 문장과 뜻이 가장 가까운 쪽입니다. 근거 원문 보기에서 확인하세요.")
 
 
 def show_sources(res):
@@ -142,9 +171,11 @@ def show_sources(res):
                    + ", ".join(cite_label(d, p) for d, p in res["uncited_ok"]))
     st.markdown("**📄 근거** · 인용된 쪽: " + (", ".join(cite_label(d, p) for d, p in res["cited"]) or "없음"))
     groups = sorted(group_by_page(res["sources"]), key=lambda g: -g["cos"])  # 문서 구분 없이 코사인 높은 순
-    rows = [{"순위": i + 1, "문서": DOCS[g["doc"]]["short"], "PDF 쪽": g["page"],
+    rows = [{"순위": i + 1, "문서": short_of(g["doc"]), "PDF 쪽": g["page"],
              "인용": "✅" if (g["doc"], g["page"]) in cited else "",
              "벡터 유사도(코사인)": round(g["cos"], 3), "BM25": round(g["bm25"], 1),
+             "적용 지역·연도": scope_label(g["doc"]).removeprefix("적용 ")
+             + (" · OCR" if DOCS.get(g["doc"], {}).get("ocr_engine") else ""),
              "청크 수": g["n_chunks"], "장": g["section"]}
             for i, g in enumerate(groups)]
     st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True,
@@ -172,7 +203,11 @@ def show_sources(res):
                         f" · BM25 {g['bm25']:.1f}{parts} · 매칭 검색어: {g['matched_query']}")
             st.text(g["text"])
             if st.toggle(f"{label} 원본 쪽 이미지", key=f"img-{id(res)}-{g['doc']}-{g['page']}"):
-                st.image(page_png(g["doc"], g["page"]))
+                png = page_png(g["doc"], g["page"])
+                if png:
+                    st.image(png)
+                else:
+                    st.caption("이 자료는 지금 등록돼 있지 않아 원본 쪽을 보여 줄 수 없습니다.")
             st.divider()
 
 
@@ -321,6 +356,12 @@ with st.sidebar:
         st.markdown(f"**모델** `{LLM_MODEL}`")
         st.caption("실제 학생 이름, 학교명, 연락처는 입력하지 마세요. 질문 내용이 Google Gemini API로 전송됩니다.")
         st.caption("대화는 logs/conversations/, 질문·답변 기록은 logs/chat_log.jsonl에 이 컴퓨터에만 저장됩니다.")
+        n_cached = answer_cache.stats()["items"]
+        st.caption(f"자주 묻는 질문 캐시: 저장된 답변 {n_cached}개(logs/answer_cache.json). 대화의 첫 질문이 같고 "
+                   "자료·답변 규칙이 그대로면 저장된 답을 바로 보여 줍니다.")
+        if n_cached and st.button("저장된 답변 모두 지우기", icon=":material/delete_sweep:", use_container_width=True):
+            answer_cache.clear()
+            st.rerun()
         if st.session_state.get("conv_id"):
             st.button("지금 대화 삭제", icon=":material/delete:", on_click=delete_conv, use_container_width=True)
 
@@ -353,6 +394,25 @@ if not st.session_state.messages and not st.session_state.get("pending"):
 
 def request_stop():
     st.session_state.stop_requested = True
+
+
+def refresh_answer():
+    """저장된(캐시) 답 대신 지금 자료로 다시 답한다: 마지막 질문·답을 빼고 같은 질문을 캐시 없이 다시 보낸다."""
+    msgs = st.session_state.messages
+    if len(msgs) >= 2 and msgs[-1]["role"] == "assistant":
+        question = msgs[-2]["content"]
+        del msgs[-2:]
+        st.session_state.pending = question
+        st.session_state.skip_cache = True
+
+
+def api_error(e):
+    """Gemini 오류를 상담사가 알아볼 수 있게 바꾼다."""
+    msg = str(e)
+    if "429" in msg or "RESOURCE_EXHAUSTED" in msg:
+        return ("Gemini API 사용 한도를 넘었습니다(429). 월 지출 한도라면 Google AI Studio의 결제(Billing)에서 한도를 "
+                "확인하고, 잠시 뒤 다시 시도하세요.")
+    return f"답변 생성 중 오류가 났습니다: {e}"
 
 
 def save_conversation():
@@ -403,6 +463,12 @@ for i, m in enumerate(st.session_state.messages):
             show_use_alerts(m["result"])
             show_weak_cites(m["result"])
             show_sources(m["result"])
+            if m["result"].get("cached_at"):
+                c1, c2 = st.columns([3, 1], vertical_alignment="center")
+                c1.caption(f"⚡ 저장된 답변({m['result']['cached_at']})을 바로 보여 드렸습니다. "
+                           "같은 자료·같은 답변 규칙일 때만 다시 씁니다.")
+                if i == len(st.session_state.messages) - 1:
+                    c2.button("새로 답변 받기", key=f"fresh_{i}", on_click=refresh_answer, use_container_width=True)
         else:
             st.markdown(m["content"])
 
@@ -416,6 +482,15 @@ if question:
     history = [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages]
     # 멈추면 다음 실행에서 이 기록으로 대화에 남긴다(끝까지 쓰면 지운다)
     st.session_state.partial = {"question": question, "text": ""}
+    # 대화의 첫 질문이면 저장된 답(같은 질문·같은 자료·같은 규칙)을 먼저 찾는다
+    cached = None if history or st.session_state.pop("skip_cache", False) else answer_cache.get(question, index)
+    if cached:
+        st.session_state.pop("partial", None)
+        log_turn(question, cached)
+        st.session_state.messages.append({"role": "user", "content": question})
+        st.session_state.messages.append({"role": "assistant", "content": cached["answer"], "result": cached})
+        save_conversation()
+        st.rerun()
     show_stop_button()
     with st.chat_message("assistant", avatar=AI_AVATAR):
         st.markdown('<div class="gy-ai-label">곁</div>', unsafe_allow_html=True)
@@ -426,7 +501,7 @@ if question:
         except Exception as e:
             st.session_state.pop("partial", None)
             status.empty()
-            st.error(f"답변 생성 중 오류가 났습니다: {e}")
+            st.error(api_error(e))
             st.stop()
         status.empty()
         if "crisis" in ctx["flags"]:
@@ -443,15 +518,20 @@ if question:
                 box.markdown(text + " ▌")  # 조각마다 화면에 그림: 정지를 누르면 여기서 멈춘다
         except Exception as e:
             st.session_state.pop("partial", None)
-            st.error(f"답변 생성 중 오류가 났습니다: {e}")
+            st.error(api_error(e))
             st.stop()
-        res = finish(ctx, text, index)
+        try:
+            res = finish(ctx, text, index)
+        except Exception:  # 근거 약함 검사의 임베딩 호출이 실패해도 답은 보여 준다(단어 겹침만으로 검사)
+            res = finish(ctx, text, None)
         box.empty()
         render_answer(res["answer"], len(st.session_state.messages) + 1)
         show_use_alerts(res)
         show_weak_cites(res)
         show_sources(res)
     st.session_state.pop("partial", None)
+    if not history:
+        answer_cache.put(question, index, res)
     log_turn(question, res)
     st.session_state.messages.append({"role": "user", "content": question})
     st.session_state.messages.append({"role": "assistant", "content": res["answer"], "result": res})

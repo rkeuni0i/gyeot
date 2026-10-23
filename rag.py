@@ -30,8 +30,8 @@ if _env_path.exists():
 BASE_SEED = {
     "guide": {"name": "2026학년도 학교폭력 사안처리 가이드북", "short": "가이드북",
               "file": "2026학년도 학교폭력 사안처리 가이드북.pdf", "kind": "guide"},
-    "esan": {"name": "이산중학교 학생생활규정(2026.8.27 개정)", "short": "이산중",
-             "file": "이산중학교 학생생활규정(2026.8.27 개정).pdf", "kind": "school"},
+    "esan": {"name": "2026학년도 이산중학교 학생생활규정(이산중학교, 2026)", "short": "이산중",
+             "file": "이산중학교 학생생활규정2026.8.27 개정.pdf", "kind": "school"},
     # 상담 기법 자료(한국청소년상담복지개발원 연구보고서). toc = (인쇄 쪽, 장 이름), offset = PDF 쪽 - 인쇄 쪽
     "cyber": {"name": "사이버 비행 청소년 상담개입 매뉴얼(한국청소년상담복지개발원, 2023)", "short": "사이버상담",
               "file": "2023_사이버 비행 청소년 상담개입 매뉴얼(한국청소년상담복지개발원).pdf", "kind": "manual",
@@ -57,13 +57,13 @@ BASE_SEED = {
 # 기본 자료의 층·주제·발행 정보(저장소를 처음 만들 때 쓴다)
 BASE_META = {
     "guide": {"layer": "topic", "topics": ["학교폭력"], "publisher": "교육부·이화여자대학교 학교폭력예방연구소",
-              "published_year": 2026},
-    "esan": {"layer": "school", "topics": ["학교 운영", "학교폭력"], "publisher": "이산중학교", "published_year": 2026,
-             "school_id": "esan"},
+              "published_year": 2026, "region": "전국"},
+    "esan": {"layer": "school", "topics": ["학교 운영", "학교폭력", "학업·학교부적응"], "publisher": "이산중학교",
+             "published_year": 2026, "school_id": "esan", "region": "학교"},
     "cyber": {"layer": "topic", "topics": ["디지털·사이버", "상담 기법", "학교폭력"], "publisher": "한국청소년상담복지개발원",
-              "published_year": 2023},
+              "published_year": 2023, "region": "전국"},
     "digital": {"layer": "topic", "topics": ["디지털·사이버", "상담 기법"], "publisher": "한국청소년상담복지개발원",
-                "published_year": 2024},
+                "published_year": 2024, "region": "전국"},
 }
 BASE_DOCS = set(BASE_SEED)
 
@@ -82,7 +82,12 @@ MUST_QUERIES = {
                "보호자가 전문기관 연계를 원치 않는 경우 대체 지원 긴급지원팀 청소년동반자"],
     "procedure": ["학교폭력 사안처리 흐름도 접수 분리 보고 조사",
                   "학교폭력 전담조사관 배정 요청 전담기구 자체 사안조사"],
+    # 다문화·이주배경·북한배경·장애 학생이 질문에 나오면(규칙 16): 사안조사·상담·심의 단계의 통역·전문가 지원
+    "special": ["이주배경학생 사안조사 통역 전문가 참여 진술 기회 확보",
+                "장애학생 사안조사 특수교육 전문가 진술조력인 참여",
+                "이주배경학생 장애학생 보호자 상담 통역 심의위원회 전문가 의견 청취"],
 }
+MUST_PLAN = {"special": ["guide"]}  # 그 묶음을 찾을 자료(없으면 유형의 1·2순위 자료)
 
 
 def refresh_docs(create=False):
@@ -105,7 +110,8 @@ def refresh_docs(create=False):
         DOCS[d] = {"name": r["title"], "short": r["short"], "file": r["file_name"], "kind": r["kind"],
                    "layer": r["layer"], "topics": r["topics"], "use_in": r["qtypes"], "summary": r["summary"] or "",
                    "school_id": r["school_id"], "is_base": bool(r["is_base"]), "published_year": r["published_year"],
-                   "toc": r["toc"], "offset": r["page_offset"]}
+                   "toc": r["toc"], "offset": r["page_offset"], "region": r.get("region"),
+                   "ocr_engine": r.get("ocr_engine")}
     MANUAL_DOCS[:] = [d for d, m in DOCS.items() if m["kind"] == "manual"]
     SHORT_TO_DOC = {m["short"]: d for d, m in DOCS.items()}
 
@@ -119,12 +125,13 @@ def migrate_from_files():
     import numpy as np
     con = store.connect(create=True)
     store.init_db(con)
-    con.execute("INSERT OR IGNORE INTO schools VALUES ('esan', '이산중학교', '경기', ?)", (SCHOOL_INFO,))
+    con.execute("INSERT OR IGNORE INTO schools VALUES ('esan', '이산중학교', '경기 화성시', ?)", (SCHOOL_INFO,))
     for d, m in BASE_SEED.items():
         meta = BASE_META[d]
         store.upsert_document(con, d, short=m["short"], title=m["name"], file_name=m["file"], layer=meta["layer"],
                               kind=m["kind"], school_id=meta.get("school_id"), publisher=meta["publisher"],
-                              published_year=meta["published_year"], is_base=1, status="active",
+                              published_year=meta["published_year"], region=meta.get("region"),
+                              is_base=1, status="active",
                               toc_json=json.dumps(m.get("toc")) if m.get("toc") else None,
                               page_offset=m.get("offset"), added_at=store.now(), added_by="초기 설정")
         store.set_topics(con, d, meta["topics"])
@@ -253,6 +260,10 @@ SYSTEM_PROMPT = f"""너는 {SCHOOL_NAME} 전용 사안처리·상담 도우미 '
  - 원인이 다른 것은 섞지 않는다(예: 학교폭력 피해로 인한 결석의 출석 인정과, 생활 습관으로 인한 미인정 결석의 숙려제 안내는 따로 쓴다).
  - [자료]에 근거가 없는 조각은 "등록 자료에서 확인되지 않습니다"라고 쓰고 지어내지 않는다.
 15. 근거는 문장마다 그 문장 내용이 실제로 나오는 쪽만 단다. 한 문장에 근거 있는 내용과 근거 없는 내용을 섞지 않는다(근거 없는 부분은 빼거나, 규칙 10-1의 [일반 원칙]으로 따로 쓴다). 한 문장에 다는 쪽은 핵심 3개 이하로 줄인다.
+ - [일반 원칙]을 단 문장에는 쪽 번호를 함께 달지 않는다. 같은 항목에 자료 근거가 있으면 그 내용을 다음 문장으로 나눠 쓰고 그 문장에만 쪽을 단다.
+15-1. 질문 사안과 다른 사안을 다루는 자료의 내용을 빌려 쓸 때(예: 성희롱·성폭력 안내서를 일반 학교폭력 사안에, 아동학대 가이드북을 가정 문제가 아닌 상담에, 정서행동검사 매뉴얼을 검사와 무관한 위기에)는 그 문장 안에 "(성희롱·성폭력 사안 기준)"처럼 원래 대상 사안을 밝힌다.
+16. 질문에 다문화·이주배경·북한배경 학생이나 장애(특수교육 대상) 학생이 나오면, 절차를 안내하는 부분(사안조사·보호자 상담·심의위원회) 안에 그 학생을 위한 지원을 반드시 쓴다: 이주배경·북한배경이면 통역·번역 지원과 이주배경 전문가·관련 담당교사 참여, 장애 학생이면 특수교육 전문가(진술조력인) 참여와 의견 청취. 근거는 [자료]의 쪽으로 단다.
+17. 자료 블록 머리의 "적용 지역 · 기준 연도"를 본다. 적용 지역이 경기도·전국·이 학교가 아닌 다른 시·도 자료면 그 내용을 쓸 때 "(○○ 지역 기준)"이라고 밝히고, 같은 내용의 전국·경기 자료가 있으면 그쪽을 우선한다. 같은 내용이 연도가 다른 자료에 다르게 나오면 최신 연도 자료를 따른다.
 """
 
 
@@ -338,16 +349,25 @@ def plan_for(qtype, index=None, topics=None):
     (주제를 판단하지 못했으면 주제 조건은 보지 않는다). 인덱스에 청크가 있는 자료만 쓴다."""
     indexed = set(index.doc_of) if index is not None else None
     plan = [x for x in QTYPES[qtype]["plan"] if x[0] in DOCS and (indexed is None or x[0] in indexed)]
+    crisis_docs = []
     for d in added_docs():
         m = DOCS[d]
         topic_ok = not topics or m.get("layer") in ("common", "school") or set(topics) & set(m.get("topics", []))
         if qtype in m.get("use_in", []) and topic_ok and (indexed is None or d in indexed):
-            if qtype == "crisis":  # 기본 자료에 위기 대응 자료가 없으므로, 등록된 위기 대응 자료를 1순위로 크게 본다
-                plan.insert(0, (d, 5, 2, 9))
+            if qtype == "crisis":
+                crisis_docs.append(d)
             elif topics and set(topics) & set(m.get("topics", [])):
                 plan.append((d, *ADDED_TOPIC_BUDGET))
             else:
                 plan.append((d, *ADDED_BUDGET))
+    if crisis_docs:
+        # 기본 자료에 위기 대응 자료가 없으므로, 등록된 위기 대응 자료를 1순위로 크게 본다.
+        # 순서: 이 학교에 그대로 쓸 수 있는 지역(전국·경기·관할·학교) 자료 먼저, 그다음 '정서·위기' 주제 자료,
+        # 그 안에서는 최근 등록한 자료 먼저(학교 위기대응 안내서 → 마음건강 → 정서행동). 다른 시·도 자료는 뒤로
+        order = list(DOCS)
+        crisis_docs.sort(key=lambda d: (DOCS[d].get("region") not in LOCAL_REGIONS | {None},
+                                        "정서·위기" not in DOCS[d].get("topics", []), -order.index(d)))
+        plan = [(d, 5, 2, 9) for d in crisis_docs] + plan
     return plan
 
 
@@ -364,8 +384,29 @@ def merge_plans(plans):
     return [(d, *budget[d]) for d in order]
 
 
+MAIN_MAX_CHUNKS = 60  # 본 질문 검색이 모든 자료에서 가져오는 청크 합계 상한(자료가 늘어도 프롬프트가 무한정 커지지 않게)
+
+
+def fit_budget(plan, total=MAIN_MAX_CHUNKS, floor=2):
+    """자료 수에 맞춘 검색 몫: 최대 청크 합이 total을 넘으면 1·2순위 자료 몫은 그대로 두고 나머지를 같은 비율로 줄인다
+    (자료마다 floor개는 남긴다). 원 질문·검색어별 몫도 줄어든 최대 청크를 넘지 않게 맞춘다."""
+    caps = sum(c for _, _, _, c in plan)
+    if caps <= total or len(plan) < 3:
+        return plan
+    head, rest = plan[:2], plan[2:]
+    ratio = max(0.0, total - sum(c for *_, c in head)) / sum(c for *_, c in rest)
+    out = list(head)
+    for d, a, b, c in rest:
+        c2 = max(floor, round(c * ratio))
+        out.append((d, min(a, c2), min(b, max(1, c2 // 2)), c2))
+    return out
+
+
 CRISIS_RE = re.compile(r"자살|자해|죽고\s?싶|죽을래|목숨|손목|그었|유서|뛰어내")
 SEXUAL_RE = re.compile(r"성폭력|성폭행|성추행|성희롱|불법\s?촬영|딥페이크|몰카|음란")
+# 지원이 필요한 학생 특성(규칙 16): 이주배경·북한배경·다문화, 장애·특수교육
+SPECIAL_RE = re.compile(r"다문화|이주\s?배경|중도\s?입국|외국인\s?(?:학생|가정|부모)|북한\s?배경|탈북|한국어(?:가|를|에|도)?\s*(?:서툴|서툰|못|부족|어려)"
+                        r"|장애|특수\s?교육|특수\s?학급|자폐|청각|시각\s?장애")
 
 _kiwi = None
 _client = None
@@ -534,13 +575,16 @@ def build_chunks(only=None):
     return chunks
 
 
-def embed_texts(texts, batch=90):
-    """Gemini 임베딩 → L2 정규화된 float32 행렬(코사인 유사도 = 내적)."""
+def embed_texts(texts, batch=90, progress=None):
+    """Gemini 임베딩 → L2 정규화된 float32 행렬(코사인 유사도 = 내적).
+    progress(done, total): 자료 등록처럼 오래 걸릴 때 화면 진행 막대를 움직인다."""
     import numpy as np
     vecs = []
     for i in range(0, len(texts), batch):
         resp = client().embeddings.create(model=EMBED_MODEL, input=texts[i:i + batch])
         vecs.extend(d.embedding for d in resp.data)
+        if progress:
+            progress(len(vecs), len(texts))
     m = np.asarray(vecs, dtype="float32")
     return m / np.linalg.norm(m, axis=1, keepdims=True)
 
@@ -570,6 +614,14 @@ class Index:
                                  else 1.0
                                  for c in self.chunks])
         self.doc_of = np.array([c["doc"] for c in self.chunks])
+        # 자료 구성 지문: 자료를 추가·교체·사용 중지하면 바뀐다(답변 캐시가 이전 자료 기준 답을 내지 않게)
+        import hashlib
+        counts = {}
+        for c in self.chunks:
+            counts[c["doc"]] = counts.get(c["doc"], 0) + 1
+        self.fingerprint = hashlib.sha256(json.dumps(
+            sorted((d, n, DOCS[d]["name"], DOCS[d].get("published_year")) for d, n in counts.items()),
+            ensure_ascii=False).encode()).hexdigest()[:16]
         self.id_row = {c["id"]: i for i, c in enumerate(self.chunks)}  # 청크 ID → 임베딩 행(인용 검증용)
         # 가이드북 부록 양식: "[양식2-4]"가 시작되는 쪽부터 다음 양식 전까지를 그 양식의 쪽으로 본다
         starts = {}
@@ -652,8 +704,28 @@ def format_context(hits, doc_order=None):
     order = {d: i for i, d in enumerate(doc_order or ["esan", "guide"] + MANUAL_DOCS)}
     blocks = []
     for h in sorted(hits, key=lambda x: (order.get(x["doc"], 9), x["page"])):  # 확인 순서대로 보여준다
-        blocks.append(f"<<{cite_label(h['doc'], h['page'])} | {DOCS[h['doc']]['name']} | {h['section']}>>\n{h['text']}")
+        blocks.append(f"<<{cite_label(h['doc'], h['page'])} | {DOCS[h['doc']]['name']} | {h['section']}"
+                      f" | {scope_label(h['doc'])}>>\n{h['text']}")
     return "\n\n".join(blocks)
+
+
+SCHOOL_REGION = "경기 화성시"
+# 이 학교에 그대로 쓸 수 있는 적용 지역(전국 공통·경기도·관할 교육지원청·이 학교). 그 밖의 시·도 자료는 경고한다
+LOCAL_REGIONS = {"전국", "경기", "화성·오산", "학교"}
+
+
+def scope_label(doc):
+    """'적용 전국 · 2026년' 같은 자료의 적용 지역·기준 연도 표시(근거 블록 머리, 근거 표)."""
+    m = DOCS.get(doc, {})
+    region = m.get("region") or "지역 미상"
+    year = f"{m['published_year']}년" if m.get("published_year") else "연도 미상"
+    return f"적용 {'이 학교' if region == '학교' else region} · {year}"
+
+
+def other_region_docs(doc_ids):
+    """적용 지역이 이 학교 지역(경기 화성시)이 아닌 자료(다른 시·도 지침)."""
+    return [d for d in dict.fromkeys(doc_ids) if d in DOCS and DOCS[d].get("region")
+            and DOCS[d]["region"] not in LOCAL_REGIONS]
 
 
 SHORT_TO_DOC = {m["short"]: d for d, m in DOCS.items()}
@@ -686,6 +758,9 @@ WEAK_CITE_SEM = 0.70  # 뜻 겹침: 문장과 인용 쪽 청크의 임베딩 코
 CLAUSE_SPLIT_RE = re.compile(r",|·(?=\s)|(?<=[고며])\s+|(?<=거나)\s+")
 CLAUSE_STOP = {"학생", "경우", "필요", "진행", "실시", "확인", "지원", "위하", "통하", "대하", "하", "있", "되", "않"}
 CLAUSE_SEM = 0.66  # 구절은 짧아 뜻 겹침이 낮게 나오므로 줄(0.70)보다 낮은 기준. 사례 2 "혼자 두지 않고" 0.63
+GENERAL_MIX_SEM = 0.75  # [일반 원칙]과 쪽을 함께 단 줄은 더 엄격하게(규칙 15)
+SUGGEST_MARGIN = 0.03   # 맞는 쪽 추천: 인용한 쪽보다 이만큼 이상 뜻이 가까운 검색 쪽이 있으면 추천
+BETTER_PAGE_MARGIN = 0.08  # 단어 겹침이 낮은 줄에서 다른 쪽이 이만큼 더 가까우면 뜻 겹침이 기준을 넘어도 근거 약함
 
 
 def check_citations(text, hits, index=None, threshold=WEAK_CITE, sem_threshold=WEAK_CITE_SEM):
@@ -715,6 +790,10 @@ def check_citations(text, hits, index=None, threshold=WEAK_CITE, sem_threshold=W
         if len(toks) < 4:
             continue
         best = max(len(toks & page_tok[c]) / len(toks) for c in cites)
+        if "[일반 원칙]" in line:
+            # 규칙 15: [일반 원칙] 문장에 쪽을 함께 달면 '빌린 쪽'일 가능성이 높다 → 뜻 겹침을 더 엄격하게 본다
+            cand.append({"line": body[:160], "cites": cites, "overlap": round(best, 2), "general_mix": True})
+            continue
         if best < threshold:
             cand.append({"line": body[:160], "cites": cites, "overlap": round(best, 2)})
             continue
@@ -730,11 +809,26 @@ def check_citations(text, hits, index=None, threshold=WEAK_CITE, sem_threshold=W
                              "full": body[:160]})
     if cand and index is not None and index.emb is not None and rows:
         vecs = embed_texts([c["line"] for c in cand])  # 후보 줄만 한 번에
+        page_sim = {}
         for c, v in zip(cand, vecs):
             sims = [float(index.emb[r] @ v) for cc in c["cites"] for r in rows.get(cc, [])]
             c["sem"] = round(max(sims), 3) if sims else None
-        cand = [c for c in cand if c.get("sem") is None
-                or c["sem"] < (CLAUSE_SEM if c.get("clause") else sem_threshold)]
+            page_sim[id(c)] = {k: max(float(index.emb[r] @ v) for r in rs) for k, rs in rows.items()}
+
+        def limit(c):
+            return CLAUSE_SEM if c.get("clause") else GENERAL_MIX_SEM if c.get("general_mix") else sem_threshold
+
+        # 맞는 쪽 추천: 검색된 쪽 중 그 줄과 뜻이 가장 가까운 쪽이 기준을 넘고 인용한 쪽보다 분명히 가까우면 알려 준다
+        for c in cand:
+            alt = [(s, k) for k, s in page_sim.get(id(c), {}).items() if k not in c["cites"]]
+            if alt:
+                s, k = max(alt)
+                if s >= limit(c) and s >= (c.get("sem") or 0) + SUGGEST_MARGIN:
+                    c["suggest"], c["suggest_sem"] = cite_label(*k), round(s, 3)
+        # 근거 약함으로 남기는 줄: 뜻 겹침도 낮거나, 뜻은 기준을 넘어도 다른 쪽이 훨씬 가까운 줄
+        # (같은 자료의 비슷한 장끼리는 뜻 유사도가 0.7을 넘기 쉬워, 엉뚱한 쪽을 빌린 줄이 빠지던 문제)
+        cand = [c for c in cand if c.get("sem") is None or c["sem"] < limit(c)
+                or (c.get("suggest") and c["suggest_sem"] >= c["sem"] + BETTER_PAGE_MARGIN)]
     for c in cand:
         c["cites"] = [cite_label(d, pg) for d, pg in c["cites"]]
     return cand
@@ -862,6 +956,8 @@ def prepare(index, question, history=None, model=LLM_MODEL, temperature=0.1, exp
         qtype = "crisis"
     if SEXUAL_RE.search(question):
         flags.append("sexual")
+    if SPECIAL_RE.search(question):
+        flags.append("special")
     if qtype_override:
         qtype = qtype_override
     spec = QTYPES[qtype]
@@ -870,14 +966,16 @@ def prepare(index, question, history=None, model=LLM_MODEL, temperature=0.1, exp
     plan = merge_plans([plan_for(t, index, topics) for t in qtypes])
     doc_order = [d for d, *_ in plan]
     # 검색 묶음: 본 질문 + 조각마다(한 조각의 근거가 다른 조각에 밀려 빠지지 않게 조각별로도 찾는다)
-    jobs = [([standalone] + queries, {**RETRIEVAL, **(retrieval or {}), "plan": plan})]
+    jobs = [([standalone] + queries, {**RETRIEVAL, **(retrieval or {}), "plan": fit_budget(plan)})]
     for pt in parts:
         pplan = [(d, min(a, PART_BUDGET[0]), min(b, PART_BUDGET[1]), min(c, PART_BUDGET[2]))
                  for d, a, b, c in plan_for(pt["type"], index)]  # 조각 검색은 주제로 거르지 않는다(결석 조각 → 학업숙려제 등)
         jobs.append(([pt["text"] or pt["aspect"]] + pt["queries"], {"link_forms": False, "plan": pplan}))
-    must = [t for t in qtypes + (["crisis"] if "crisis" in flags else []) if t in MUST_QUERIES]
+    must = [t for t in qtypes + [f for f in ("crisis", "special") if f in flags] if t in MUST_QUERIES]
     for t in dict.fromkeys(must):
-        mplan = [(d, 2, 1, MUST_BUDGET) for d, *_ in plan_for(t, index, topics)[:2]]  # 그 유형의 1·2순위 자료만
+        mdocs = ([d for d in MUST_PLAN[t] if d in DOCS] if t in MUST_PLAN
+                 else [d for d, *_ in plan_for(t, index, topics)[:2]])  # 그 유형의 1·2순위 자료만
+        mplan = [(d, 2, 1, MUST_BUDGET) for d in mdocs]
         jobs.append((MUST_QUERIES[t], {"link_forms": False, "plan": mplan}))
     # 임베딩은 모든 검색어를 한 번에 묶어 만들고, BM25 점수도 미리 계산해 둔다(검색어마다 한 번)
     all_texts = [t for texts, _ in jobs for t in texts]
@@ -909,6 +1007,8 @@ def prepare(index, question, history=None, model=LLM_MODEL, temperature=0.1, exp
         note += "\n(참고: 질문에 자해·자살 위험 신호가 있음 → 규칙 10 적용)"
     if "sexual" in flags:
         note += "\n(참고: 성 관련 사안 가능성 → 규칙 9 적용)"
+    if "special" in flags:
+        note += "\n(참고: 이주배경·다문화·북한배경 또는 장애 학생 관련 → 규칙 16 적용)"
     order_text = " → ".join(f"{i + 1}순위 [{DOCS[d]['short']}]" for i, d in enumerate(doc_order))
     marks = "①②③④⑤"
     parts_text = ("[질문 분해] (규칙 14: 조각마다 소제목을 달고 빠짐없이 답한다)\n"
@@ -943,7 +1043,14 @@ def finish(ctx, text, index=None):
     hit_keys = {(h["doc"], h["page"]) for h in hits}
     for h in hits:
         h["cited"] = (h["doc"], h["page"]) in cited
+    cited_docs = list(dict.fromkeys(d for d, _ in cited))
+    topics = ctx.get("topics") or []
     return {
+        # 근거 맥락 확인용: 다른 시·도 자료, OCR로 읽은 자료, 질문 주제 밖에서 빌린 추가 자료
+        "other_region": other_region_docs(cited_docs),
+        "ocr_docs": [d for d in cited_docs if DOCS.get(d, {}).get("ocr_engine")],
+        "borrowed": [d for d in cited_docs if d in added_docs() and topics
+                     and not set(topics) & set(DOCS[d].get("topics", []))],
         "answer": text,
         "sources": hits,
         "standalone": ctx["standalone"],
@@ -977,6 +1084,8 @@ def log_turn(question, result):
            "model": result["model"], "flags": result["flags"], "qtype": result.get("qtype"), "topics": result.get("topics"),
            "doc_order": result.get("doc_order"), "standalone": result["standalone"],
            "parts": result.get("parts"), "weak_cites": result.get("weak_cites"),
+           "other_region": result.get("other_region"), "borrowed": result.get("borrowed"),
+           "cache_hit": bool(result.get("cached_at")),
            "queries": result["queries"], "cited": [cite_label(d, p) for d, p in result["cited"]],
            "sources": [{"id": h["id"], "doc": h["doc"], "page": h["page"], "section": h["section"], "cos": round(h["cos"], 4),
                         "bm25": round(h["bm25"], 2), "rrf": round(h["score"], 5), "cited": h["cited"],

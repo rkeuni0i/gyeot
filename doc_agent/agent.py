@@ -143,11 +143,12 @@ JUDGE_PROMPT = """너는 학교 전문상담교사가 쓰는 AI 도우미의 '�
   - role: "procedure"(학교폭력 절차·법 지침), "school"(이 학교 규정), "manual"(상담 기법·개입 매뉴얼), "reference"(기타 참고) 중 하나
   - use_in: 이 자료를 확인할 질문 유형 목록(school, procedure, definition, counseling, student_explain, crisis 중. crisis는 자해·자살 위기 대응을 다루는 자료일 때만)
   - topics: 주제 분류 목록
+  - region: 이 자료가 적용되는 지역. "전국"(교육부·전국 공통), "경기"(경기도교육청), "화성·오산"(화성오산교육지원청), "학교"(한 학교 규정), 그 밖의 시·도면 그 이름(예: "서울")
   - summary: 자료가 무엇이고 상담사에게 어떤 도움이 되는지 2~3문장
   - cautions: 추가한다면 주의할 점 목록
 JSON 객체만 출력한다:
 {{"scores": {{"recency": {{"score": 2, "evidence": "..."}}, ...}}, "short": "...", "title": "...", "role": "...",
- "use_in": [...], "topics": [...], "summary": "...", "cautions": [...]}}"""
+ "use_in": [...], "topics": [...], "region": "...", "summary": "...", "cautions": [...]}}"""
 
 
 def judge(measured, pages, model=rag.LLM_MODEL, exclude_doc=None):
@@ -221,7 +222,8 @@ def evaluate_pdf(pdf_path, index=None, save=True, exclude_doc=None):
                    for c in CRITERIA["criteria"]},
         "proposal": {"short": short, "title": j.get("title") or Path(pdf_path).stem, "role": j.get("role", "reference"),
                      "use_in": [u for u in j.get("use_in", []) if u in rag.QTYPES],
-                     "topics": j.get("topics", []), "summary": j.get("summary", ""), "cautions": j.get("cautions", [])},
+                     "topics": j.get("topics", []), "region": j.get("region"),
+                     "summary": j.get("summary", ""), "cautions": j.get("cautions", [])},
         "measured": measured, "seconds": round(time.time() - t, 1),
     }
     if save:
